@@ -3,7 +3,7 @@ data "aws_region" "current" {}
 
 // TF provider agentless scan resource
 
-resource "lacework_aws_agentless_scanning" "lacework-cloud-account" {
+resource "lacework_aws_agentless_scanning" "lacework_cloud_account" {
   name                      = var.name
   scan_frequency            = var.scan_frequency
   query_text                = var.query_text
@@ -11,6 +11,68 @@ resource "lacework_aws_agentless_scanning" "lacework-cloud-account" {
   scan_host_vulnerabilities = var.scan_host_vulnerabilities
 }
 
+// Global
+// SecretsManagers
+resource "aws_secretsmanager_secret" "agentless_scan_secret" {
+  name = "${var.resource_name_prefix}-secret-${var.resource_name_suffix}"
+}
+
+resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
+  secret_id     = aws_secretsmanager_secret.agentless_scan_secret.id
+  secret_string = <<EOF
+   {
+    "account": "${var.account}",
+    "token": "${lacework_aws_agentless_scanning.lacework_cloud_account.server_token}"
+   }
+EOF
+}
+
+// TODO: AWS::IAM::ServiceLinkedRole
+resource "aws_iam_service_linked_role" "agentless_scan_linked_role" {
+  aws_service_name = "ecs.amazonaws.com"
+  description      = "Role to enable Amazon ECS to manage your cluster."
+}
+// TODO: AWS::IAM::ManagedPolicy
+resource "aws_iam_policy_attachment" "agentless_scan_policy_attachment" {
+  //...
+}
+
+// TODO: AWS::IAM::Role
+resource "aws_iam_role" "agentless_scan_ecs_task_role" {
+  //...
+}
+
+// TODO: AWS::IAM::Role
+resource "aws_iam_role" "agentless_scan_ecs_event_role" {
+  //...
+}
+// TODO: AWS::IAM::Role
+resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
+  //...
+}
+
+// TODO: AWS::S3::Bucket
+resource "aws_s3_bucket" "agentless_scan_bucket" {
+  bucket = "${var.resource_name_prefix}-bucket-${var.resource_name_suffix}"
+
+  tags = {
+    LWTAG_SIDEKICK = "1"
+  }
+}
+// TODO: AWS::S3::BucketPolicy
+resource "aws_s3_bucket_policy" "agentless_scan_bucket_policy" {
+  bucket = aws_s3_bucket.agentless_scan_bucket.id
+  policy = data.aws_iam_policy_document.agentless_scan_bucket_policy.json
+}
+
+data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
+  //...
+}
+
+// TODO: AWS::IAM::Role
+
+
+// Per Region
 // EC2 VPC
 resource "aws_vpc" "agentless_scan_vpc" {
   cidr_block           = "10.10.0.0/16"
@@ -25,7 +87,7 @@ resource "aws_vpc" "agentless_scan_vpc" {
   }
 }
 
-// Todo SecretsManagers
+
 
 // EC2 RouteTable
 resource "aws_route_table" "agentless_scan_route_table" {
@@ -178,3 +240,29 @@ resource "aws_cloudwatch_log_group" "agentless_scan_log_group" {
   retention_in_days = 14
 }
 
+// TODO: AgentlessScanOrchestrateEvent
+resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
+  name                = "${var.resource_name_prefix}-periodic-trigger-${var.resource_name_suffix}"
+  schedule_expression = "rate(1 hour)"
+  event_bus_name      = "default"
+}
+
+resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
+  target_id = "sidekick"
+  rule      = aws_cloudwatch_event_rule.agentless_scan_event_rule.name
+  arn       = aws_ecs_cluster.agentless_scan_ecs_cluster.arn
+  input     = "{\"containerOverrides\":[{\"name\":\"sidekick\",\"environment\":[{\"name\":\"STARTUP_SERVICE\",\"value\":\"ORCHESTRATE\"}]}]}"
+  ecs_target {
+    task_count       = 1
+    launch_type      = "FARGATE"
+    platform_version = "LATEST"
+    network_configuration {
+      subnets          = [aws_subnet.agentless_scan_public_subnet.id]
+      security_groups  = [aws_vpc.agentless_scan_vpc.default_security_group_id]
+      assign_public_ip = true
+    }
+    tags = {
+      LWTAG_SIDEKICK = "1"
+    }
+  }
+}
