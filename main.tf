@@ -70,7 +70,9 @@ data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
 }
 
 // TODO: AWS::IAM::Role
-
+resource "aws_iam_role" "agentless_scan_cross_account_role" {
+  //...
+}
 
 // Per Region
 // EC2 VPC

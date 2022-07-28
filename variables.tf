@@ -12,16 +12,3 @@ variable "resource_name_suffix" {
   description = ""
 }
 
-variable "ecs_task_role_arn" {
-  type        = string
-  description = ""
-}
-
-variable "ecs_task_execution_arn" {
-  type        = string
-  description = ""
-}
-variable "lacework_apiserver" {
-  type        = string
-  description = ""
-}
