@@ -1,6 +1,8 @@
 
 data "aws_region" "current" {}
 
+data "aws_caller_identity" "current" {}
+
 // TF provider agentless scan resource
 
 resource "lacework_aws_agentless_scanning" "lacework_cloud_account" {
@@ -284,7 +286,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   }
 }
 
-// TODO: AWS::S3::Bucket
+// AWS::S3::Bucket
 resource "aws_s3_bucket" "agentless_scan_bucket" {
   bucket = "${var.resource_name_prefix}-bucket-${var.resource_name_suffix}"
 
@@ -325,7 +327,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "agentless_scan_bucket_lifecyle
     status = "Enabled"
   }
 }
-// TODO: AWS::S3::BucketPolicy
+// AWS::S3::BucketPolicy
 resource "aws_s3_bucket_policy" "agentless_scan_bucket_policy" {
   bucket = aws_s3_bucket.agentless_scan_bucket.id
   policy = data.aws_iam_policy_document.agentless_scan_bucket_policy.json
@@ -352,10 +354,79 @@ data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
   }
 }
 
-// TODO: AWS::IAM::Role
-resource "aws_iam_role" "agentless_scan_cross_account_role" {
-  //...
+// AWS::IAM::Role
+
+data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
+  statement {
+    sid     = "ForceSSLOnlyAccess"
+    effect  = "Deny"
+    actions = ["s3:*"]
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+    resources = [
+      aws_s3_bucket.agentless_scan_bucket.arn,
+      "${aws_s3_bucket.agentless_scan_bucket.arn}/*"
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "sts:ExternalId"
+      values   = [var.ExternalId]
+    }
+  }
 }
+
+resource "aws_iam_role" "agentless_scan_cross_account_role" {
+  name                 = "${var.resource_name_prefix}-cross-account-role-${var.resource_name_suffix}"
+  max_session_duration = 3600
+  path                 = "/"
+  assume_role_policy   = data.aws_iam_policy_document.agentless_scan_cross_account_policy.json
+  inline_policy {
+    name = "S3WriteAllowPolicy"
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid      = "ListAndTagBucket"
+          Action   = ["s3:ListBucket", "s3:GetBucketLocation", "s3:GetBucketTagging", "s3:PutBucketTagging"]
+          Effect   = "Allow"
+          Resource = aws_s3_bucket.agentless_scan_bucket.arn
+        },
+        {
+          Sid      = "PutGetDeleteObjectsInBucket"
+          Action   = ["s3:DeleteObject", "s3:PutObject", "s3:GetObject"]
+          Effect   = "Allow"
+          Resource = aws_s3_bucket.agentless_scan_bucket.arn
+        }
+      ]
+    })
+  }
+
+  inline_policy {
+    name = "ECSTaskManagement"
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid      = "AllowEcsStopTask"
+          Action   = ["ecs:StopTask"]
+          Effect   = "Allow"
+          Resource = "*"
+          Condition = {
+            "ArnEquals" : { "ecs:cluster" : "arn:aws:ecs:*:*:cluster/${ResourceNamePrefix}-cluster-${ResourceNameSuffix}" }
+          }
+        }
+      ]
+    })
+  }
+
+  tags = {
+    Name           = "${var.resource_name_prefix}-cross-account-role-${var.resource_name_suffix}"
+    LWTAG_SIDEKICK = "1"
+  }
+}
+
 
 // Per Region
 // EC2 VPC
