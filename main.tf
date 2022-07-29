@@ -1,8 +1,6 @@
 
 data "aws_region" "current" {}
 
-data "aws_caller_identity" "current" {}
-
 // TF provider agentless scan resource
 
 resource "lacework_aws_agentless_scanning" "lacework_cloud_account" {
@@ -363,7 +361,7 @@ data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
     actions = ["s3:*"]
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+      identifiers = ["arn:aws:iam::${var.lacework_aws_account_id}:root"]
     }
     resources = [
       aws_s3_bucket.agentless_scan_bucket.arn,
@@ -372,10 +370,12 @@ data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
     condition {
       test     = "StringEquals"
       variable = "sts:ExternalId"
-      values   = [var.ExternalId]
+      values   = [random_string.external_id[count.index].result]
     }
   }
 }
+
+// Todo: use module - lacework_iam_role
 
 resource "aws_iam_role" "agentless_scan_cross_account_role" {
   name                 = "${var.resource_name_prefix}-cross-account-role-${var.resource_name_suffix}"
