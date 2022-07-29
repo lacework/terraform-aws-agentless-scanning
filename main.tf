@@ -33,9 +33,169 @@ resource "aws_iam_service_linked_role" "agentless_scan_linked_role" {
   description      = "Role to enable Amazon ECS to manage your cluster."
 }
 // TODO: AWS::IAM::ManagedPolicy
-resource "aws_iam_policy_attachment" "agentless_scan_policy_attachment" {
-  //...
+resource "aws_iam_policy" "agentless_scan_task_policy" {
+  name   = "${var.resource_name_prefix}-task-policy-${var.resource_name_suffix}"
+  policy = <<EOF
+  {
+    "Version": "2012-10-17",
+      "Statement": [
+        { 
+        "Sid": "AllowControlOfBucket",
+        "Effect": "Allow",
+        "Action": "s3:*",
+        "Resource": [
+            "${aws_s3_bucket.agentless_scan_bucket.arn}",
+            "${aws_s3_bucket.agentless_scan_bucket.arn}/*" 
+            ]
+        },
+        {
+        "Sid": "AllowTagECSCluster",
+        "Effect": "Allow",
+        "Action": [
+                "ecs:TagResource",
+                "ecs:UntagResource",
+                "ecs:ListTagsForResource"
+                ],
+        "Resource": "*",
+        "Condition": {
+            "StringLike": {
+            "ecs:ResourceTag/LWTAG_SIDEKICK": "*"
+                    }
+            }
+        },
+        {
+          "Sid": "AllowListRules",
+            "Effect": "Allow",
+            "Action": [
+                "events:DescribeRule",
+                "events:ListRules",
+                "events:ListTargetsByRule",
+                "events:ListTagsForResource",
+                "events:ListRuleNamesByTarget"
+                    ],
+            "Resource": "*"
+        },
+        {
+         "Sid": "AllowUpdateRule",
+         "Effect": "Allow",
+         "Action": [
+            "events:DisableRule",
+            "events:EnableRule",
+            "events:PutTargets",
+            "events:RemoveTargets"
+                ],
+        "Resource": "arn:aws:events:*:*:rule/${ResourceNamePrefix}-periodic-trigger-${ResourceNameSuffix}"
+        },
+        {
+        "Sid": "AllowReadFromSecretsManager",
+        "Effect": "Allow",
+        "Action": [
+                "secretsmanager:ListSecretVersionIds",
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:GetResourcePolicy"
+                ],
+        "Resource": "${aws_secretsmanager_secret.agentless_scan_secret.arn}"
+        },
+        {
+        "Sid": "AllowListSecrets",
+        "Effect": "Allow",
+        "Action": "secretsmanager:ListSecrets",
+        "Resource": "*"
+        },
+        {
+        "Sid": "DescribeInstances",
+        "Effect": "Allow",
+         "Action": [
+         "ec2:Describe*"
+                ],
+        "Resource": "*"
+        },
+        {
+        "Sid": "CreateSnapshots",
+        "Effect": "Allow",
+        "Action": [
+            "ec2:CreateTags",
+            "ec2:CreateSnapshot"
+            ],
+        "Resource": "*"
+        },
+        {
+        "Sid": "SnapshotManagement",
+        "Effect": "Allow",
+        "Action": [
+            "ec2:DeleteSnapshot",
+            "ec2:ModifySnapshotAttribute",
+            "ec2:ResetSnapshotAttribute",
+            "ebs:ListChangedBlocks",
+            "ebs:ListSnapshotBlocks",
+            "ebs:GetSnapshotBlock",
+            "ebs:CompleteSnapshot"
+                ],
+        "Resource": "*",
+        "Condition": {
+            "StringLike": {
+                "aws:ResourceTag/LWTAG_SIDEKICK": "*"
+                    }
+                }
+        },
+        {
+        "Sid": "TaskManagement",
+        "Effect": "Allow",
+        "Action": [
+            "ecs:RunTask",
+            "ecs:StartTask",
+            "ecs:StopTask",
+            "ecs:ListTasks",
+            "ecs:Describe*"
+             ],
+        "Resource": "*",
+            "Condition": {
+                "ArnEquals": {
+                    "ecs:cluster": "arn:aws:ecs:*:*:cluster/${ResourceNamePrefix}-cluster-${ResourceNameSuffix}"  
+                            }
+                        }
+            },
+            {
+            "Sid": "SnapshotEncryption",
+            "Effect": "Allow",
+            "Action": [
+                    "kms:DescribeKey",
+                    "kms:Encrypt",
+                    "kms:Decrypt",
+                    "kms:ReEncrypt*",
+                    "kms:GenerateDataKey*",
+                    "kms:CreateGrant"
+                        ],
+            "Resource": "*"
+            },
+            {
+            "Sid": "PassRoleToTasks",
+            "Effect": "Allow",
+            "Action": [
+                    "iam:PassRole",
+                    "sts:AssumeRole"
+                    ],
+            "Resource": "*",
+                "Condition": {
+                    "StringLike": {
+                        "iam:ResourceTag/LWTAG_SIDEKICK": "*"
+                        }
+                    }
+            },
+            {
+            "Sid": "ReadLogs",
+            "Effect": "Allow",
+            "Action": [
+                "logs:DescribeLogStreams",
+                "logs:GetLogEvents"
+                ],
+            "Resource": "arn:aws:logs:*:*:log-group:/ecs/${ResourceNamePrefix}-*"
+            }
+    ]
+  }
+  EOF
 }
+
 
 // TODO: AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_task_role" {

@@ -1,5 +1,5 @@
 provider "lacework" {}
 
-module "lacework_module" {
+module "lacework_aws_agentless_scanning" {
   source = "../.."
 }
