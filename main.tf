@@ -269,7 +269,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
       Version = "2012-10-17"
       Statement = [
         {
-          Sid = "AllowLoggingToCloudWatch"
+          Sid      = "AllowLoggingToCloudWatch"
           Action   = ["logs:PutLogEvents", "logs:CreateLogStream", "logs:CreateLogGroup"]
           Effect   = "Allow"
           Resource = "arn:aws:logs:*:*:log-group:/ecs/${ResourceNamePrefix}-*"
@@ -277,7 +277,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
       ]
     })
   }
-  }
+
   tags = {
     Name           = "${var.resource_name_prefix}-task-execution-role-${var.resource_name_suffix}"
     LWTAG_SIDEKICK = "1"
@@ -292,6 +292,39 @@ resource "aws_s3_bucket" "agentless_scan_bucket" {
     LWTAG_SIDEKICK = "1"
   }
 }
+
+resource "aws_s3_bucket_versioning" "versioning_example" {
+  bucket = aws_s3_bucket.agentless_scan_bucket.id
+  versioning_configuration {
+    status = "Suspended"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "agentless_scan_bucket_lifecyle" {
+  bucket = aws_s3_bucket.agentless_scan_bucket.id
+
+  rule {
+    id = "Work"
+    expiration {
+      days = 7
+    }
+    filter {
+      prefix = "sidekick/work/"
+    }
+    status = "Enabled"
+  }
+
+  rule {
+    id = "All"
+    expiration {
+      days = 30
+    }
+    filter {
+      prefix = "sidekick/"
+    }
+    status = "Enabled"
+  }
+}
 // TODO: AWS::S3::BucketPolicy
 resource "aws_s3_bucket_policy" "agentless_scan_bucket_policy" {
   bucket = aws_s3_bucket.agentless_scan_bucket.id
@@ -299,7 +332,24 @@ resource "aws_s3_bucket_policy" "agentless_scan_bucket_policy" {
 }
 
 data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
-  //...
+  statement {
+    sid     = "ForceSSLOnlyAccess"
+    effect  = "Deny"
+    actions = ["s3:*"]
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+    resources = [
+      aws_s3_bucket.agentless_scan_bucket.arn,
+      "${aws_s3_bucket.agentless_scan_bucket.arn}/*"
+    ]
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
 }
 
 // TODO: AWS::IAM::Role
