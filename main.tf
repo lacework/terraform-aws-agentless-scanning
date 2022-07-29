@@ -27,7 +27,7 @@ resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
 EOF
 }
 
-// TODO: AWS::IAM::ServiceLinkedRole
+// AWS::IAM::ServiceLinkedRole
 resource "aws_iam_service_linked_role" "agentless_scan_linked_role" {
   aws_service_name = "ecs.amazonaws.com"
   description      = "Role to enable Amazon ECS to manage your cluster."
@@ -197,18 +197,91 @@ resource "aws_iam_policy" "agentless_scan_task_policy" {
 }
 
 
-// TODO: AWS::IAM::Role
+// AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_task_role" {
-  //...
+  name                 = "${var.resource_name_prefix}-task-role-${var.resource_name_suffix}"
+  max_session_duration = 43200
+  path                 = "/"
+  managed_policy_arns  = [aws_iam_policy.agentless_scan_task_policy.arn]
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      },
+    ]
+  })
+  tags = {
+    Name           = "${var.resource_name_prefix}-task-role-${var.resource_name_suffix}"
+    LWTAG_SIDEKICK = "1"
+  }
 }
 
-// TODO: AWS::IAM::Role
+// AWS::IAM::Role
+
 resource "aws_iam_role" "agentless_scan_ecs_event_role" {
-  //...
+  name                 = "${var.resource_name_prefix}-task-event-role-${var.resource_name_suffix}"
+  max_session_duration = 3600
+  path                 = "/service-role/"
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"]
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "events.amazonaws.com"
+        }
+      },
+    ]
+  })
+  tags = {
+    Name           = "${var.resource_name_prefix}-task-event-role-${var.resource_name_suffix}"
+    LWTAG_SIDEKICK = "1"
+  }
 }
-// TODO: AWS::IAM::Role
+// AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
-  //...
+  name                 = "${var.resource_name_prefix}-task-execution-role-${var.resource_name_suffix}"
+  max_session_duration = 3600
+  path                 = "/"
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"]
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      },
+    ]
+  })
+  inline_policy {
+    name = "AllowCloudWatch"
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid = "AllowLoggingToCloudWatch"
+          Action   = ["logs:PutLogEvents", "logs:CreateLogStream", "logs:CreateLogGroup"]
+          Effect   = "Allow"
+          Resource = "arn:aws:logs:*:*:log-group:/ecs/${ResourceNamePrefix}-*"
+        },
+      ]
+    })
+  }
+  }
+  tags = {
+    Name           = "${var.resource_name_prefix}-task-execution-role-${var.resource_name_suffix}"
+    LWTAG_SIDEKICK = "1"
+  }
 }
 
 // TODO: AWS::S3::Bucket
@@ -331,8 +404,8 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   name                     = "sidekick"
   image                    = var.image_url
   family                   = aws_ecs_cluster.agentless_scan_ecs_cluster.name
-  task_role_arn            = var.ecs_task_role_arn
-  execution_role_arn       = var.ecs_task_execution_arn
+  task_role_arn            = aws_iam_role.agentless_scan_ecs_task_role.arn
+  execution_role_arn       = aws_iam_role.agentless_scan_ecs_execution_role.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 4096
