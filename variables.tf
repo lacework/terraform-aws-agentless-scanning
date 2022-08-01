@@ -12,3 +12,33 @@ variable "resource_name_suffix" {
   description = ""
 }
 
+variable "cloud_integration_name" {
+  type        = string
+  description = ""
+}
+
+variable "scan_frequency" {
+  type        = number
+  description = ""
+}
+
+variable "query_text" {
+  type        = string
+  description = ""
+  default     = ""
+}
+
+variable "scan_containers" {
+  type        = bool
+  description = ""
+}
+variable "scan_host_vulnerabilities" {
+  type        = string
+  description = ""
+}
+
+variable "lacework_aws_account_id" {
+  type        = string
+  default     = "434813966438"
+  description = "The Lacework AWS account that the IAM role will grant access"
+}

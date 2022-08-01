@@ -1,10 +1,16 @@
 
 data "aws_region" "current" {}
 
+// replace with iam role module
+resource "random_string" "external_id" {
+  length           = 256
+  override_special = "=,.@:/-"
+}
+
 // TF provider agentless scan resource
 
-resource "lacework_aws_agentless_scanning" "lacework_cloud_account" {
-  name                      = var.name
+resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" {
+  name                      = var.cloud_integration_name
   scan_frequency            = var.scan_frequency
   query_text                = var.query_text
   scan_containers           = var.scan_containers
@@ -21,8 +27,8 @@ resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
   secret_id     = aws_secretsmanager_secret.agentless_scan_secret.id
   secret_string = <<EOF
    {
-    "account": "${var.account}",
-    "token": "${lacework_aws_agentless_scanning.lacework_cloud_account.server_token}"
+    "account": "${var.lacework_aws_account_id}",
+    "token": "${lacework_integration_aws_agentless_scanning.lacework_cloud_account.server_token}"
    }
 EOF
 }
@@ -32,168 +38,153 @@ resource "aws_iam_service_linked_role" "agentless_scan_linked_role" {
   aws_service_name = "ecs.amazonaws.com"
   description      = "Role to enable Amazon ECS to manage your cluster."
 }
-// TODO: AWS::IAM::ManagedPolicy
+
+data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
+  statement {
+    sid       = "AllowControlOfBucket"
+    effect    = "Allow"
+    actions   = ["s3:*"]
+    resources = ["${aws_s3_bucket.agentless_scan_bucket.arn}", "${aws_s3_bucket.agentless_scan_bucket.arn}/*"]
+  }
+
+  statement {
+    sid       = "AllowTagECSCluster"
+    effect    = "Allow"
+    actions   = ["ecs:TagResource", "ecs:UntagResource", "ecs:ListTagsForResource"]
+    resources = ["*"]
+    condition {
+      test     = "StringLike"
+      variable = "ecs:ResourceTag/LWTAG_SIDEKICK"
+      values   = ["*"]
+    }
+  }
+
+  statement {
+    sid    = "AllowListRules"
+    effect = "Allow"
+    actions = ["events:DescribeRule",
+      "events:ListRules",
+      "events:ListTargetsByRule",
+      "events:ListTagsForResource",
+    "events:ListRuleNamesByTarget"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "AllowUpdateRule"
+    effect = "Allow"
+    actions = ["events:DisableRule",
+      "events:EnableRule",
+      "events:PutTargets",
+    "events:RemoveTargets"]
+    resources = ["arn:aws:events:*:*:rule/${var.resource_name_prefix}-periodic-trigger-${var.resource_name_suffix}"]
+  }
+
+  statement {
+    sid    = "AllowReadFromSecretsManager"
+    effect = "Allow"
+    actions = ["secretsmanager:ListSecretVersionIds",
+      "secretsmanager:GetSecretValue",
+    "secretsmanager:GetResourcePolicy"]
+    resources = ["${aws_secretsmanager_secret.agentless_scan_secret.arn}"]
+  }
+
+  statement {
+    sid       = "AllowListSecrets"
+    effect    = "Allow"
+    actions   = ["secretsmanager:ListSecrets"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid       = "DescribeInstances"
+    effect    = "Allow"
+    actions   = ["ec2:Describe*"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "CreateSnapshots"
+    effect = "Allow"
+    actions = ["ec2:CreateTags",
+    "ec2:CreateSnapshot"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "SnapshotManagement"
+    effect = "Allow"
+    actions = ["ec2:DeleteSnapshot",
+      "ec2:ModifySnapshotAttribute",
+      "ec2:ResetSnapshotAttribute",
+      "ebs:ListChangedBlocks",
+      "ebs:ListSnapshotBlocks",
+      "ebs:GetSnapshotBlock",
+    "ebs:CompleteSnapshot"]
+    resources = ["*"]
+    condition {
+      test     = "StringLike"
+      variable = "aws:ResourceTag/LWTAG_SIDEKICK"
+      values   = ["*"]
+    }
+  }
+
+  statement {
+    sid    = "TaskManagement"
+    effect = "Allow"
+    actions = ["ecs:RunTask",
+      "ecs:StartTask",
+      "ecs:StopTask",
+      "ecs:ListTasks",
+    "ecs:Describe*"]
+    resources = ["*"]
+    condition {
+      test     = "ArnEquals"
+      variable = "ecs:cluster"
+      values   = ["arn:aws:ecs:*:*:cluster/${var.resource_name_prefix}-cluster-${var.resource_name_suffix}"]
+    }
+  }
+
+  statement {
+    sid    = "SnapshotEncryption"
+    effect = "Allow"
+    actions = ["kms:DescribeKey",
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+    "kms:CreateGrant"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "PassRoleToTasks"
+    effect = "Allow"
+    actions = ["iam:PassRole",
+    "sts:AssumeRole"]
+    resources = ["*"]
+    condition {
+      test     = "StringLike"
+      variable = "iam:ResourceTag/LWTAG_SIDEKICK"
+      values   = ["*"]
+    }
+  }
+
+  statement {
+    sid    = "ReadLogs"
+    effect = "Allow"
+    actions = ["logs:DescribeLogStreams",
+    "logs:GetLogEvents"]
+    resources = ["arn:aws:logs:*:*:log-group:/ecs/${var.resource_name_prefix}-*"]
+  }
+
+}
+
+
+// AWS::IAM::ManagedPolicy
 resource "aws_iam_policy" "agentless_scan_task_policy" {
   name   = "${var.resource_name_prefix}-task-policy-${var.resource_name_suffix}"
-  policy = <<EOF
-  {
-    "Version": "2012-10-17",
-      "Statement": [
-        { 
-        "Sid": "AllowControlOfBucket",
-        "Effect": "Allow",
-        "Action": "s3:*",
-        "Resource": [
-            "${aws_s3_bucket.agentless_scan_bucket.arn}",
-            "${aws_s3_bucket.agentless_scan_bucket.arn}/*" 
-            ]
-        },
-        {
-        "Sid": "AllowTagECSCluster",
-        "Effect": "Allow",
-        "Action": [
-                "ecs:TagResource",
-                "ecs:UntagResource",
-                "ecs:ListTagsForResource"
-                ],
-        "Resource": "*",
-        "Condition": {
-            "StringLike": {
-            "ecs:ResourceTag/LWTAG_SIDEKICK": "*"
-                    }
-            }
-        },
-        {
-          "Sid": "AllowListRules",
-            "Effect": "Allow",
-            "Action": [
-                "events:DescribeRule",
-                "events:ListRules",
-                "events:ListTargetsByRule",
-                "events:ListTagsForResource",
-                "events:ListRuleNamesByTarget"
-                    ],
-            "Resource": "*"
-        },
-        {
-         "Sid": "AllowUpdateRule",
-         "Effect": "Allow",
-         "Action": [
-            "events:DisableRule",
-            "events:EnableRule",
-            "events:PutTargets",
-            "events:RemoveTargets"
-                ],
-        "Resource": "arn:aws:events:*:*:rule/${ResourceNamePrefix}-periodic-trigger-${ResourceNameSuffix}"
-        },
-        {
-        "Sid": "AllowReadFromSecretsManager",
-        "Effect": "Allow",
-        "Action": [
-                "secretsmanager:ListSecretVersionIds",
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:GetResourcePolicy"
-                ],
-        "Resource": "${aws_secretsmanager_secret.agentless_scan_secret.arn}"
-        },
-        {
-        "Sid": "AllowListSecrets",
-        "Effect": "Allow",
-        "Action": "secretsmanager:ListSecrets",
-        "Resource": "*"
-        },
-        {
-        "Sid": "DescribeInstances",
-        "Effect": "Allow",
-         "Action": [
-         "ec2:Describe*"
-                ],
-        "Resource": "*"
-        },
-        {
-        "Sid": "CreateSnapshots",
-        "Effect": "Allow",
-        "Action": [
-            "ec2:CreateTags",
-            "ec2:CreateSnapshot"
-            ],
-        "Resource": "*"
-        },
-        {
-        "Sid": "SnapshotManagement",
-        "Effect": "Allow",
-        "Action": [
-            "ec2:DeleteSnapshot",
-            "ec2:ModifySnapshotAttribute",
-            "ec2:ResetSnapshotAttribute",
-            "ebs:ListChangedBlocks",
-            "ebs:ListSnapshotBlocks",
-            "ebs:GetSnapshotBlock",
-            "ebs:CompleteSnapshot"
-                ],
-        "Resource": "*",
-        "Condition": {
-            "StringLike": {
-                "aws:ResourceTag/LWTAG_SIDEKICK": "*"
-                    }
-                }
-        },
-        {
-        "Sid": "TaskManagement",
-        "Effect": "Allow",
-        "Action": [
-            "ecs:RunTask",
-            "ecs:StartTask",
-            "ecs:StopTask",
-            "ecs:ListTasks",
-            "ecs:Describe*"
-             ],
-        "Resource": "*",
-            "Condition": {
-                "ArnEquals": {
-                    "ecs:cluster": "arn:aws:ecs:*:*:cluster/${ResourceNamePrefix}-cluster-${ResourceNameSuffix}"  
-                            }
-                        }
-            },
-            {
-            "Sid": "SnapshotEncryption",
-            "Effect": "Allow",
-            "Action": [
-                    "kms:DescribeKey",
-                    "kms:Encrypt",
-                    "kms:Decrypt",
-                    "kms:ReEncrypt*",
-                    "kms:GenerateDataKey*",
-                    "kms:CreateGrant"
-                        ],
-            "Resource": "*"
-            },
-            {
-            "Sid": "PassRoleToTasks",
-            "Effect": "Allow",
-            "Action": [
-                    "iam:PassRole",
-                    "sts:AssumeRole"
-                    ],
-            "Resource": "*",
-                "Condition": {
-                    "StringLike": {
-                        "iam:ResourceTag/LWTAG_SIDEKICK": "*"
-                        }
-                    }
-            },
-            {
-            "Sid": "ReadLogs",
-            "Effect": "Allow",
-            "Action": [
-                "logs:DescribeLogStreams",
-                "logs:GetLogEvents"
-                ],
-            "Resource": "arn:aws:logs:*:*:log-group:/ecs/${ResourceNamePrefix}-*"
-            }
-    ]
-  }
-  EOF
+  policy = data.aws_iam_policy_document.agentless_scan_task_policy_document.json
 }
 
 
@@ -272,7 +263,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
           Sid      = "AllowLoggingToCloudWatch"
           Action   = ["logs:PutLogEvents", "logs:CreateLogStream", "logs:CreateLogGroup"]
           Effect   = "Allow"
-          Resource = "arn:aws:logs:*:*:log-group:/ecs/${ResourceNamePrefix}-*"
+          Resource = "arn:aws:logs:*:*:log-group:/ecs/${var.resource_name_prefix}-*"
         },
       ]
     })
@@ -370,7 +361,7 @@ data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
     condition {
       test     = "StringEquals"
       variable = "sts:ExternalId"
-      values   = [random_string.external_id[count.index].result]
+      values   = [random_string.external_id.result]
     }
   }
 }
@@ -414,7 +405,7 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
           Effect   = "Allow"
           Resource = "*"
           Condition = {
-            "ArnEquals" : { "ecs:cluster" : "arn:aws:ecs:*:*:cluster/${ResourceNamePrefix}-cluster-${ResourceNameSuffix}" }
+            "ArnEquals" : { "ecs:cluster" : "arn:aws:ecs:*:*:cluster/${var.resource_name_prefix}-cluster-${var.resource_name_suffix}" }
           }
         }
       ]
@@ -463,7 +454,7 @@ resource "aws_route_table_association" "agentless_scan_route_table_association" 
 
 // EC2:InternetGateway
 resource "aws_internet_gateway" "agentless_scan_gateway" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.agentless_scan_vpc.id
 
   tags = {
     Name           = "${var.resource_name_prefix}-vpc-${var.resource_name_suffix}"
@@ -483,11 +474,10 @@ resource "aws_route" "agentless_scan_route" {
 resource "aws_security_group" "agentless_scan_vpc_egress" {
   name = "AgentlessScanVPCEgress"
   egress {
-    security_groups = ""
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
-    cidr_blocks     = ["0.0.0.0/0"]
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 // EC2 Subnet
@@ -522,8 +512,6 @@ resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
 
 // ECS TaskDefinition
 resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
-  name                     = "sidekick"
-  image                    = var.image_url
   family                   = aws_ecs_cluster.agentless_scan_ecs_cluster.name
   task_role_arn            = aws_iam_role.agentless_scan_ecs_task_role.arn
   execution_role_arn       = aws_iam_role.agentless_scan_ecs_execution_role.arn
@@ -531,13 +519,15 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = 4096
   memory                   = 8192
-  essential                = true
   tags = {
     Name           = "${var.resource_name_prefix}-task-definition-${var.resource_name_suffix}"
     LWTAG_SIDEKICK = "1"
   }
   container_definitions = jsonencode([
     {
+      name      = "sidekick"
+      image     = var.image_url
+      essential = true
       environment = [
         {
           name  = "STARTUP_PROVIDER"
@@ -557,7 +547,7 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
         },
         {
           name  = "LACEWORK_APISERVER"
-          value = "${var.lacework_apiserver}"
+          value = "${var.lacework_aws_account_id}"
         },
         {
           name  = "SECRET_ARN"
@@ -580,10 +570,10 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-create-group  = true
+          awslogs-create-group  = "true"
           awslogs-group         = "/ecs/${aws_ecs_cluster.agentless_scan_ecs_cluster.name}"
           awslogs-region        = "${data.aws_region.current.name}"
-          awslogs-stream-prefix = ecs
+          awslogs-stream-prefix = "ecs"
         }
       }
     }
@@ -609,9 +599,10 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
   arn       = aws_ecs_cluster.agentless_scan_ecs_cluster.arn
   input     = "{\"containerOverrides\":[{\"name\":\"sidekick\",\"environment\":[{\"name\":\"STARTUP_SERVICE\",\"value\":\"ORCHESTRATE\"}]}]}"
   ecs_target {
-    task_count       = 1
-    launch_type      = "FARGATE"
-    platform_version = "LATEST"
+    task_count          = 1
+    task_definition_arn = aws_ecs_task_definition.agentless_scan_task_definition.arn
+    launch_type         = "FARGATE"
+    platform_version    = "LATEST"
     network_configuration {
       subnets          = [aws_subnet.agentless_scan_public_subnet.id]
       security_groups  = [aws_vpc.agentless_scan_vpc.default_security_group_id]
