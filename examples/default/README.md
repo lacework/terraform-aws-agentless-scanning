@@ -1,7 +1,5 @@
 # Default Example
 
-Every Terraform module must have one or more examples.
-
 ```hcl
 terraform {
   required_providers {
@@ -14,7 +12,14 @@ terraform {
 provider "lacework" {}
 
 module "lacework_module" {
-  source  = "lacework/<NAME>/<PROVIDER>"
+  source  = "lacework/agentless-scanning/aws"
   version = "~> 0.1"
+
+  resource_name_prefix      = "lacework"
+  resource_name_suffix      = "terraform"
+  cloud_integration_name    = "sidekick_from_terraform"
+  scan_frequency            = 10
+  scan_containers           = true
+  scan_host_vulnerabilities = true
 }
 ```
