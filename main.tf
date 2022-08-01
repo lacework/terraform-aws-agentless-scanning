@@ -347,17 +347,12 @@ data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
 
 data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
   statement {
-    sid     = "ForceSSLOnlyAccess"
-    effect  = "Deny"
-    actions = ["s3:*"]
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
     principals {
       type        = "AWS"
       identifiers = ["arn:aws:iam::${var.lacework_aws_account_id}:root"]
     }
-    resources = [
-      aws_s3_bucket.agentless_scan_bucket.arn,
-      "${aws_s3_bucket.agentless_scan_bucket.arn}/*"
-    ]
     condition {
       test     = "StringEquals"
       variable = "sts:ExternalId"
@@ -468,7 +463,6 @@ resource "aws_route" "agentless_scan_route" {
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.agentless_scan_gateway.id
   route_table_id         = aws_route_table.agentless_scan_route_table.id
-  #Depends on AgentlessScanGatewayAttachment
 }
 
 // EC2 SecurityGroupEgress
@@ -483,11 +477,8 @@ resource "aws_security_group" "agentless_scan_vpc_egress" {
 }
 // EC2 Subnet
 resource "aws_subnet" "agentless_scan_public_subnet" {
-  vpc_id = aws_vpc.agentless_scan_vpc.id
-  //availability_zone = data.aws_region.current.id
-  availability_zone = "us-east-1a"
-  cidr_block        = "10.10.1.0/24"
-
+  vpc_id                  = aws_vpc.agentless_scan_vpc.id
+  cidr_block              = "10.10.1.0/24"
   map_public_ip_on_launch = false
 
 
@@ -599,6 +590,7 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
   target_id = "sidekick"
   rule      = aws_cloudwatch_event_rule.agentless_scan_event_rule.name
   arn       = aws_ecs_cluster.agentless_scan_ecs_cluster.arn
+  role_arn  = aws_iam_role.agentless_scan_ecs_event_role.arn
   input     = "{\"containerOverrides\":[{\"name\":\"sidekick\",\"environment\":[{\"name\":\"STARTUP_SERVICE\",\"value\":\"ORCHESTRATE\"}]}]}"
   ecs_target {
     task_count          = 1
