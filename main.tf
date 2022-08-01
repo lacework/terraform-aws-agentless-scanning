@@ -1,7 +1,7 @@
 
 data "aws_region" "current" {}
 
-// replace with iam role module
+// Todo: replace with iam role module
 resource "random_string" "external_id" {
   length           = 256
   override_special = "=,.@:/-"
@@ -366,6 +366,36 @@ data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
   }
 }
 
+data "aws_iam_policy_document" "cross_account_inline_policy_bucket" {
+  statement {
+    sid       = "ListAndTagBucket"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket", "s3:GetBucketLocation", "s3:GetBucketTagging", "s3:PutBucketTagging"]
+    resources = [aws_s3_bucket.agentless_scan_bucket.arn]
+  }
+
+  statement {
+    sid       = "PutGetDeleteObjectsInBucket"
+    effect    = "Allow"
+    actions   = ["s3:DeleteObject", "s3:PutObject", "s3:GetObject"]
+    resources = [aws_s3_bucket.agentless_scan_bucket.arn]
+  }
+}
+
+data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
+  statement {
+    sid       = "AllowEcsStopTask"
+    effect    = "Allow"
+    actions   = ["ecs:StopTask"]
+    resources = ["*"]
+    condition {
+      test     = "ArnEquals"
+      variable = "ecs:cluster"
+      values   = ["arn:aws:ecs:*:*:cluster/${var.resource_name_prefix}-cluster-${var.resource_name_suffix}"]
+    }
+  }
+}
+
 // Todo: use module - lacework_iam_role
 
 resource "aws_iam_role" "agentless_scan_cross_account_role" {
@@ -374,42 +404,13 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
   path                 = "/"
   assume_role_policy   = data.aws_iam_policy_document.agentless_scan_cross_account_policy.json
   inline_policy {
-    name = "S3WriteAllowPolicy"
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Sid      = "ListAndTagBucket"
-          Action   = ["s3:ListBucket", "s3:GetBucketLocation", "s3:GetBucketTagging", "s3:PutBucketTagging"]
-          Effect   = "Allow"
-          Resource = aws_s3_bucket.agentless_scan_bucket.arn
-        },
-        {
-          Sid      = "PutGetDeleteObjectsInBucket"
-          Action   = ["s3:DeleteObject", "s3:PutObject", "s3:GetObject"]
-          Effect   = "Allow"
-          Resource = aws_s3_bucket.agentless_scan_bucket.arn
-        }
-      ]
-    })
+    name   = "S3WriteAllowPolicy"
+    policy = data.aws_iam_policy_document.cross_account_inline_policy_bucket.json
   }
 
   inline_policy {
-    name = "ECSTaskManagement"
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Sid      = "AllowEcsStopTask"
-          Action   = ["ecs:StopTask"]
-          Effect   = "Allow"
-          Resource = "*"
-          Condition = {
-            "ArnEquals" : { "ecs:cluster" : "arn:aws:ecs:*:*:cluster/${var.resource_name_prefix}-cluster-${var.resource_name_suffix}" }
-          }
-        }
-      ]
-    })
+    name   = "ECSTaskManagement"
+    policy = data.aws_iam_policy_document.cross_account_inline_policy_ecs.json
   }
 
   tags = {
@@ -482,8 +483,9 @@ resource "aws_security_group" "agentless_scan_vpc_egress" {
 }
 // EC2 Subnet
 resource "aws_subnet" "agentless_scan_public_subnet" {
-  vpc_id            = aws_vpc.agentless_scan_vpc.id
-  availability_zone = data.aws_region.current.name
+  vpc_id = aws_vpc.agentless_scan_vpc.id
+  //availability_zone = data.aws_region.current.id
+  availability_zone = "us-east-1a"
   cidr_block        = "10.10.1.0/24"
 
   map_public_ip_on_launch = false
@@ -586,7 +588,7 @@ resource "aws_cloudwatch_log_group" "agentless_scan_log_group" {
   retention_in_days = 14
 }
 
-// TODO: AgentlessScanOrchestrateEvent
+// AgentlessScanOrchestrateEvent
 resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
   name                = "${var.resource_name_prefix}-periodic-trigger-${var.resource_name_suffix}"
   schedule_expression = "rate(1 hour)"
