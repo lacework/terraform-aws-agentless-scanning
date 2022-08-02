@@ -12,17 +12,18 @@ variable "resource_name_suffix" {
   description = ""
 }
 
-variable "cloud_integration_name" {
+variable "lacework_integration_name" {
   type        = string
   description = ""
 }
 
-variable "scan_frequency" {
+variable "scan_frequency_hours" {
   type        = number
   description = ""
+  default     = 24
 }
 
-variable "query_text" {
+variable "filter_query_text" {
   type        = string
   description = ""
   default     = ""
@@ -33,7 +34,7 @@ variable "scan_containers" {
   description = ""
 }
 variable "scan_host_vulnerabilities" {
-  type        = string
+  type        = bool
   description = ""
 }
 

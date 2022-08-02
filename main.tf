@@ -3,16 +3,16 @@ data "aws_region" "current" {}
 
 // Todo: replace with iam role module
 resource "random_string" "external_id" {
-  length           = 256
+  length           = 16
   override_special = "=,.@:/-"
 }
 
 // TF provider agentless scan resource
 
 resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" {
-  name                      = var.cloud_integration_name
-  scan_frequency            = var.scan_frequency
-  query_text                = var.query_text
+  name                      = var.lacework_integration_name
+  scan_frequency            = var.scan_frequency_hours
+  query_text                = var.filter_query_text
   scan_containers           = var.scan_containers
   scan_host_vulnerabilities = var.scan_host_vulnerabilities
 }
@@ -489,7 +489,7 @@ resource "aws_subnet" "agentless_scan_public_subnet" {
 }
 
 // ECS Capacity Providers
-resource "aws_ecs_cluster_capacity_providers" "example" {
+resource "aws_ecs_cluster_capacity_providers" "agentless_scan_capacity_providers" {
   cluster_name       = aws_ecs_cluster.agentless_scan_ecs_cluster.name
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
 }

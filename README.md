@@ -33,7 +33,7 @@ No modules.
 | [aws_cloudwatch_event_target.agentless_scan_event_target](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_log_group.agentless_scan_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_ecs_cluster.agentless_scan_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
-| [aws_ecs_cluster_capacity_providers.example](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers) | resource |
+| [aws_ecs_cluster_capacity_providers.agentless_scan_capacity_providers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers) | resource |
 | [aws_ecs_task_definition.agentless_scan_task_definition](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_iam_policy.agentless_scan_task_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.agentless_scan_cross_account_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -67,15 +67,15 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cloud_integration_name"></a> [cloud\_integration\_name](#input\_cloud\_integration\_name) | n/a | `string` | n/a | yes |
+| <a name="input_filter_query_text"></a> [filter\_query\_text](#input\_filter\_query\_text) | n/a | `string` | `""` | no |
 | <a name="input_image_url"></a> [image\_url](#input\_image\_url) | Container Image | `string` | `"public.ecr.aws/p5r4i7k7/sidekick:latest"` | no |
 | <a name="input_lacework_aws_account_id"></a> [lacework\_aws\_account\_id](#input\_lacework\_aws\_account\_id) | The Lacework AWS account that the IAM role will grant access | `string` | `"434813966438"` | no |
-| <a name="input_query_text"></a> [query\_text](#input\_query\_text) | n/a | `string` | `""` | no |
+| <a name="input_lacework_integration_name"></a> [lacework\_integration\_name](#input\_lacework\_integration\_name) | n/a | `string` | n/a | yes |
 | <a name="input_resource_name_prefix"></a> [resource\_name\_prefix](#input\_resource\_name\_prefix) | n/a | `string` | n/a | yes |
 | <a name="input_resource_name_suffix"></a> [resource\_name\_suffix](#input\_resource\_name\_suffix) | n/a | `string` | n/a | yes |
 | <a name="input_scan_containers"></a> [scan\_containers](#input\_scan\_containers) | n/a | `bool` | n/a | yes |
-| <a name="input_scan_frequency"></a> [scan\_frequency](#input\_scan\_frequency) | n/a | `number` | n/a | yes |
-| <a name="input_scan_host_vulnerabilities"></a> [scan\_host\_vulnerabilities](#input\_scan\_host\_vulnerabilities) | n/a | `string` | n/a | yes |
+| <a name="input_scan_frequency_hours"></a> [scan\_frequency\_hours](#input\_scan\_frequency\_hours) | n/a | `number` | `24` | no |
+| <a name="input_scan_host_vulnerabilities"></a> [scan\_host\_vulnerabilities](#input\_scan\_host\_vulnerabilities) | n/a | `bool` | n/a | yes |
 
 ## Outputs
 
