@@ -3,13 +3,17 @@ variable "image_url" {
   default     = "public.ecr.aws/p5r4i7k7/sidekick:latest"
   description = "The container image url for Lacework sidekick."
 }
+
 variable "resource_name_prefix" {
   type        = string
   description = "A string to be prefixed to the name of all new resources."
+  default     = "lacework-agentless-workload-scanning"
 }
+
 variable "resource_name_suffix" {
   type        = string
   description = "A string to be appended to the end of the name of all new resources."
+  default     = ""
 }
 
 variable "lacework_integration_name" {
