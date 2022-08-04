@@ -1,4 +1,3 @@
-
 data "aws_region" "current" {}
 
 // Todo: replace with iam role module
@@ -7,9 +6,15 @@ resource "random_string" "external_id" {
   override_special = "=,.@:/-"
 }
 
+// Global - The following are resources created once per Aws Account
+// includes the lacework cloud account integration
+// Only create global resources if global variable is set to true
+// count = var.global ? 1 : 0
+
 // TF provider agentless scan resource
 
 resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" {
+  count                     = var.global ? 1 : 0
   name                      = var.lacework_integration_name
   scan_frequency            = var.scan_frequency_hours
   query_text                = var.filter_query_text
@@ -17,13 +22,14 @@ resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" 
   scan_host_vulnerabilities = var.scan_host_vulnerabilities
 }
 
-// Global
 // SecretsManagers
 resource "aws_secretsmanager_secret" "agentless_scan_secret" {
-  name = "${var.resource_name_prefix}-secret-${var.resource_name_suffix}"
+  count = var.global ? 1 : 0
+  name  = "${var.resource_name_prefix}-secret-${var.resource_name_suffix}"
 }
 
 resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
+  count         = var.global ? 1 : 0
   secret_id     = aws_secretsmanager_secret.agentless_scan_secret.id
   secret_string = <<EOF
    {
@@ -35,11 +41,13 @@ EOF
 
 // AWS::IAM::ServiceLinkedRole
 resource "aws_iam_service_linked_role" "agentless_scan_linked_role" {
+  count            = var.global ? 1 : 0
   aws_service_name = "ecs.amazonaws.com"
   description      = "Role to enable Amazon ECS to manage your cluster."
 }
 
 data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
+  count = var.global ? 1 : 0
   statement {
     sid       = "AllowControlOfBucket"
     effect    = "Allow"
@@ -183,6 +191,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
 
 // AWS::IAM::ManagedPolicy
 resource "aws_iam_policy" "agentless_scan_task_policy" {
+  count  = var.global ? 1 : 0
   name   = "${var.resource_name_prefix}-task-policy-${var.resource_name_suffix}"
   policy = data.aws_iam_policy_document.agentless_scan_task_policy_document.json
 }
@@ -190,6 +199,7 @@ resource "aws_iam_policy" "agentless_scan_task_policy" {
 
 // AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_task_role" {
+  count                = var.global ? 1 : 0
   name                 = "${var.resource_name_prefix}-task-role-${var.resource_name_suffix}"
   max_session_duration = 43200
   path                 = "/"
@@ -215,6 +225,7 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
 // AWS::IAM::Role
 
 resource "aws_iam_role" "agentless_scan_ecs_event_role" {
+  count                = var.global ? 1 : 0
   name                 = "${var.resource_name_prefix}-task-event-role-${var.resource_name_suffix}"
   max_session_duration = 3600
   path                 = "/service-role/"
@@ -238,6 +249,7 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
 }
 // AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
+  count                = var.global ? 1 : 0
   name                 = "${var.resource_name_prefix}-task-execution-role-${var.resource_name_suffix}"
   max_session_duration = 3600
   path                 = "/"
@@ -277,6 +289,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
 
 // AWS::S3::Bucket
 resource "aws_s3_bucket" "agentless_scan_bucket" {
+  count  = var.global ? 1 : 0
   bucket = "${var.resource_name_prefix}-bucket-${var.resource_name_suffix}"
 
   tags = {
@@ -285,6 +298,7 @@ resource "aws_s3_bucket" "agentless_scan_bucket" {
 }
 
 resource "aws_s3_bucket_versioning" "versioning_example" {
+  count  = var.global ? 1 : 0
   bucket = aws_s3_bucket.agentless_scan_bucket.id
   versioning_configuration {
     status = "Suspended"
@@ -292,6 +306,7 @@ resource "aws_s3_bucket_versioning" "versioning_example" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "agentless_scan_bucket_lifecyle" {
+  count  = var.global ? 1 : 0
   bucket = aws_s3_bucket.agentless_scan_bucket.id
 
   rule {
@@ -318,11 +333,13 @@ resource "aws_s3_bucket_lifecycle_configuration" "agentless_scan_bucket_lifecyle
 }
 // AWS::S3::BucketPolicy
 resource "aws_s3_bucket_policy" "agentless_scan_bucket_policy" {
+  count  = var.global ? 1 : 0
   bucket = aws_s3_bucket.agentless_scan_bucket.id
   policy = data.aws_iam_policy_document.agentless_scan_bucket_policy.json
 }
 
 data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
+  count = var.global ? 1 : 0
   statement {
     sid     = "ForceSSLOnlyAccess"
     effect  = "Deny"
@@ -346,6 +363,7 @@ data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
 // AWS::IAM::Role
 
 data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
+  count = var.global ? 1 : 0
   statement {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
@@ -362,6 +380,7 @@ data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
 }
 
 data "aws_iam_policy_document" "cross_account_inline_policy_bucket" {
+  count = var.global ? 1 : 0
   statement {
     sid       = "ListAndTagBucket"
     effect    = "Allow"
@@ -378,6 +397,7 @@ data "aws_iam_policy_document" "cross_account_inline_policy_bucket" {
 }
 
 data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
+  count = var.global ? 1 : 0
   statement {
     sid       = "AllowEcsStopTask"
     effect    = "Allow"
@@ -394,6 +414,7 @@ data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
 // Todo: use module - lacework_iam_role
 
 resource "aws_iam_role" "agentless_scan_cross_account_role" {
+  count = var.global ? 1 : 0
   name                 = "${var.resource_name_prefix}-cross-account-role-${var.resource_name_suffix}"
   max_session_duration = 3600
   path                 = "/"
@@ -415,9 +436,12 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
 }
 
 
-// Per Region
-// EC2 VPC
+// Regional - The following are resources created once per Aws Region
+// Only create regional resources if regional variable is set to true
+// count = var.regional ? 1 : 0
+// VPC
 resource "aws_vpc" "agentless_scan_vpc" {
+  count                = var.regional ? 1 : 0
   cidr_block           = "10.10.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
@@ -432,8 +456,9 @@ resource "aws_vpc" "agentless_scan_vpc" {
 
 
 
-// EC2 RouteTable
+// RouteTable
 resource "aws_route_table" "agentless_scan_route_table" {
+  count  = var.regional ? 1 : 0
   vpc_id = aws_vpc.agentless_scan_vpc.id
   tags = {
     Name           = "${var.resource_name_prefix}-vpc-${var.resource_name_suffix}"
@@ -441,15 +466,17 @@ resource "aws_route_table" "agentless_scan_route_table" {
   }
 }
 
-// EC2 SubnetRouteTableAsccociation
+// SubnetRouteTableAsccociation
 
 resource "aws_route_table_association" "agentless_scan_route_table_association" {
+  count          = var.regional ? 1 : 0
   subnet_id      = aws_subnet.agentless_scan_public_subnet.id
   route_table_id = aws_route_table.agentless_scan_route_table.id
 }
 
-// EC2:InternetGateway
+// InternetGateway
 resource "aws_internet_gateway" "agentless_scan_gateway" {
+  count  = var.regional ? 1 : 0
   vpc_id = aws_vpc.agentless_scan_vpc.id
 
   tags = {
@@ -458,16 +485,18 @@ resource "aws_internet_gateway" "agentless_scan_gateway" {
   }
 }
 
-// EC2 Route
+// Route
 resource "aws_route" "agentless_scan_route" {
+  count                  = var.regional ? 1 : 0
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.agentless_scan_gateway.id
   route_table_id         = aws_route_table.agentless_scan_route_table.id
 }
 
-// EC2 SecurityGroupEgress
+// SecurityGroupEgress
 resource "aws_security_group" "agentless_scan_vpc_egress" {
-  name = "AgentlessScanVPCEgress"
+  count = var.regional ? 1 : 0
+  name  = "AgentlessScanVPCEgress"
   egress {
     from_port   = 443
     to_port     = 443
@@ -475,8 +504,9 @@ resource "aws_security_group" "agentless_scan_vpc_egress" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-// EC2 Subnet
+// Subnet
 resource "aws_subnet" "agentless_scan_public_subnet" {
+  count                   = var.regional ? 1 : 0
   vpc_id                  = aws_vpc.agentless_scan_vpc.id
   cidr_block              = "10.10.1.0/24"
   map_public_ip_on_launch = false
@@ -488,14 +518,16 @@ resource "aws_subnet" "agentless_scan_public_subnet" {
   }
 }
 
-// ECS Capacity Providers
+// Capacity Providers
 resource "aws_ecs_cluster_capacity_providers" "agentless_scan_capacity_providers" {
+  count              = var.regional ? 1 : 0
   cluster_name       = aws_ecs_cluster.agentless_scan_ecs_cluster.name
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
 }
-// ECS Cluster
+// Cluster
 resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
-  name = "${var.resource_name_prefix}-cluster-${var.resource_name_suffix}"
+  count = var.regional ? 1 : 0
+  name  = "${var.resource_name_prefix}-cluster-${var.resource_name_suffix}"
 
   tags = {
     Name           = "${var.resource_name_prefix}-vpc-${var.resource_name_suffix}"
@@ -503,8 +535,9 @@ resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
   }
 }
 
-// ECS TaskDefinition
+// TaskDefinition
 resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
+  count                    = var.regional ? 1 : 0
   family                   = aws_ecs_cluster.agentless_scan_ecs_cluster.name
   task_role_arn            = aws_iam_role.agentless_scan_ecs_task_role.arn
   execution_role_arn       = aws_iam_role.agentless_scan_ecs_execution_role.arn
@@ -573,20 +606,23 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   ])
 }
 
-// Logs LogGroup
+// LogGroup
 resource "aws_cloudwatch_log_group" "agentless_scan_log_group" {
+  count             = var.regional ? 1 : 0
   name              = "/ecs/${aws_ecs_cluster.agentless_scan_ecs_cluster.name}"
   retention_in_days = 14
 }
 
 // AgentlessScanOrchestrateEvent
 resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
+  count               = var.regional ? 1 : 0
   name                = "${var.resource_name_prefix}-periodic-trigger-${var.resource_name_suffix}"
   schedule_expression = "rate(1 hour)"
   event_bus_name      = "default"
 }
 
 resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
+  count     = var.regional ? 1 : 0
   target_id = "sidekick"
   rule      = aws_cloudwatch_event_rule.agentless_scan_event_rule.name
   arn       = aws_ecs_cluster.agentless_scan_ecs_cluster.arn

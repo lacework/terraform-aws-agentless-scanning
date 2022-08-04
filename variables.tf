@@ -1,45 +1,57 @@
 variable "image_url" {
   type        = string
   default     = "public.ecr.aws/p5r4i7k7/sidekick:latest"
-  description = "Container Image"
+  description = "The container image url for Lacework sidekick."
 }
 variable "resource_name_prefix" {
   type        = string
-  description = ""
+  description = "A string to be prefixed to the name of all new resources."
 }
 variable "resource_name_suffix" {
   type        = string
-  description = ""
+  description = "A string to be appended to the end of the name of all new resources."
 }
 
 variable "lacework_integration_name" {
   type        = string
-  description = ""
+  description = "The name of the Lacework cloud account integration."
 }
 
 variable "scan_frequency_hours" {
   type        = number
-  description = ""
+  description = "How often in hours the scan will run in hours. Defaults to `24`."
   default     = 24
 }
 
 variable "filter_query_text" {
   type        = string
-  description = ""
+  description = "The LQL query text."
   default     = ""
 }
 
 variable "scan_containers" {
   type        = bool
-  description = ""
+  description = "Whether to includes scanning for containers."
 }
 variable "scan_host_vulnerabilities" {
   type        = bool
-  description = ""
+  description = "Whether to includes scanning for host vulnerabilities."
 }
 
 variable "lacework_aws_account_id" {
   type        = string
   default     = "434813966438"
-  description = "The Lacework AWS account that the IAM role will grant access"
+  description = "The Lacework AWS account that the IAM role will grant access."
+}
+
+variable "global" {
+  type        = bool
+  default     = false
+  description = "Whether or not to create global resources. Defaults to `false`."
+}
+
+variable "regional" {
+  type        = bool
+  default     = true
+  description = "Whether or not to create regional resources. Defaults to `true`."
 }

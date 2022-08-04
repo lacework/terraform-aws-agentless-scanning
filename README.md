@@ -12,13 +12,14 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.15.0 |
+| <a name="requirement_lacework"></a> [lacework](#requirement\_lacework) | ~> 0.23 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
-| <a name="provider_lacework"></a> [lacework](#provider\_lacework) | n/a |
+| <a name="provider_lacework"></a> [lacework](#provider\_lacework) | ~> 0.23 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
 
 ## Modules
@@ -67,15 +68,17 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_filter_query_text"></a> [filter\_query\_text](#input\_filter\_query\_text) | n/a | `string` | `""` | no |
-| <a name="input_image_url"></a> [image\_url](#input\_image\_url) | Container Image | `string` | `"public.ecr.aws/p5r4i7k7/sidekick:latest"` | no |
-| <a name="input_lacework_aws_account_id"></a> [lacework\_aws\_account\_id](#input\_lacework\_aws\_account\_id) | The Lacework AWS account that the IAM role will grant access | `string` | `"434813966438"` | no |
-| <a name="input_lacework_integration_name"></a> [lacework\_integration\_name](#input\_lacework\_integration\_name) | n/a | `string` | n/a | yes |
-| <a name="input_resource_name_prefix"></a> [resource\_name\_prefix](#input\_resource\_name\_prefix) | n/a | `string` | n/a | yes |
-| <a name="input_resource_name_suffix"></a> [resource\_name\_suffix](#input\_resource\_name\_suffix) | n/a | `string` | n/a | yes |
-| <a name="input_scan_containers"></a> [scan\_containers](#input\_scan\_containers) | n/a | `bool` | n/a | yes |
-| <a name="input_scan_frequency_hours"></a> [scan\_frequency\_hours](#input\_scan\_frequency\_hours) | n/a | `number` | `24` | no |
-| <a name="input_scan_host_vulnerabilities"></a> [scan\_host\_vulnerabilities](#input\_scan\_host\_vulnerabilities) | n/a | `bool` | n/a | yes |
+| <a name="input_filter_query_text"></a> [filter\_query\_text](#input\_filter\_query\_text) | The LQL query text. | `string` | `""` | no |
+| <a name="input_global"></a> [global](#input\_global) | Whether or not to create global resources. Defaults to `false`. | `bool` | `false` | no |
+| <a name="input_image_url"></a> [image\_url](#input\_image\_url) | The container image url for Lacework sidekick. | `string` | `"public.ecr.aws/p5r4i7k7/sidekick:latest"` | no |
+| <a name="input_lacework_aws_account_id"></a> [lacework\_aws\_account\_id](#input\_lacework\_aws\_account\_id) | The Lacework AWS account that the IAM role will grant access. | `string` | `"434813966438"` | no |
+| <a name="input_lacework_integration_name"></a> [lacework\_integration\_name](#input\_lacework\_integration\_name) | The name of the Lacework cloud account integration. | `string` | n/a | yes |
+| <a name="input_regional"></a> [regional](#input\_regional) | Whether or not to create regional resources. Defaults to `true`. | `bool` | `true` | no |
+| <a name="input_resource_name_prefix"></a> [resource\_name\_prefix](#input\_resource\_name\_prefix) | A string to be prefixed to the name of all new resources. | `string` | n/a | yes |
+| <a name="input_resource_name_suffix"></a> [resource\_name\_suffix](#input\_resource\_name\_suffix) | A string to be appended to the end of the name of all new resources. | `string` | n/a | yes |
+| <a name="input_scan_containers"></a> [scan\_containers](#input\_scan\_containers) | Whether to includes scanning for containers. | `bool` | n/a | yes |
+| <a name="input_scan_frequency_hours"></a> [scan\_frequency\_hours](#input\_scan\_frequency\_hours) | How often in hours the scan will run in hours. Defaults to `24`. | `number` | `24` | no |
+| <a name="input_scan_host_vulnerabilities"></a> [scan\_host\_vulnerabilities](#input\_scan\_host\_vulnerabilities) | Whether to includes scanning for host vulnerabilities. | `bool` | n/a | yes |
 
 ## Outputs
 
