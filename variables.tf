@@ -15,6 +15,7 @@ variable "resource_name_suffix" {
 variable "lacework_integration_name" {
   type        = string
   description = "The name of the Lacework cloud account integration."
+  default     = "aws-agentless-scan"
 }
 
 variable "scan_frequency_hours" {
@@ -32,10 +33,12 @@ variable "filter_query_text" {
 variable "scan_containers" {
   type        = bool
   description = "Whether to includes scanning for containers."
+  default     = false
 }
 variable "scan_host_vulnerabilities" {
   type        = bool
   description = "Whether to includes scanning for host vulnerabilities."
+  default     = false
 }
 
 variable "lacework_aws_account_id" {
@@ -54,4 +57,22 @@ variable "regional" {
   type        = bool
   default     = true
   description = "Whether or not to create regional resources. Defaults to `true`."
+}
+
+variable "agentless_scan_ecs_task_role_arn" {
+  type        = string
+  default     = ""
+  description = "Ecs task role arn. Required input for regional resources"
+}
+
+variable "agentless_scan_ecs_execution_role_arn" {
+  type        = string
+  default     = ""
+  description = "Ecs execution role arn. Required input for regional resources"
+}
+
+variable "agentless_scan_ecs_event_role_arn" {
+  type        = string
+  default     = ""
+  description = "Ecs event role arn. Required input for regional resources"
 }

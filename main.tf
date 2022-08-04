@@ -1,3 +1,9 @@
+locals {
+  agentless_scan_ecs_task_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : ""
+  agentless_scan_ecs_execution_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : ""
+  agentless_scan_ecs_event_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : ""
+}
+
 data "aws_region" "current" {}
 
 // Todo: replace with iam role module
@@ -30,11 +36,11 @@ resource "aws_secretsmanager_secret" "agentless_scan_secret" {
 
 resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
   count         = var.global ? 1 : 0
-  secret_id     = aws_secretsmanager_secret.agentless_scan_secret.id
+  secret_id     = aws_secretsmanager_secret.agentless_scan_secret[0].id
   secret_string = <<EOF
    {
     "account": "${var.lacework_aws_account_id}",
-    "token": "${lacework_integration_aws_agentless_scanning.lacework_cloud_account.server_token}"
+    "token": "${lacework_integration_aws_agentless_scanning.lacework_cloud_account[0].server_token}"
    }
 EOF
 }
@@ -52,7 +58,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     sid       = "AllowControlOfBucket"
     effect    = "Allow"
     actions   = ["s3:*"]
-    resources = ["${aws_s3_bucket.agentless_scan_bucket.arn}", "${aws_s3_bucket.agentless_scan_bucket.arn}/*"]
+    resources = ["${aws_s3_bucket.agentless_scan_bucket[0].arn}", "${aws_s3_bucket.agentless_scan_bucket[0].arn}/*"]
   }
 
   statement {
@@ -94,7 +100,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     actions = ["secretsmanager:ListSecretVersionIds",
       "secretsmanager:GetSecretValue",
     "secretsmanager:GetResourcePolicy"]
-    resources = ["${aws_secretsmanager_secret.agentless_scan_secret.arn}"]
+    resources = ["${aws_secretsmanager_secret.agentless_scan_secret[0].arn}"]
   }
 
   statement {
@@ -193,7 +199,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
 resource "aws_iam_policy" "agentless_scan_task_policy" {
   count  = var.global ? 1 : 0
   name   = "${var.resource_name_prefix}-task-policy-${var.resource_name_suffix}"
-  policy = data.aws_iam_policy_document.agentless_scan_task_policy_document.json
+  policy = data.aws_iam_policy_document.agentless_scan_task_policy_document[0].json
 }
 
 
@@ -203,7 +209,7 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
   name                 = "${var.resource_name_prefix}-task-role-${var.resource_name_suffix}"
   max_session_duration = 43200
   path                 = "/"
-  managed_policy_arns  = [aws_iam_policy.agentless_scan_task_policy.arn]
+  managed_policy_arns  = [aws_iam_policy.agentless_scan_task_policy[0].arn]
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -299,7 +305,7 @@ resource "aws_s3_bucket" "agentless_scan_bucket" {
 
 resource "aws_s3_bucket_versioning" "versioning_example" {
   count  = var.global ? 1 : 0
-  bucket = aws_s3_bucket.agentless_scan_bucket.id
+  bucket = aws_s3_bucket.agentless_scan_bucket[0].id
   versioning_configuration {
     status = "Suspended"
   }
@@ -307,7 +313,7 @@ resource "aws_s3_bucket_versioning" "versioning_example" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "agentless_scan_bucket_lifecyle" {
   count  = var.global ? 1 : 0
-  bucket = aws_s3_bucket.agentless_scan_bucket.id
+  bucket = aws_s3_bucket.agentless_scan_bucket[0].id
 
   rule {
     id = "Work"
@@ -334,8 +340,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "agentless_scan_bucket_lifecyle
 // AWS::S3::BucketPolicy
 resource "aws_s3_bucket_policy" "agentless_scan_bucket_policy" {
   count  = var.global ? 1 : 0
-  bucket = aws_s3_bucket.agentless_scan_bucket.id
-  policy = data.aws_iam_policy_document.agentless_scan_bucket_policy.json
+  bucket = aws_s3_bucket.agentless_scan_bucket[0].id
+  policy = data.aws_iam_policy_document.agentless_scan_bucket_policy[0].json
 }
 
 data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
@@ -349,8 +355,8 @@ data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
       identifiers = ["*"]
     }
     resources = [
-      aws_s3_bucket.agentless_scan_bucket.arn,
-      "${aws_s3_bucket.agentless_scan_bucket.arn}/*"
+      aws_s3_bucket.agentless_scan_bucket[0].arn,
+      "${aws_s3_bucket.agentless_scan_bucket[0].arn}/*"
     ]
     condition {
       test     = "Bool"
@@ -385,14 +391,14 @@ data "aws_iam_policy_document" "cross_account_inline_policy_bucket" {
     sid       = "ListAndTagBucket"
     effect    = "Allow"
     actions   = ["s3:ListBucket", "s3:GetBucketLocation", "s3:GetBucketTagging", "s3:PutBucketTagging"]
-    resources = [aws_s3_bucket.agentless_scan_bucket.arn]
+    resources = [aws_s3_bucket.agentless_scan_bucket[0].arn]
   }
 
   statement {
     sid       = "PutGetDeleteObjectsInBucket"
     effect    = "Allow"
     actions   = ["s3:DeleteObject", "s3:PutObject", "s3:GetObject"]
-    resources = [aws_s3_bucket.agentless_scan_bucket.arn]
+    resources = [aws_s3_bucket.agentless_scan_bucket[0].arn]
   }
 }
 
@@ -418,15 +424,15 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
   name                 = "${var.resource_name_prefix}-cross-account-role-${var.resource_name_suffix}"
   max_session_duration = 3600
   path                 = "/"
-  assume_role_policy   = data.aws_iam_policy_document.agentless_scan_cross_account_policy.json
+  assume_role_policy   = data.aws_iam_policy_document.agentless_scan_cross_account_policy[0].json
   inline_policy {
     name   = "S3WriteAllowPolicy"
-    policy = data.aws_iam_policy_document.cross_account_inline_policy_bucket.json
+    policy = data.aws_iam_policy_document.cross_account_inline_policy_bucket[0].json
   }
 
   inline_policy {
     name   = "ECSTaskManagement"
-    policy = data.aws_iam_policy_document.cross_account_inline_policy_ecs.json
+    policy = data.aws_iam_policy_document.cross_account_inline_policy_ecs[0].json
   }
 
   tags = {
@@ -459,7 +465,7 @@ resource "aws_vpc" "agentless_scan_vpc" {
 // RouteTable
 resource "aws_route_table" "agentless_scan_route_table" {
   count  = var.regional ? 1 : 0
-  vpc_id = aws_vpc.agentless_scan_vpc.id
+  vpc_id = aws_vpc.agentless_scan_vpc[0].id
   tags = {
     Name           = "${var.resource_name_prefix}-vpc-${var.resource_name_suffix}"
     LWTAG_SIDEKICK = "1"
@@ -470,14 +476,14 @@ resource "aws_route_table" "agentless_scan_route_table" {
 
 resource "aws_route_table_association" "agentless_scan_route_table_association" {
   count          = var.regional ? 1 : 0
-  subnet_id      = aws_subnet.agentless_scan_public_subnet.id
-  route_table_id = aws_route_table.agentless_scan_route_table.id
+  subnet_id      = aws_subnet.agentless_scan_public_subnet[0].id
+  route_table_id = aws_route_table.agentless_scan_route_table[0].id
 }
 
 // InternetGateway
 resource "aws_internet_gateway" "agentless_scan_gateway" {
   count  = var.regional ? 1 : 0
-  vpc_id = aws_vpc.agentless_scan_vpc.id
+  vpc_id = aws_vpc.agentless_scan_vpc[0].id
 
   tags = {
     Name           = "${var.resource_name_prefix}-vpc-${var.resource_name_suffix}"
@@ -489,8 +495,8 @@ resource "aws_internet_gateway" "agentless_scan_gateway" {
 resource "aws_route" "agentless_scan_route" {
   count                  = var.regional ? 1 : 0
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.agentless_scan_gateway.id
-  route_table_id         = aws_route_table.agentless_scan_route_table.id
+  gateway_id             = aws_internet_gateway.agentless_scan_gateway[0].id
+  route_table_id         = aws_route_table.agentless_scan_route_table[0].id
 }
 
 // SecurityGroupEgress
@@ -507,7 +513,7 @@ resource "aws_security_group" "agentless_scan_vpc_egress" {
 // Subnet
 resource "aws_subnet" "agentless_scan_public_subnet" {
   count                   = var.regional ? 1 : 0
-  vpc_id                  = aws_vpc.agentless_scan_vpc.id
+  vpc_id                  = aws_vpc.agentless_scan_vpc[0].id
   cidr_block              = "10.10.1.0/24"
   map_public_ip_on_launch = false
 
@@ -521,7 +527,7 @@ resource "aws_subnet" "agentless_scan_public_subnet" {
 // Capacity Providers
 resource "aws_ecs_cluster_capacity_providers" "agentless_scan_capacity_providers" {
   count              = var.regional ? 1 : 0
-  cluster_name       = aws_ecs_cluster.agentless_scan_ecs_cluster.name
+  cluster_name       = aws_ecs_cluster.agentless_scan_ecs_cluster[0].name
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
 }
 // Cluster
@@ -538,9 +544,11 @@ resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
 // TaskDefinition
 resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   count                    = var.regional ? 1 : 0
-  family                   = aws_ecs_cluster.agentless_scan_ecs_cluster.name
-  task_role_arn            = aws_iam_role.agentless_scan_ecs_task_role.arn
-  execution_role_arn       = aws_iam_role.agentless_scan_ecs_execution_role.arn
+  family                   = aws_ecs_cluster.agentless_scan_ecs_cluster[0].name
+  // if global is true, use created resource, else use input from global output
+  task_role_arn            =   var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : local.agentless_scan_ecs_task_role_arn
+  // if global is true, use created resource, else use input from global output
+  execution_role_arn       =   var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : local.agentless_scan_ecs_execution_role_arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 4096
@@ -565,7 +573,7 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
         },
         {
           name  = "ECS_CLUSTER_ARN"
-          value = "${aws_ecs_cluster.agentless_scan_ecs_cluster.arn}"
+          value = "${aws_ecs_cluster.agentless_scan_ecs_cluster[0].arn}"
         },
         {
           name  = "S3_BUCKET"
@@ -597,7 +605,7 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
         logDriver = "awslogs"
         options = {
           awslogs-create-group  = "true"
-          awslogs-group         = "/ecs/${aws_ecs_cluster.agentless_scan_ecs_cluster.name}"
+          awslogs-group         = "/ecs/${aws_ecs_cluster.agentless_scan_ecs_cluster[0].name}"
           awslogs-region        = "${data.aws_region.current.name}"
           awslogs-stream-prefix = "ecs"
         }
@@ -609,7 +617,7 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
 // LogGroup
 resource "aws_cloudwatch_log_group" "agentless_scan_log_group" {
   count             = var.regional ? 1 : 0
-  name              = "/ecs/${aws_ecs_cluster.agentless_scan_ecs_cluster.name}"
+  name              = "/ecs/${aws_ecs_cluster.agentless_scan_ecs_cluster[0].name}"
   retention_in_days = 14
 }
 
@@ -624,18 +632,19 @@ resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
 resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
   count     = var.regional ? 1 : 0
   target_id = "sidekick"
-  rule      = aws_cloudwatch_event_rule.agentless_scan_event_rule.name
-  arn       = aws_ecs_cluster.agentless_scan_ecs_cluster.arn
-  role_arn  = aws_iam_role.agentless_scan_ecs_event_role.arn
+  rule      = aws_cloudwatch_event_rule.agentless_scan_event_rule[0].name
+  arn       = aws_ecs_cluster.agentless_scan_ecs_cluster[0].arn
+  // if global is true, use created resource, else use input from global output
+  role_arn =   var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : local.agentless_scan_ecs_event_role_arn
   input     = "{\"containerOverrides\":[{\"name\":\"sidekick\",\"environment\":[{\"name\":\"STARTUP_SERVICE\",\"value\":\"ORCHESTRATE\"}]}]}"
   ecs_target {
     task_count          = 1
-    task_definition_arn = aws_ecs_task_definition.agentless_scan_task_definition.arn
+    task_definition_arn = aws_ecs_task_definition.agentless_scan_task_definition[0].arn
     launch_type         = "FARGATE"
     platform_version    = "LATEST"
     network_configuration {
-      subnets          = [aws_subnet.agentless_scan_public_subnet.id]
-      security_groups  = [aws_vpc.agentless_scan_vpc.default_security_group_id]
+      subnets          = [aws_subnet.agentless_scan_public_subnet[0].id]
+      security_groups  = [aws_vpc.agentless_scan_vpc[0].default_security_group_id]
       assign_public_ip = true
     }
     tags = {
