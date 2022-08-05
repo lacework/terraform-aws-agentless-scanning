@@ -1,7 +1,7 @@
 locals {
-  agentless_scan_ecs_task_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : ""
-  agentless_scan_ecs_execution_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : ""
-  agentless_scan_ecs_event_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : ""
+  agentless_scan_ecs_task_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : var.agentless_scan_ecs_task_role_arn
+  agentless_scan_ecs_execution_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : var.agentless_scan_ecs_execution_role_arn
+  agentless_scan_ecs_event_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : var.agentless_scan_ecs_event_role_arn
 }
 
 data "aws_region" "current" {}
@@ -546,9 +546,9 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   count                    = var.regional ? 1 : 0
   family                   = aws_ecs_cluster.agentless_scan_ecs_cluster[0].name
   // if global is true, use created resource, else use input from global output
-  task_role_arn            =   var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : var.agentless_scan_ecs_task_role_arn
+  task_role_arn            =  local.agentless_scan_ecs_task_role_arn
   // if global is true, use created resource, else use input from global output
-  execution_role_arn       =   var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : var.agentless_scan_ecs_execution_role_arn
+  execution_role_arn       =  local.agentless_scan_ecs_execution_role_arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 4096
@@ -635,7 +635,7 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
   rule      = aws_cloudwatch_event_rule.agentless_scan_event_rule[0].name
   arn       = aws_ecs_cluster.agentless_scan_ecs_cluster[0].arn
   // if global is true, use created resource, else use input from global output
-  role_arn =   var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : var.agentless_scan_ecs_event_role_arn
+  role_arn =   local.agentless_scan_ecs_event_role_arn
   input     = "{\"containerOverrides\":[{\"name\":\"sidekick\",\"environment\":[{\"name\":\"STARTUP_SERVICE\",\"value\":\"ORCHESTRATE\"}]}]}"
   ecs_target {
     task_count          = 1
