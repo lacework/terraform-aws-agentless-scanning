@@ -17,8 +17,6 @@ module "lacework_aws_agentless_scanning_global" {
   resource_name_suffix      = "terraform"
   lacework_integration_name = "sidekick_from_terraform"
   scan_frequency_hours      = 24
-  scan_containers           = true
-  scan_host_vulnerabilities = true
 }
 
 // By default only regional resources are created
