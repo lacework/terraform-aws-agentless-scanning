@@ -1,12 +1,12 @@
 provider "lacework" {}
 
 provider "aws" {
-  region = "us-east-1"
+  region = "eu-west-1"
 }
 
 provider "aws" {
   alias  = "usw2"
-  region = "us-west-2"
+  region = "eu-north-1"
 }
 
 // Create global and regional resources, includes lacework cloud integration
