@@ -1,18 +1,19 @@
 provider "lacework" {}
 
 provider "aws" {
-  region = "us-east-1"
+  region = "eu-west-1"
 }
 
 provider "aws" {
   alias  = "usw2"
-  region = "us-west-2"
+  region = "eu-north-1"
 }
 
 // Create global and regional resources, includes lacework cloud integration
 module "lacework_aws_agentless_scanning_global" {
   source                    = "../.."
   global                    = true
+  iam_service_linked_role   = false
   resource_name_prefix      = "lacework"
   resource_name_suffix      = "terraform"
   lacework_integration_name = "sidekick_from_terraform"
