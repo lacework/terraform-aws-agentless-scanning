@@ -13,7 +13,6 @@ provider "aws" {
 module "lacework_aws_agentless_scanning_global" {
   source                    = "../.."
   global                    = true
-  iam_service_linked_role   = false
   resource_name_prefix      = "lacework"
   resource_name_suffix      = "terraform"
   lacework_integration_name = "sidekick_from_terraform"

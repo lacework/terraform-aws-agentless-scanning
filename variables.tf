@@ -61,8 +61,8 @@ variable "regional" {
 
 variable "iam_service_linked_role" {
   type        = bool
-  default     = true
-  description = "Whether or not to create aws_iam_service_linked_role. Defaults to `true`."
+  default     = false
+  description = "Whether or not to create aws_iam_service_linked_role. Defaults to `false`."
 }
 
 variable "agentless_scan_ecs_task_role_arn" {
