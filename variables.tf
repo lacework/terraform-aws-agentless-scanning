@@ -36,13 +36,13 @@ variable "filter_query_text" {
 
 variable "scan_containers" {
   type        = bool
-  description = "Whether to includes scanning for containers."
-  default     = false
+  description = "Whether to includes scanning for containers.  Defaults to `true`."
+  default     = true
 }
 variable "scan_host_vulnerabilities" {
   type        = bool
-  description = "Whether to includes scanning for host vulnerabilities."
-  default     = false
+  description = "Whether to includes scanning for host vulnerabilities.  Defaults to `true`."
+  default     = true
 }
 
 variable "lacework_aws_account_id" {
@@ -61,6 +61,12 @@ variable "regional" {
   type        = bool
   default     = true
   description = "Whether or not to create regional resources. Defaults to `true`."
+}
+
+variable "iam_service_linked_role" {
+  type        = bool
+  default     = false
+  description = "Whether or not to create aws_iam_service_linked_role. Defaults to `false`."
 }
 
 variable "agentless_scan_ecs_task_role_arn" {
