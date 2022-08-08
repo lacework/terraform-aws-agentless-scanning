@@ -1,8 +1,8 @@
 locals {
-  resource_name_suffix = length(var.resource_name_suffix) > 0 ? var.resource_name_suffix : random_id.uniq.hex
-  agentless_scan_ecs_task_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : var.agentless_scan_ecs_task_role_arn
+  resource_name_suffix                  = length(var.resource_name_suffix) > 0 ? var.resource_name_suffix : random_id.uniq.hex
+  agentless_scan_ecs_task_role_arn      = var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : var.agentless_scan_ecs_task_role_arn
   agentless_scan_ecs_execution_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : var.agentless_scan_ecs_execution_role_arn
-  agentless_scan_ecs_event_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : var.agentless_scan_ecs_event_role_arn
+  agentless_scan_ecs_event_role_arn     = var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : var.agentless_scan_ecs_event_role_arn
 }
 
 data "aws_region" "current" {}
@@ -52,7 +52,7 @@ EOF
 
 // AWS::IAM::ServiceLinkedRole
 resource "aws_iam_service_linked_role" "agentless_scan_linked_role" {
-  count            = var.global && var.iam_service_linked_role? 1 : 0
+  count            = var.global && var.iam_service_linked_role ? 1 : 0
   aws_service_name = "ecs.amazonaws.com"
   description      = "Role to enable Amazon ECS to manage your cluster."
 }
@@ -67,9 +67,13 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
   }
 
   statement {
-    sid       = "AllowTagECSCluster"
-    effect    = "Allow"
-    actions   = ["ecs:TagResource", "ecs:UntagResource", "ecs:ListTagsForResource"]
+    sid    = "AllowTagECSCluster"
+    effect = "Allow"
+    actions = [
+      "ecs:TagResource",
+      "ecs:UntagResource",
+      "ecs:ListTagsForResource"
+    ]
     resources = ["*"]
     condition {
       test     = "StringLike"
@@ -81,30 +85,36 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
   statement {
     sid    = "AllowListRules"
     effect = "Allow"
-    actions = ["events:DescribeRule",
+    actions = [
+      "events:DescribeRule",
       "events:ListRules",
       "events:ListTargetsByRule",
       "events:ListTagsForResource",
-    "events:ListRuleNamesByTarget"]
+      "events:ListRuleNamesByTarget"
+    ]
     resources = ["*"]
   }
 
   statement {
     sid    = "AllowUpdateRule"
     effect = "Allow"
-    actions = ["events:DisableRule",
+    actions = [
+      "events:DisableRule",
       "events:EnableRule",
       "events:PutTargets",
-    "events:RemoveTargets"]
+      "events:RemoveTargets"
+    ]
     resources = ["arn:aws:events:*:*:rule/${var.resource_name_prefix}-periodic-trigger-${local.resource_name_suffix}"]
   }
 
   statement {
     sid    = "AllowReadFromSecretsManager"
     effect = "Allow"
-    actions = ["secretsmanager:ListSecretVersionIds",
+    actions = [
+      "secretsmanager:ListSecretVersionIds",
       "secretsmanager:GetSecretValue",
-    "secretsmanager:GetResourcePolicy"]
+      "secretsmanager:GetResourcePolicy"
+    ]
     resources = ["${aws_secretsmanager_secret.agentless_scan_secret[0].arn}"]
   }
 
@@ -125,21 +135,25 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
   statement {
     sid    = "CreateSnapshots"
     effect = "Allow"
-    actions = ["ec2:CreateTags",
-    "ec2:CreateSnapshot"]
+    actions = [
+      "ec2:CreateTags",
+      "ec2:CreateSnapshot"
+    ]
     resources = ["*"]
   }
 
   statement {
     sid    = "SnapshotManagement"
     effect = "Allow"
-    actions = ["ec2:DeleteSnapshot",
+    actions = [
+      "ec2:DeleteSnapshot",
       "ec2:ModifySnapshotAttribute",
       "ec2:ResetSnapshotAttribute",
       "ebs:ListChangedBlocks",
       "ebs:ListSnapshotBlocks",
       "ebs:GetSnapshotBlock",
-    "ebs:CompleteSnapshot"]
+      "ebs:CompleteSnapshot"
+    ]
     resources = ["*"]
     condition {
       test     = "StringLike"
@@ -151,11 +165,13 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
   statement {
     sid    = "TaskManagement"
     effect = "Allow"
-    actions = ["ecs:RunTask",
+    actions = [
+      "ecs:RunTask",
       "ecs:StartTask",
       "ecs:StopTask",
       "ecs:ListTasks",
-    "ecs:Describe*"]
+      "ecs:Describe*"
+    ]
     resources = ["*"]
     condition {
       test     = "ArnEquals"
@@ -167,20 +183,24 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
   statement {
     sid    = "SnapshotEncryption"
     effect = "Allow"
-    actions = ["kms:DescribeKey",
+    actions = [
+      "kms:DescribeKey",
       "kms:Encrypt",
       "kms:Decrypt",
       "kms:ReEncrypt*",
       "kms:GenerateDataKey*",
-    "kms:CreateGrant"]
+      "kms:CreateGrant"
+    ]
     resources = ["*"]
   }
 
   statement {
     sid    = "PassRoleToTasks"
     effect = "Allow"
-    actions = ["iam:PassRole",
-    "sts:AssumeRole"]
+    actions = [
+      "iam:PassRole",
+      "sts:AssumeRole"
+    ]
     resources = ["*"]
     condition {
       test     = "StringLike"
@@ -192,13 +212,14 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
   statement {
     sid    = "ReadLogs"
     effect = "Allow"
-    actions = ["logs:DescribeLogStreams",
-    "logs:GetLogEvents"]
+    actions = [
+      "logs:DescribeLogStreams",
+      "logs:GetLogEvents"
+    ]
     resources = ["arn:aws:logs:*:*:log-group:/ecs/${var.resource_name_prefix}-*"]
   }
 
 }
-
 
 // AWS::IAM::ManagedPolicy
 resource "aws_iam_policy" "agentless_scan_task_policy" {
@@ -206,7 +227,6 @@ resource "aws_iam_policy" "agentless_scan_task_policy" {
   name   = "${var.resource_name_prefix}-task-policy-${local.resource_name_suffix}"
   policy = data.aws_iam_policy_document.agentless_scan_task_policy_document[0].json
 }
-
 
 // AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_task_role" {
@@ -342,6 +362,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "agentless_scan_bucket_lifecyle
     status = "Enabled"
   }
 }
+
 // AWS::S3::BucketPolicy
 resource "aws_s3_bucket_policy" "agentless_scan_bucket_policy" {
   count  = var.global ? 1 : 0
@@ -372,7 +393,6 @@ data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
 }
 
 // AWS::IAM::Role
-
 data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
   count = var.global ? 1 : 0
   statement {
@@ -393,16 +413,25 @@ data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
 data "aws_iam_policy_document" "cross_account_inline_policy_bucket" {
   count = var.global ? 1 : 0
   statement {
-    sid       = "ListAndTagBucket"
-    effect    = "Allow"
-    actions   = ["s3:ListBucket", "s3:GetBucketLocation", "s3:GetBucketTagging", "s3:PutBucketTagging"]
+    sid    = "ListAndTagBucket"
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket",
+      "s3:GetBucketLocation",
+      "s3:GetBucketTagging",
+      "s3:PutBucketTagging"
+    ]
     resources = [aws_s3_bucket.agentless_scan_bucket[0].arn]
   }
 
   statement {
-    sid       = "PutGetDeleteObjectsInBucket"
-    effect    = "Allow"
-    actions   = ["s3:DeleteObject", "s3:PutObject", "s3:GetObject"]
+    sid    = "PutGetDeleteObjectsInBucket"
+    effect = "Allow"
+    actions = [
+      "s3:DeleteObject",
+      "s3:PutObject",
+      "s3:GetObject"
+    ]
     resources = [aws_s3_bucket.agentless_scan_bucket[0].arn]
   }
 }
@@ -430,6 +459,7 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
   max_session_duration = 3600
   path                 = "/"
   assume_role_policy   = data.aws_iam_policy_document.agentless_scan_cross_account_policy[0].json
+
   inline_policy {
     name   = "S3WriteAllowPolicy"
     policy = data.aws_iam_policy_document.cross_account_inline_policy_bucket[0].json
@@ -458,14 +488,11 @@ resource "aws_vpc" "agentless_scan_vpc" {
   enable_dns_hostnames = true
   instance_tenancy     = "default"
 
-
   tags = {
     Name           = "${var.resource_name_prefix}-vpc-${local.resource_name_suffix}"
     LWTAG_SIDEKICK = "1"
   }
 }
-
-
 
 // RouteTable
 resource "aws_route_table" "agentless_scan_route_table" {
@@ -478,7 +505,6 @@ resource "aws_route_table" "agentless_scan_route_table" {
 }
 
 // SubnetRouteTableAsccociation
-
 resource "aws_route_table_association" "agentless_scan_route_table_association" {
   count          = var.regional ? 1 : 0
   subnet_id      = aws_subnet.agentless_scan_public_subnet[0].id
@@ -515,6 +541,7 @@ resource "aws_security_group" "agentless_scan_vpc_egress" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
 // Subnet
 resource "aws_subnet" "agentless_scan_public_subnet" {
   count                   = var.regional ? 1 : 0
@@ -535,6 +562,7 @@ resource "aws_ecs_cluster_capacity_providers" "agentless_scan_capacity_providers
   cluster_name       = aws_ecs_cluster.agentless_scan_ecs_cluster[0].name
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
 }
+
 // Cluster
 resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
   count = var.regional ? 1 : 0
@@ -548,12 +576,12 @@ resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
 
 // TaskDefinition
 resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
-  count                    = var.regional ? 1 : 0
-  family                   = aws_ecs_cluster.agentless_scan_ecs_cluster[0].name
+  count  = var.regional ? 1 : 0
+  family = aws_ecs_cluster.agentless_scan_ecs_cluster[0].name
   // if global is true, use created resource, else use input from global output
-  task_role_arn            =  local.agentless_scan_ecs_task_role_arn
+  task_role_arn = local.agentless_scan_ecs_task_role_arn
   // if global is true, use created resource, else use input from global output
-  execution_role_arn       =  local.agentless_scan_ecs_execution_role_arn
+  execution_role_arn       = local.agentless_scan_ecs_execution_role_arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 4096
@@ -640,8 +668,8 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
   rule      = aws_cloudwatch_event_rule.agentless_scan_event_rule[0].name
   arn       = aws_ecs_cluster.agentless_scan_ecs_cluster[0].arn
   // if global is true, use created resource, else use input from global output
-  role_arn =   local.agentless_scan_ecs_event_role_arn
-  input     = "{\"containerOverrides\":[{\"name\":\"sidekick\",\"environment\":[{\"name\":\"STARTUP_SERVICE\",\"value\":\"ORCHESTRATE\"}]}]}"
+  role_arn = local.agentless_scan_ecs_event_role_arn
+  input    = "{\"containerOverrides\":[{\"name\":\"sidekick\",\"environment\":[{\"name\":\"STARTUP_SERVICE\",\"value\":\"ORCHESTRATE\"}]}]}"
   ecs_target {
     task_count          = 1
     task_definition_arn = aws_ecs_task_definition.agentless_scan_task_definition[0].arn
