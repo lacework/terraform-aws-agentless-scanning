@@ -282,7 +282,7 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
 // AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   count                = var.global ? 1 : 0
-  name                 = "${var.resource_name_prefix}-task-execution-role-${local.resource_name_suffix}"
+  name                 = "${var.resource_name_prefix}-task-exec-role-${local.resource_name_suffix}"
   max_session_duration = 3600
   path                 = "/"
   managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"]
