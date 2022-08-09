@@ -657,6 +657,11 @@ resource "aws_cloudwatch_log_group" "agentless_scan_log_group" {
 
 // AgentlessScanOrchestrateEvent
 resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
+  depends_on = [
+    aws_ecs_cluster.agentless_scan_ecs_cluster,
+    aws_ecs_task_definition.agentless_scan_task_definition
+  ]
+
   count               = var.regional ? 1 : 0
   name                = "${var.resource_name_prefix}-periodic-trigger-${local.resource_name_suffix}"
   schedule_expression = "rate(1 hour)"
