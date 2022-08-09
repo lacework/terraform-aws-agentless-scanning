@@ -3,6 +3,7 @@ locals {
   agentless_scan_ecs_task_role_arn      = var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : var.agentless_scan_ecs_task_role_arn
   agentless_scan_ecs_execution_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : var.agentless_scan_ecs_execution_role_arn
   agentless_scan_ecs_event_role_arn     = var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : var.agentless_scan_ecs_event_role_arn
+  agentless_scan_secret_arn             = var.global ? aws_secretsmanager_secret.agentless_scan_secret[0].id : var.agentless_scan_secret_arn
 }
 
 data "aws_region" "current" {}
@@ -44,7 +45,7 @@ resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
   secret_id     = aws_secretsmanager_secret.agentless_scan_secret[0].id
   secret_string = <<EOF
    {
-    "account": "${var.lacework_aws_account_id}",
+    "account": "${var.lacework_account}",
     "token": "${lacework_integration_aws_agentless_scanning.lacework_cloud_account[0].server_token}"
    }
 EOF
@@ -281,7 +282,7 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
 // AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   count                = var.global ? 1 : 0
-  name                 = "${var.resource_name_prefix}-task-execution-role-${local.resource_name_suffix}"
+  name                 = "${var.resource_name_prefix}-task-exec-role-${local.resource_name_suffix}"
   max_session_duration = 3600
   path                 = "/"
   managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"]
@@ -614,11 +615,11 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
         },
         {
           name  = "LACEWORK_APISERVER"
-          value = "${var.lacework_aws_account_id}"
+          value = "${var.lacework_account}.${var.lacework_domain}"
         },
         {
           name  = "SECRET_ARN"
-          value = "${var.resource_name_prefix}-bucket-${local.resource_name_suffix}"
+          value = "${local.agentless_scan_secret_arn}"
         },
         {
           name  = "LOCAL_STORAGE"
@@ -656,6 +657,11 @@ resource "aws_cloudwatch_log_group" "agentless_scan_log_group" {
 
 // AgentlessScanOrchestrateEvent
 resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
+  depends_on = [
+    aws_ecs_cluster.agentless_scan_ecs_cluster,
+    aws_ecs_task_definition.agentless_scan_task_definition
+  ]
+
   count               = var.regional ? 1 : 0
   name                = "${var.resource_name_prefix}-periodic-trigger-${local.resource_name_suffix}"
   schedule_expression = "rate(1 hour)"

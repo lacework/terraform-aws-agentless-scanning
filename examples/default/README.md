@@ -29,8 +29,10 @@ module "lacework_aws_agentless_scanning_regional" {
     aws = aws.usw2
   }
 
-  agentless_scan_ecs_task_role_arn = module.lacework_agentless_global.agentless_scan_ecs_task_role_arn
+  agentless_scan_ecs_task_role_arn      = module.lacework_agentless_global.agentless_scan_ecs_task_role_arn
   agentless_scan_ecs_execution_role_arn = module.lacework_agentless_global.agentless_scan_ecs_execution_role_arn
-  agentless_scan_ecs_event_role_arn = module.lacework_agentless_global.agentless_scan_ecs_event_role_arn
+  agentless_scan_ecs_event_role_arn     = module.lacework_agentless_global.agentless_scan_ecs_event_role_arn
+  agentless_scan_secret_arn             = module.lacework_aws_agentless_scanning_global.agentless_scan_secret_arn
+  lacework_account                      = module.lacework_aws_agentless_scanning_global.lacework_account
 }
 ```
