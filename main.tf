@@ -3,6 +3,7 @@ locals {
   agentless_scan_ecs_task_role_arn      = var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : var.agentless_scan_ecs_task_role_arn
   agentless_scan_ecs_execution_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : var.agentless_scan_ecs_execution_role_arn
   agentless_scan_ecs_event_role_arn     = var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : var.agentless_scan_ecs_event_role_arn
+  agentless_scan_secret_arn             = var.global ? aws_secretsmanager_secret.agentless_scan_secret[0].id : var.agentless_scan_secret_arn
 }
 
 data "aws_region" "current" {}
@@ -44,7 +45,7 @@ resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
   secret_id     = aws_secretsmanager_secret.agentless_scan_secret[0].id
   secret_string = <<EOF
    {
-    "account": "${var.lacework_aws_account_id}",
+    "account": "${var.lacework_account}",
     "token": "${lacework_integration_aws_agentless_scanning.lacework_cloud_account[0].server_token}"
    }
 EOF
@@ -614,11 +615,11 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
         },
         {
           name  = "LACEWORK_APISERVER"
-          value = "${var.lacework_aws_account_id}"
+          value = "${var.lacework_account}.${var.lacework_domain}"
         },
         {
           name  = "SECRET_ARN"
-          value = "${var.resource_name_prefix}-bucket-${local.resource_name_suffix}"
+          value = "${local.agentless_scan_secret_arn}"
         },
         {
           name  = "LOCAL_STORAGE"

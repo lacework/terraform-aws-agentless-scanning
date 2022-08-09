@@ -45,6 +45,17 @@ variable "scan_host_vulnerabilities" {
   default     = true
 }
 
+variable "lacework_account" {
+  type        = string
+  description = "The name of the Lacework account with which to integrate."
+}
+
+variable "lacework_domain" {
+  type        = string
+  description = "The domain of the Lacework account with with to integrate."
+  default     = "lacework.net"
+}
+
 variable "lacework_aws_account_id" {
   type        = string
   default     = "434813966438"
@@ -85,4 +96,10 @@ variable "agentless_scan_ecs_event_role_arn" {
   type        = string
   default     = ""
   description = "Ecs event role arn. Required input for regional resources"
+}
+
+variable "agentless_scan_secret_arn" {
+  type        = string
+  default     = ""
+  description = "AWS SecretsManager Secret ARN for Lacework Account/Token. *Required if Global is `false` and Regional is `true`*"
 }
