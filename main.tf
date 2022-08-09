@@ -8,6 +8,8 @@ locals {
 
 data "aws_region" "current" {}
 
+data "aws_caller_identity" "current" {}
+
 // Todo: replace with iam role module
 resource "random_string" "external_id" {
   length           = 16
@@ -32,6 +34,12 @@ resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" 
   query_text                = var.filter_query_text
   scan_containers           = var.scan_containers
   scan_host_vulnerabilities = var.scan_host_vulnerabilities
+  account_id                = data.aws_caller_identity.current.account_id
+  bucket_arn                = aws_s3_bucket.agentless_scan_bucket[0].arn
+  credentials {
+    role_arn    = aws_iam_role.agentless_scan_cross_account_role[0].arn
+    external_id = random_string.external_id.result
+  }
 }
 
 // SecretsManagers
