@@ -90,6 +90,9 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_agentless_scan_ecs_event_role_arn"></a> [agentless\_scan\_ecs\_event\_role\_arn](#output\_agentless\_scan\_ecs\_event\_role\_arn) | Output ecs event role arn |
-| <a name="output_agentless_scan_ecs_execution_role_arn"></a> [agentless\_scan\_ecs\_execution\_role\_arn](#output\_agentless\_scan\_ecs\_execution\_role\_arn) | Output ecs executuin role arn |
-| <a name="output_agentless_scan_ecs_task_role_arn"></a> [agentless\_scan\_ecs\_task\_role\_arn](#output\_agentless\_scan\_ecs\_task\_role\_arn) | Output ecs task role arn |
+| <a name="output_agentless_scan_ecs_event_role_arn"></a> [agentless\_scan\_ecs\_event\_role\_arn](#output\_agentless\_scan\_ecs\_event\_role\_arn) | Output ECS event role ARN. |
+| <a name="output_agentless_scan_ecs_execution_role_arn"></a> [agentless\_scan\_ecs\_execution\_role\_arn](#output\_agentless\_scan\_ecs\_execution\_role\_arn) | Output ECS execution role ARN. |
+| <a name="output_agentless_scan_ecs_task_role_arn"></a> [agentless\_scan\_ecs\_task\_role\_arn](#output\_agentless\_scan\_ecs\_task\_role\_arn) | Output ECS task role ARN. |
+| <a name="output_agentless_scan_secret_arn"></a> [agentless\_scan\_secret\_arn](#output\_agentless\_scan\_secret\_arn) | Output Secret Manager Secret ARN. |
+| <a name="output_lacework_account"></a> [lacework\_account](#output\_lacework\_account) | Output Lacework account name. |
+| <a name="output_lacework_domain"></a> [lacework\_domain](#output\_lacework\_domain) | Output Lacework domain name. |
