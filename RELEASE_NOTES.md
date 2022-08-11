@@ -1,10 +1,9 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.2.0`.
+Another day, another release. These are the release notes for the version `v0.2.1`.
 
-## Features
-* feat: pass credentials to lacework_integration_aws_agentless_scanning resource (#8) (Darren)([8cb1815](https://github.com/lacework/terraform-aws-agentless-scanning/commit/8cb1815b2e5fca36e9d0594616e9e4a626943a8c))
-* feat: agentless scanning terraform module (#1) (Darren)([068ba95](https://github.com/lacework/terraform-aws-agentless-scanning/commit/068ba950a6fe1a25b20033de472acaa709d2fb5f))
 ## Bug Fixes
-* fix: release script (#6) (Darren)([c468b26](https://github.com/lacework/terraform-aws-agentless-scanning/commit/c468b2612dadeb7c0bad7ba1c4fab70331c9af03))
+* fix: Update readme and examples with required inputs (#9) (Teddy Reed)([b2db7eb](https://github.com/lacework/terraform-aws-agentless-scanning/commit/b2db7eb89444d0d49de2fd3985cd4f0b42bcf877))
 ## Documentation Updates
-* docs: Update Readme (Darren Murray)([50e4e97](https://github.com/lacework/terraform-aws-agentless-scanning/commit/50e4e9731959e889a8d13a86e79e9dfc12542d00))
+* docs: update documentation (Darren Murray)([00d57f9](https://github.com/lacework/terraform-aws-agentless-scanning/commit/00d57f9f4e79ad875e53107cf29eecbebbaa0c41))
+## Other Changes
+* ci: version bump to v0.2.1-dev (Lacework)([6c85a41](https://github.com/lacework/terraform-aws-agentless-scanning/commit/6c85a415e8c12b57d954c93fd65cdfbd14bb666b))
