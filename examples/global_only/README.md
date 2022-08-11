@@ -12,6 +12,7 @@ module "lacework_aws_agentless_scanning_global" {
   source                    = "../.."
   global                    = true
   regional                  = false
+  lacework_account          = "yourlacework"
   resource_name_prefix      = "lacework"
   resource_name_suffix      = "terraform"
   lacework_integration_name = "sidekick_from_terraform"

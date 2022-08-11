@@ -22,3 +22,8 @@ output "lacework_account" {
   value       = var.lacework_account
   description = "Lacework Account Name for Integration"
 }
+
+output "lacework_domain" {
+  value       = var.lacework_domain
+  description = "Lacework Domain Name for Integration"
+}

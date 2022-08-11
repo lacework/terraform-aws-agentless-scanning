@@ -70,7 +70,7 @@ variable "global" {
 
 variable "regional" {
   type        = bool
-  default     = true
+  default     = false
   description = "Whether or not to create regional resources. Defaults to `true`."
 }
 
