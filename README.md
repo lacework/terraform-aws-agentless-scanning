@@ -71,6 +71,7 @@ No modules.
 | <a name="input_agentless_scan_ecs_event_role_arn"></a> [agentless\_scan\_ecs\_event\_role\_arn](#input\_agentless\_scan\_ecs\_event\_role\_arn) | ECS event role ARN. Required input for regional resources. | `string` | `""` | no |
 | <a name="input_agentless_scan_ecs_execution_role_arn"></a> [agentless\_scan\_ecs\_execution\_role\_arn](#input\_agentless\_scan\_ecs\_execution\_role\_arn) | ECS execution role ARN. Required input for regional resources. | `string` | `""` | no |
 | <a name="input_agentless_scan_ecs_task_role_arn"></a> [agentless\_scan\_ecs\_task\_role\_arn](#input\_agentless\_scan\_ecs\_task\_role\_arn) | ECS task role ARN. Required input for regional resources. | `string` | `""` | no |
+| <a name="input_bucket_force_destroy"></a> [bucket\_force\_destroy](#input\_bucket\_force\_destroy) | Force destroy S3 bucket when removing the module. | `bool` | `true` | no |
 | <a name="input_filter_query_text"></a> [filter\_query\_text](#input\_filter\_query\_text) | The LQL query text. | `string` | `""` | no |
 | <a name="input_global"></a> [global](#input\_global) | Whether or not to create global resources. Defaults to `false`. | `bool` | `false` | no |
 | <a name="input_iam_service_linked_role"></a> [iam\_service\_linked\_role](#input\_iam\_service\_linked\_role) | Whether or not to create aws\_iam\_service\_linked\_role. Defaults to `false`. | `bool` | `false` | no |

@@ -332,6 +332,8 @@ resource "aws_s3_bucket" "agentless_scan_bucket" {
   count  = var.global ? 1 : 0
   bucket = "${var.resource_name_prefix}-bucket-${local.resource_name_suffix}"
 
+  force_destroy = var.bucket_force_destroy
+
   tags = {
     LWTAG_SIDEKICK = "1"
   }

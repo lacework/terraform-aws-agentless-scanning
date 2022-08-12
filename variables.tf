@@ -103,3 +103,9 @@ variable "agentless_scan_secret_arn" {
   default     = ""
   description = "AWS SecretsManager Secret ARN for Lacework Account/Token. *Required if Global is `false` and Regional is `true`*"
 }
+
+variable "bucket_force_destroy" {
+  type        = bool
+  default     = true
+  description = "Force destroy bucket (Required when bucket not empty)"
+}
