@@ -1,3 +1,8 @@
+# v0.2.2
+
+## Other Changes
+* ci: version bump to v0.2.2-dev (Lacework)([5c01154](https://github.com/lacework/terraform-aws-agentless-scanning/commit/5c0115421f38be3e261bb5515a2a9573014d9844))
+---
 # v0.2.1
 
 ## Bug Fixes
