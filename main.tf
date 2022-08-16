@@ -4,11 +4,14 @@ locals {
   agentless_scan_ecs_execution_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : var.agentless_scan_ecs_execution_role_arn
   agentless_scan_ecs_event_role_arn     = var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : var.agentless_scan_ecs_event_role_arn
   agentless_scan_secret_arn             = var.global ? aws_secretsmanager_secret.agentless_scan_secret[0].id : var.agentless_scan_secret_arn
+  lacework_account                      = length(var.lacework_account) > 0 ? var.lacework_account : trimsuffix(data.lacework_user_profile.current.url, ".${var.lacework_domain}")
 }
 
 data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
+
+data "lacework_user_profile" "current" {}
 
 // Todo: replace with iam role module
 resource "random_string" "external_id" {
@@ -53,7 +56,7 @@ resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
   secret_id     = aws_secretsmanager_secret.agentless_scan_secret[0].id
   secret_string = <<EOF
    {
-    "account": "${var.lacework_account}",
+    "account": "${local.lacework_account}",
     "token": "${lacework_integration_aws_agentless_scanning.lacework_cloud_account[0].server_token}"
    }
 EOF
