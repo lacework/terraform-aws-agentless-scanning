@@ -18,7 +18,6 @@ module "lacework_aws_agentless_scanning_global" {
   version = "~> 0.1"
 
   global                    = true
-  lacework_account          = "yourlacework"
   lacework_integration_name = "sidekick_from_terraform"
 }
 
