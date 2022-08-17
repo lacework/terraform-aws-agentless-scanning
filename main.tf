@@ -628,7 +628,7 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
         },
         {
           name  = "LACEWORK_APISERVER"
-          value = "${var.lacework_account}.${var.lacework_domain}"
+          value = "${local.lacework_account}.${var.lacework_domain}"
         },
         {
           name  = "SECRET_ARN"
