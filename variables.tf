@@ -13,6 +13,7 @@ variable "prefix" {
 variable "suffix" {
   type        = string
   description = "A string to be appended to the end of the name of all new resources."
+  default     = ""
 }
 
 variable "lacework_integration_name" {

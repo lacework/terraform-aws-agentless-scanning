@@ -1,4 +1,5 @@
 locals {
+  suffix                                = length(var.suffix) > 0 ? var.suffix : random_id.uniq.hex
   agentless_scan_ecs_task_role_arn      = var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : var.agentless_scan_ecs_task_role_arn
   agentless_scan_ecs_execution_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : var.agentless_scan_ecs_execution_role_arn
   agentless_scan_ecs_event_role_arn     = var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : var.agentless_scan_ecs_event_role_arn
@@ -44,7 +45,7 @@ resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" 
 // SecretsManagers
 resource "aws_secretsmanager_secret" "agentless_scan_secret" {
   count = var.global ? 1 : 0
-  name  = "${var.prefix}-secret-${var.suffix}"
+  name  = "${var.prefix}-secret-${local.suffix}"
 }
 
 resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
@@ -112,7 +113,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
       "events:PutTargets",
       "events:RemoveTargets"
     ]
-    resources = ["arn:aws:events:*:*:rule/${var.prefix}-periodic-trigger-${var.suffix}"]
+    resources = ["arn:aws:events:*:*:rule/${var.prefix}-periodic-trigger-${local.suffix}"]
   }
 
   statement {
@@ -184,7 +185,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     condition {
       test     = "ArnEquals"
       variable = "ecs:cluster"
-      values   = ["arn:aws:ecs:*:*:cluster/${var.prefix}-cluster-${var.suffix}"]
+      values   = ["arn:aws:ecs:*:*:cluster/${var.prefix}-cluster-${local.suffix}"]
     }
   }
 
@@ -232,14 +233,14 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
 // AWS::IAM::ManagedPolicy
 resource "aws_iam_policy" "agentless_scan_task_policy" {
   count  = var.global ? 1 : 0
-  name   = "${var.prefix}-task-policy-${var.suffix}"
+  name   = "${var.prefix}-task-policy-${local.suffix}"
   policy = data.aws_iam_policy_document.agentless_scan_task_policy_document[0].json
 }
 
 // AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_task_role" {
   count                = var.global ? 1 : 0
-  name                 = "${var.prefix}-task-role-${var.suffix}"
+  name                 = "${var.prefix}-task-role-${local.suffix}"
   max_session_duration = 43200
   path                 = "/"
   managed_policy_arns  = [aws_iam_policy.agentless_scan_task_policy[0].arn]
@@ -256,7 +257,7 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
     ]
   })
   tags = {
-    Name           = "${var.prefix}-task-role-${var.suffix}"
+    Name           = "${var.prefix}-task-role-${local.suffix}"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -265,7 +266,7 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
 
 resource "aws_iam_role" "agentless_scan_ecs_event_role" {
   count                = var.global ? 1 : 0
-  name                 = "${var.prefix}-task-event-role-${var.suffix}"
+  name                 = "${var.prefix}-task-event-role-${local.suffix}"
   max_session_duration = 3600
   path                 = "/service-role/"
   managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"]
@@ -282,14 +283,14 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
     ]
   })
   tags = {
-    Name           = "${var.prefix}-task-event-role-${var.suffix}"
+    Name           = "${var.prefix}-task-event-role-${local.suffix}"
     LWTAG_SIDEKICK = "1"
   }
 }
 // AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   count                = var.global ? 1 : 0
-  name                 = "${var.prefix}-task-exec-role-${var.suffix}"
+  name                 = "${var.prefix}-task-exec-role-${local.suffix}"
   max_session_duration = 3600
   path                 = "/"
   managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"]
@@ -321,7 +322,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   }
 
   tags = {
-    Name           = "${var.prefix}-task-execution-role-${var.suffix}"
+    Name           = "${var.prefix}-task-execution-role-${local.suffix}"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -329,7 +330,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
 // AWS::S3::Bucket
 resource "aws_s3_bucket" "agentless_scan_bucket" {
   count  = var.global ? 1 : 0
-  bucket = "${var.prefix}-bucket-${var.suffix}"
+  bucket = "${var.prefix}-bucket-${local.suffix}"
 
   force_destroy = var.bucket_force_destroy
 
@@ -456,7 +457,7 @@ data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
     condition {
       test     = "ArnEquals"
       variable = "ecs:cluster"
-      values   = ["arn:aws:ecs:*:*:cluster/${var.prefix}-cluster-${var.suffix}"]
+      values   = ["arn:aws:ecs:*:*:cluster/${var.prefix}-cluster-${local.suffix}"]
     }
   }
 }
@@ -465,7 +466,7 @@ data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
 
 resource "aws_iam_role" "agentless_scan_cross_account_role" {
   count                = var.global ? 1 : 0
-  name                 = "${var.prefix}-cross-account-role-${var.suffix}"
+  name                 = "${var.prefix}-cross-account-role-${local.suffix}"
   max_session_duration = 3600
   path                 = "/"
   assume_role_policy   = data.aws_iam_policy_document.agentless_scan_cross_account_policy[0].json
@@ -481,7 +482,7 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
   }
 
   tags = {
-    Name           = "${var.prefix}-cross-account-role-${var.suffix}"
+    Name           = "${var.prefix}-cross-account-role-${local.suffix}"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -499,7 +500,7 @@ resource "aws_vpc" "agentless_scan_vpc" {
   instance_tenancy     = "default"
 
   tags = {
-    Name           = "${var.prefix}-vpc-${var.suffix}"
+    Name           = "${var.prefix}-vpc-${local.suffix}"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -509,7 +510,7 @@ resource "aws_route_table" "agentless_scan_route_table" {
   count  = var.regional ? 1 : 0
   vpc_id = aws_vpc.agentless_scan_vpc[0].id
   tags = {
-    Name           = "${var.prefix}-vpc-${var.suffix}"
+    Name           = "${var.prefix}-vpc-${local.suffix}"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -527,7 +528,7 @@ resource "aws_internet_gateway" "agentless_scan_gateway" {
   vpc_id = aws_vpc.agentless_scan_vpc[0].id
 
   tags = {
-    Name           = "${var.prefix}-vpc-${var.suffix}"
+    Name           = "${var.prefix}-vpc-${local.suffix}"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -561,7 +562,7 @@ resource "aws_subnet" "agentless_scan_public_subnet" {
 
 
   tags = {
-    Name           = "${var.prefix}-vpc-${var.suffix}"
+    Name           = "${var.prefix}-vpc-${local.suffix}"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -576,10 +577,10 @@ resource "aws_ecs_cluster_capacity_providers" "agentless_scan_capacity_providers
 // Cluster
 resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
   count = var.regional ? 1 : 0
-  name  = "${var.prefix}-cluster-${var.suffix}"
+  name  = "${var.prefix}-cluster-${local.suffix}"
 
   tags = {
-    Name           = "${var.prefix}-vpc-${var.suffix}"
+    Name           = "${var.prefix}-vpc-${local.suffix}"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -597,7 +598,7 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   cpu                      = 4096
   memory                   = 8192
   tags = {
-    Name           = "${var.prefix}-task-definition-${var.suffix}"
+    Name           = "${var.prefix}-task-definition-${local.suffix}"
     LWTAG_SIDEKICK = "1"
   }
   container_definitions = jsonencode([
@@ -620,7 +621,7 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
         },
         {
           name  = "S3_BUCKET"
-          value = "${var.prefix}-bucket-${var.suffix}"
+          value = "${var.prefix}-bucket-${local.suffix}"
         },
         {
           name  = "LACEWORK_APISERVER"
@@ -672,7 +673,7 @@ resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
   ]
 
   count               = var.regional ? 1 : 0
-  name                = "${var.prefix}-periodic-trigger-${var.suffix}"
+  name                = "${var.prefix}-periodic-trigger-${local.suffix}"
   schedule_expression = "rate(1 hour)"
   event_bus_name      = "default"
 }

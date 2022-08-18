@@ -7,7 +7,6 @@ provider "aws" {
 // Create only global resources, includes lacework cloud integration
 module "lacework_aws_agentless_scanning_global" {
   source                    = "../.."
-  suffix                    = "global"
   global                    = true
   regional                  = false
   lacework_account          = "yourlacework"
