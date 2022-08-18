@@ -16,6 +16,7 @@ module "lacework_aws_agentless_scanning_global" {
   global                    = true
   lacework_account          = "yourlacework"
   lacework_integration_name = "sidekick_from_terraform"
+  suffix                    = "global"
 }
 
 // By default only regional resources are created
@@ -27,6 +28,7 @@ module "lacework_aws_agentless_scanning_region_us_west" {
   }
 
   regional                              = true
+  suffix                                = "regional"
   agentless_scan_ecs_task_role_arn      = module.lacework_aws_agentless_scanning_global.agentless_scan_ecs_task_role_arn
   agentless_scan_ecs_execution_role_arn = module.lacework_aws_agentless_scanning_global.agentless_scan_ecs_execution_role_arn
   agentless_scan_ecs_event_role_arn     = module.lacework_aws_agentless_scanning_global.agentless_scan_ecs_event_role_arn
