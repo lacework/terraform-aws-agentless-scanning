@@ -257,7 +257,7 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
     ]
   })
   tags = {
-    Name           = "${var.prefix}-task-role-${local.suffix}"
+    Name           = "${var.prefix}-task-role"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -283,7 +283,7 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
     ]
   })
   tags = {
-    Name           = "${var.prefix}-task-event-role-${local.suffix}"
+    Name           = "${var.prefix}-task-event-role"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -322,7 +322,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   }
 
   tags = {
-    Name           = "${var.prefix}-task-execution-role-${local.suffix}"
+    Name           = "${var.prefix}-task-execution-role"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -482,7 +482,7 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
   }
 
   tags = {
-    Name           = "${var.prefix}-cross-account-role-${local.suffix}"
+    Name           = "${var.prefix}-cross-account-role"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -500,7 +500,7 @@ resource "aws_vpc" "agentless_scan_vpc" {
   instance_tenancy     = "default"
 
   tags = {
-    Name           = "${var.prefix}-vpc-${local.suffix}"
+    Name           = "${var.prefix}-vpc"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -510,7 +510,7 @@ resource "aws_route_table" "agentless_scan_route_table" {
   count  = var.regional ? 1 : 0
   vpc_id = aws_vpc.agentless_scan_vpc[0].id
   tags = {
-    Name           = "${var.prefix}-vpc-${local.suffix}"
+    Name           = "${var.prefix}-vpc"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -528,7 +528,7 @@ resource "aws_internet_gateway" "agentless_scan_gateway" {
   vpc_id = aws_vpc.agentless_scan_vpc[0].id
 
   tags = {
-    Name           = "${var.prefix}-vpc-${local.suffix}"
+    Name           = "${var.prefix}-gw"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -562,7 +562,7 @@ resource "aws_subnet" "agentless_scan_public_subnet" {
 
 
   tags = {
-    Name           = "${var.prefix}-vpc-${local.suffix}"
+    Name           = "${var.prefix}-subnet"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -580,7 +580,7 @@ resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
   name  = "${var.prefix}-cluster-${local.suffix}"
 
   tags = {
-    Name           = "${var.prefix}-vpc-${local.suffix}"
+    Name           = "${var.prefix}-cluster"
     LWTAG_SIDEKICK = "1"
   }
 }
@@ -598,7 +598,7 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   cpu                      = 4096
   memory                   = 8192
   tags = {
-    Name           = "${var.prefix}-task-definition-${local.suffix}"
+    Name           = "${var.prefix}-task-definition"
     LWTAG_SIDEKICK = "1"
   }
   container_definitions = jsonencode([
