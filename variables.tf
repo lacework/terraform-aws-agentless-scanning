@@ -4,16 +4,15 @@ variable "image_url" {
   description = "The container image url for Lacework sidekick."
 }
 
-variable "resource_name_prefix" {
+variable "prefix" {
   type        = string
   description = "A string to be prefixed to the name of all new resources."
   default     = "lacework-agentless-workload-scanning"
 }
 
-variable "resource_name_suffix" {
+variable "suffix" {
   type        = string
   description = "A string to be appended to the end of the name of all new resources."
-  default     = ""
 }
 
 variable "lacework_integration_name" {
