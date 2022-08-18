@@ -48,6 +48,7 @@ variable "scan_host_vulnerabilities" {
 variable "lacework_account" {
   type        = string
   description = "The name of the Lacework account with which to integrate."
+  default     = ""
 }
 
 variable "lacework_domain" {
