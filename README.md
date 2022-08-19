@@ -12,14 +12,14 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.15.0 |
-| <a name="requirement_lacework"></a> [lacework](#requirement\_lacework) | ~> 0.23 |
+| <a name="requirement_lacework"></a> [lacework](#requirement\_lacework) | ~> 0.25 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
-| <a name="provider_lacework"></a> [lacework](#provider\_lacework) | ~> 0.23 |
+| <a name="provider_lacework"></a> [lacework](#provider\_lacework) | ~> 0.25 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
 
 ## Modules
@@ -79,9 +79,9 @@ No modules.
 | <a name="input_lacework_account"></a> [lacework\_account](#input\_lacework\_account) | Your Lacework account name. | `string` | `"youraccountname"` | yes |
 | <a name="input_lacework_aws_account_id"></a> [lacework\_aws\_account\_id](#input\_lacework\_aws\_account\_id) | The Lacework AWS account that the IAM role will grant access. | `string` | `"434813966438"` | no |
 | <a name="input_lacework_domain"></a> [lacework\_domain](#input\_lacework\_domain) | The Lacework domain name. Defaults to `lacework.net`. | `string` | `"lacework.net"` | no |
-| <a name="input_lacework_integration_name"></a> [lacework\_integration\_name](#input\_lacework\_integration\_name) | The name of the Lacework cloud account integration. | `string` | `"aws-agentless-scan"` | no |
+| <a name="input_lacework_integration_name"></a> [lacework\_integration\_name](#input\_lacework\_integration\_name) | The name of the Lacework cloud account integration. | `string` | `"aws-agentless-scanning"` | no |
 | <a name="input_regional"></a> [regional](#input\_regional) | Whether or not to create regional resources. Defaults to `false`. | `bool` | `false` | no |
-| <a name="input_prefix"></a> [prefix](#input\_prefix) | A string to be prefixed to the name of all new resources. | `string` | `"lacework-agentless-workload-scanning"`| no |
+| <a name="input_prefix"></a> [prefix](#input\_prefix) | A string to be prefixed to the name of all new resources. | `string` | `"lacework-agentless-scanning"`| no |
 | <a name="input_suffix"></a> [suffix](#input\_suffix) | A string to be appended to the end of the name of all new resources. | `string` | n/a | no |
 | <a name="input_scan_containers"></a> [scan\_containers](#input\_scan\_containers) | Whether to includes scanning for containers.  Defaults to `true`. | `bool` | `true` | no |
 | <a name="input_scan_frequency_hours"></a> [scan\_frequency\_hours](#input\_scan\_frequency\_hours) | How often in hours the scan will run in hours. Defaults to `24`. | `number` | `24` | no |
