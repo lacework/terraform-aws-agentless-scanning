@@ -586,6 +586,12 @@ resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
     Name           = "${var.prefix}-cluster"
     LWTAG_SIDEKICK = "1"
   }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 // TaskDefinition
