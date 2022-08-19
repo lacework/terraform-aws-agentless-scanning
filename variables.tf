@@ -7,7 +7,7 @@ variable "image_url" {
 variable "prefix" {
   type        = string
   description = "A string to be prefixed to the name of all new resources."
-  default     = "lacework-agentless-workload-scanning"
+  default     = "lacework-agentless-scanning"
 }
 
 variable "suffix" {
@@ -19,7 +19,7 @@ variable "suffix" {
 variable "lacework_integration_name" {
   type        = string
   description = "The name of the Lacework cloud account integration."
-  default     = "aws-agentless-scan"
+  default     = "aws-agentless-scanning"
 }
 
 variable "scan_frequency_hours" {
