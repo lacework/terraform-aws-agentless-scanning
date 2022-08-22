@@ -37,3 +37,12 @@ module "lacework_aws_agentless_scanning_regional" {
   lacework_account                      = module.lacework_aws_agentless_scanning_global.lacework_account
 }
 ```
+
+In this example the **global** resources and **regional** resources are added.
+Global resources include the single per-account resources like IAM roles,
+policies, and S3 bucket. Regional resources include a VPC, and ECS cluster.
+A "one to many" relationship between **global** and **regional** exists so that
+scanning and snapshot usage avoids cross-region data transfer.
+
+In a situation where multiple regions are scanned, the **global** resources should
+be added once, and the **regional** should be added to each region being scanned.
