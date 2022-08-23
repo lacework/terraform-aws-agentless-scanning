@@ -1,9 +1,8 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.3.0`.
+Another day, another release. These are the release notes for the version `v0.3.1`.
 
-## Features
-* feat: added the ability to dynamically fetch the Lacework account name (#13) (Alan Nix)([7d4640f](https://github.com/lacework/terraform-aws-agentless-scanning/commit/7d4640fe7cb44ca123aa866bb62d1ddb4df0f9b4))
-## Refactor
-* refactor: address beta review changes (#14) (Darren)([4f70549](https://github.com/lacework/terraform-aws-agentless-scanning/commit/4f705490630d06027ec72e02fd98735d633bc44a))
+## Bug Fixes
+* fix: Remove global-only example (#18) (Teddy Reed)([20f3a15](https://github.com/lacework/terraform-aws-agentless-scanning/commit/20f3a15649322e8e52302be0a892933763b3a8c9))
+* fix: ignore out-of-band updates to ECS cluster tags (#17) (Alan Nix)([a0600ae](https://github.com/lacework/terraform-aws-agentless-scanning/commit/a0600ae4d14c31f5bbb3e48de817b154074393c2))
 ## Other Changes
-* ci: version bump to v0.2.3-dev (Lacework)([4371846](https://github.com/lacework/terraform-aws-agentless-scanning/commit/43718467467fd58bd74367fc94a7acb49e17d679))
+* ci: version bump to v0.3.1-dev (Lacework)([166f469](https://github.com/lacework/terraform-aws-agentless-scanning/commit/166f4699410f1b3532c8b62d014e5ba5a44f3762))
