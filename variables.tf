@@ -8,12 +8,22 @@ variable "prefix" {
   type        = string
   description = "A string to be prefixed to the name of all new resources."
   default     = "lacework-agentless-scanning"
+
+  validation {
+    condition     = length(regexall(".*lacework.*", var.prefix)) > 0
+    error_message = "The prefix value must include the term 'lacework'."
+  }
 }
 
 variable "suffix" {
   type        = string
   description = "A string to be appended to the end of the name of all new resources."
   default     = ""
+
+  validation {
+    condition     = length(var.suffix) == 0 || length(var.suffix) > 4
+    error_message = "If the suffix value is set then it must be at least 4 characters long."
+  }
 }
 
 variable "lacework_integration_name" {
@@ -39,6 +49,7 @@ variable "scan_containers" {
   description = "Whether to includes scanning for containers.  Defaults to `true`."
   default     = true
 }
+
 variable "scan_host_vulnerabilities" {
   type        = bool
   description = "Whether to includes scanning for host vulnerabilities.  Defaults to `true`."
