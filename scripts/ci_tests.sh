@@ -10,6 +10,7 @@ readonly project_name=terraform-aws-agentless-scanning
 
 TEST_CASES=(
   examples/default
+  examples/singleregion
 )
 
 log() {
