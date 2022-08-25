@@ -35,6 +35,7 @@ module "lacework_aws_agentless_scanning_regional" {
   agentless_scan_ecs_event_role_arn     = module.lacework_aws_agentless_scanning_global.agentless_scan_ecs_event_role_arn
   agentless_scan_secret_arn             = module.lacework_aws_agentless_scanning_global.agentless_scan_secret_arn
   lacework_account                      = module.lacework_aws_agentless_scanning_global.lacework_account
+  suffix                                = module.lacework_aws_agentless_scanning_global.suffix
 }
 ```
 

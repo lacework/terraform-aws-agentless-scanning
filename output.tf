@@ -18,6 +18,16 @@ output "agentless_scan_secret_arn" {
   description = "AWS SecretsManager Secret ARN for Lacework Account and Token"
 }
 
+output "prefix" {
+  value       = var.prefix
+  description = "Prefix used to add uniqueness to resource names"
+}
+
+output "suffix" {
+  value       = local.suffix
+  description = "Suffix used to add uniqueness to resource names"
+}
+
 output "lacework_account" {
   value       = var.lacework_account
   description = "Lacework Account Name for Integration"

@@ -75,7 +75,10 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     sid       = "AllowControlOfBucket"
     effect    = "Allow"
     actions   = ["s3:*"]
-    resources = ["${aws_s3_bucket.agentless_scan_bucket[0].arn}", "${aws_s3_bucket.agentless_scan_bucket[0].arn}/*"]
+    resources = [
+      "${aws_s3_bucket.agentless_scan_bucket[0].arn}",
+      "${aws_s3_bucket.agentless_scan_bucket[0].arn}/*"
+    ]
   }
 
   statement {
@@ -565,7 +568,7 @@ resource "aws_subnet" "agentless_scan_public_subnet" {
 
 
   tags = {
-    Name           = "${var.prefix}-subnet"
+    Name           = "${var.prefix}-vpc"
     LWTAG_SIDEKICK = "1"
   }
 }
