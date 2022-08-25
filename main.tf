@@ -13,7 +13,6 @@ data "aws_caller_identity" "current" {}
 
 data "lacework_user_profile" "current" {}
 
-// Todo: replace with iam role module
 resource "random_string" "external_id" {
   length           = 16
   override_special = "=,.@:/-"
@@ -27,8 +26,6 @@ resource "random_id" "uniq" {
 // includes the lacework cloud account integration
 // Only create global resources if global variable is set to true
 // count = var.global ? 1 : 0
-
-// TF provider agentless scan resource
 
 resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" {
   count                     = var.global ? 1 : 0
@@ -45,7 +42,6 @@ resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" 
   }
 }
 
-// SecretsManagers
 resource "aws_secretsmanager_secret" "agentless_scan_secret" {
   count = var.global ? 1 : 0
   name  = "${var.prefix}-secret-${local.suffix}"
@@ -62,7 +58,6 @@ resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
 EOF
 }
 
-// AWS::IAM::ServiceLinkedRole
 resource "aws_iam_service_linked_role" "agentless_scan_linked_role" {
   count            = var.global && var.iam_service_linked_role ? 1 : 0
   aws_service_name = "ecs.amazonaws.com"
@@ -225,6 +220,15 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
   }
 
   statement {
+    sid    = "DecodeErrorMessages"
+    effect = "Allow"
+    actions = [
+      "sts:DecodeAuthorizationMessage"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
     sid    = "ReadLogs"
     effect = "Allow"
     actions = [
@@ -233,17 +237,14 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     ]
     resources = ["arn:aws:logs:*:*:log-group:/ecs/${var.prefix}-*"]
   }
-
 }
 
-// AWS::IAM::ManagedPolicy
 resource "aws_iam_policy" "agentless_scan_task_policy" {
   count  = var.global ? 1 : 0
   name   = "${var.prefix}-task-policy-${local.suffix}"
   policy = data.aws_iam_policy_document.agentless_scan_task_policy_document[0].json
 }
 
-// AWS::IAM::Role
 resource "aws_iam_role" "agentless_scan_ecs_task_role" {
   count                = var.global ? 1 : 0
   name                 = "${var.prefix}-task-role-${local.suffix}"
@@ -263,12 +264,11 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
     ]
   })
   tags = {
-    Name           = "${var.prefix}-task-role"
-    LWTAG_SIDEKICK = "1"
+    Name                     = "${var.prefix}-task-role"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
   }
 }
-
-// AWS::IAM::Role
 
 resource "aws_iam_role" "agentless_scan_ecs_event_role" {
   count                = var.global ? 1 : 0
@@ -289,14 +289,15 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
     ]
   })
   tags = {
-    Name           = "${var.prefix}-task-event-role"
-    LWTAG_SIDEKICK = "1"
+    Name                     = "${var.prefix}-task-event-role"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
   }
 }
-// AWS::IAM::Role
+
 resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   count                = var.global ? 1 : 0
-  name                 = "${var.prefix}-task-exec-role-${local.suffix}"
+  name                 = "${var.prefix}-task-execution-role-${local.suffix}"
   max_session_duration = 3600
   path                 = "/"
   managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"]
@@ -328,12 +329,12 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   }
 
   tags = {
-    Name           = "${var.prefix}-task-execution-role"
-    LWTAG_SIDEKICK = "1"
+    Name                     = "${var.prefix}-task-execution-role"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
   }
 }
 
-// AWS::S3::Bucket
 resource "aws_s3_bucket" "agentless_scan_bucket" {
   count  = var.global ? 1 : 0
   bucket = "${var.prefix}-bucket-${local.suffix}"
@@ -341,7 +342,9 @@ resource "aws_s3_bucket" "agentless_scan_bucket" {
   force_destroy = var.bucket_force_destroy
 
   tags = {
-    LWTAG_SIDEKICK = "1"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
+
   }
 }
 
@@ -380,7 +383,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "agentless_scan_bucket_lifecyle
   }
 }
 
-// AWS::S3::BucketPolicy
 resource "aws_s3_bucket_policy" "agentless_scan_bucket_policy" {
   count  = var.global ? 1 : 0
   bucket = aws_s3_bucket.agentless_scan_bucket[0].id
@@ -409,7 +411,6 @@ data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
   }
 }
 
-// AWS::IAM::Role
 data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
   count = var.global ? 1 : 0
   statement {
@@ -458,17 +459,47 @@ data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
   statement {
     sid       = "AllowEcsStopTask"
     effect    = "Allow"
-    actions   = ["ecs:StopTask"]
-    resources = ["*"]
+    actions   = [
+      "ecs:StopTask",
+      "ecs:RunTask"
+    ]
+    resources = [
+      "arn:aws:ecs:*:*:task/${var.prefix}-cluster-${local.suffix}/*",
+      "arn:aws:ecs:*:*:task-definition/${var.prefix}-cluster-${local.suffix}:*",
+    ]
     condition {
       test     = "ArnEquals"
       variable = "ecs:cluster"
       values   = ["arn:aws:ecs:*:*:cluster/${var.prefix}-cluster-${local.suffix}"]
     }
   }
-}
 
-// Todo: use module - lacework_iam_role
+  statement {
+    sid       = "AllowEcsTaskManagementPassRole"
+    effect    = "Allow"
+    actions   = [
+      "iam:PassRole"
+    ]
+    resources = [
+      "arn:aws:iam::*:role/${var.prefix}-task-execution-role-${local.suffix}",
+      "arn:aws:iam::*:role/${var.prefix}-task-role-${local.suffix}",
+    ]
+  }
+
+  statement {
+    sid       = "AllowEcsTaskSubnetLookup"
+    effect    = "Allow"
+    actions   = [
+      "ec2:DescribeSubnets"
+    ]
+    resources = ["arn:aws:ec2:*:*:subnet/subnet-*"]
+    condition {
+      test     = "StringLike"
+      variable = "aws:ResourceTag/LWTAG_SIDEKICK"
+      values   = ["*"]
+    }
+  }
+}
 
 resource "aws_iam_role" "agentless_scan_cross_account_role" {
   count                = var.global ? 1 : 0
@@ -488,16 +519,16 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
   }
 
   tags = {
-    Name           = "${var.prefix}-cross-account-role"
-    LWTAG_SIDEKICK = "1"
+    Name                     = "${var.prefix}-cross-account-role"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
   }
 }
-
 
 // Regional - The following are resources created once per Aws Region
 // Only create regional resources if regional variable is set to true
 // count = var.regional ? 1 : 0
-// VPC
+
 resource "aws_vpc" "agentless_scan_vpc" {
   count                = var.regional ? 1 : 0
   cidr_block           = "10.10.0.0/16"
@@ -506,40 +537,39 @@ resource "aws_vpc" "agentless_scan_vpc" {
   instance_tenancy     = "default"
 
   tags = {
-    Name           = "${var.prefix}-vpc"
-    LWTAG_SIDEKICK = "1"
+    Name                     = "${var.prefix}-vpc"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
   }
 }
 
-// RouteTable
 resource "aws_route_table" "agentless_scan_route_table" {
   count  = var.regional ? 1 : 0
   vpc_id = aws_vpc.agentless_scan_vpc[0].id
   tags = {
-    Name           = "${var.prefix}-vpc"
-    LWTAG_SIDEKICK = "1"
+    Name                     = "${var.prefix}-vpc"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
   }
 }
 
-// SubnetRouteTableAsccociation
 resource "aws_route_table_association" "agentless_scan_route_table_association" {
   count          = var.regional ? 1 : 0
   subnet_id      = aws_subnet.agentless_scan_public_subnet[0].id
   route_table_id = aws_route_table.agentless_scan_route_table[0].id
 }
 
-// InternetGateway
 resource "aws_internet_gateway" "agentless_scan_gateway" {
   count  = var.regional ? 1 : 0
   vpc_id = aws_vpc.agentless_scan_vpc[0].id
 
   tags = {
-    Name           = "${var.prefix}-gw"
-    LWTAG_SIDEKICK = "1"
+    Name                     = "${var.prefix}-gw"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
   }
 }
 
-// Route
 resource "aws_route" "agentless_scan_route" {
   count                  = var.regional ? 1 : 0
   destination_cidr_block = "0.0.0.0/0"
@@ -547,7 +577,6 @@ resource "aws_route" "agentless_scan_route" {
   route_table_id         = aws_route_table.agentless_scan_route_table[0].id
 }
 
-// SecurityGroupEgress
 resource "aws_security_group" "agentless_scan_vpc_egress" {
   count = var.regional ? 1 : 0
   name  = "AgentlessScanVPCEgress"
@@ -559,7 +588,6 @@ resource "aws_security_group" "agentless_scan_vpc_egress" {
   }
 }
 
-// Subnet
 resource "aws_subnet" "agentless_scan_public_subnet" {
   count                   = var.regional ? 1 : 0
   vpc_id                  = aws_vpc.agentless_scan_vpc[0].id
@@ -570,24 +598,25 @@ resource "aws_subnet" "agentless_scan_public_subnet" {
   tags = {
     Name           = "${var.prefix}-vpc"
     LWTAG_SIDEKICK = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
   }
 }
 
-// Capacity Providers
 resource "aws_ecs_cluster_capacity_providers" "agentless_scan_capacity_providers" {
   count              = var.regional ? 1 : 0
   cluster_name       = aws_ecs_cluster.agentless_scan_ecs_cluster[0].name
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
 }
 
-// Cluster
 resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
   count = var.regional ? 1 : 0
   name  = "${var.prefix}-cluster-${local.suffix}"
 
   tags = {
-    Name           = "${var.prefix}-cluster"
-    LWTAG_SIDEKICK = "1"
+    Name                     = "${var.prefix}-cluster"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
+
   }
 
   lifecycle {
@@ -597,7 +626,6 @@ resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
   }
 }
 
-// TaskDefinition
 resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   count  = var.regional ? 1 : 0
   family = aws_ecs_cluster.agentless_scan_ecs_cluster[0].name
@@ -609,10 +637,14 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = 4096
   memory                   = 8192
+
   tags = {
-    Name           = "${var.prefix}-task-definition"
-    LWTAG_SIDEKICK = "1"
+    Name                     = "${var.prefix}-task-definition"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
+
   }
+
   container_definitions = jsonencode([
     {
       name      = "sidekick"
@@ -630,6 +662,10 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
         {
           name  = "ECS_CLUSTER_ARN"
           value = "${aws_ecs_cluster.agentless_scan_ecs_cluster[0].arn}"
+        },
+        {
+          name  = "ECS_SUBNET_ID"
+          value = "${aws_subnet.agentless_scan_public_subnet[0].id}"
         },
         {
           name  = "S3_BUCKET"
@@ -670,14 +706,12 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   ])
 }
 
-// LogGroup
 resource "aws_cloudwatch_log_group" "agentless_scan_log_group" {
   count             = var.regional ? 1 : 0
   name              = "/ecs/${aws_ecs_cluster.agentless_scan_ecs_cluster[0].name}"
   retention_in_days = 14
 }
 
-// AgentlessScanOrchestrateEvent
 resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
   depends_on = [
     aws_ecs_cluster.agentless_scan_ecs_cluster,
@@ -709,7 +743,8 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
       assign_public_ip = true
     }
     tags = {
-      LWTAG_SIDEKICK = "1"
+      LWTAG_SIDEKICK           = "1"
+      LWTAG_LACEWORK_AGENTLESS = "1"
     }
   }
 }
