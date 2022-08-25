@@ -1,8 +1,8 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.3.1`.
+Another day, another release. These are the release notes for the version `v0.3.2`.
 
 ## Bug Fixes
-* fix: Remove global-only example (#18) (Teddy Reed)([20f3a15](https://github.com/lacework/terraform-aws-agentless-scanning/commit/20f3a15649322e8e52302be0a892933763b3a8c9))
-* fix: ignore out-of-band updates to ECS cluster tags (#17) (Alan Nix)([a0600ae](https://github.com/lacework/terraform-aws-agentless-scanning/commit/a0600ae4d14c31f5bbb3e48de817b154074393c2))
+* fix: Update with CloudFormation on-demand scan policies (#21) (Teddy Reed)([9986ef5](https://github.com/lacework/terraform-aws-agentless-scanning/commit/9986ef56682c479752d7b6b75842758a8c0373c8))
+* fix: Output the suffix and prefix values (#20) (Teddy Reed)([c7b67a3](https://github.com/lacework/terraform-aws-agentless-scanning/commit/c7b67a3afc7afa0aa2adba1b65e5b059967534a2))
 ## Other Changes
-* ci: version bump to v0.3.1-dev (Lacework)([166f469](https://github.com/lacework/terraform-aws-agentless-scanning/commit/166f4699410f1b3532c8b62d014e5ba5a44f3762))
+* ci: version bump to v0.3.2-dev (Lacework)([8d4ecdb](https://github.com/lacework/terraform-aws-agentless-scanning/commit/8d4ecdb369ee8bf8e195c7e42199fa60bbd8c2f9))
