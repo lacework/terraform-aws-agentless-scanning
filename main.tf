@@ -450,7 +450,7 @@ data "aws_iam_policy_document" "cross_account_inline_policy_bucket" {
       "s3:PutObject",
       "s3:GetObject"
     ]
-    resources = [aws_s3_bucket.agentless_scan_bucket[0].arn]
+    resources = ["${aws_s3_bucket.agentless_scan_bucket[0].arn}/*"]
   }
 }
 
