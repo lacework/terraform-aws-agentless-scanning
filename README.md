@@ -12,19 +12,17 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.15.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.0 |
 | <a name="requirement_lacework"></a> [lacework](#requirement\_lacework) | ~> 0.25 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | >= 2.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.0 |
 | <a name="provider_lacework"></a> [lacework](#provider\_lacework) | ~> 0.25 |
-| <a name="provider_random"></a> [random](#provider\_random) | n/a |
-
-## Modules
-
-No modules.
+| <a name="provider_random"></a> [random](#provider\_random) | >= 2.1 |
 
 ## Resources
 
@@ -33,6 +31,7 @@ No modules.
 | [aws_cloudwatch_event_rule.agentless_scan_event_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_target.agentless_scan_event_target](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_log_group.agentless_scan_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_default_security_group.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_security_group) | resource |
 | [aws_ecs_cluster.agentless_scan_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_cluster_capacity_providers.agentless_scan_capacity_providers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers) | resource |
 | [aws_ecs_task_definition.agentless_scan_task_definition](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
@@ -52,17 +51,19 @@ No modules.
 | [aws_s3_bucket_versioning.versioning_example](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_secretsmanager_secret.agentless_scan_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret_version.agentless_scan_secret_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
-| [aws_security_group.agentless_scan_vpc_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_subnet.agentless_scan_public_subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.agentless_scan_vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
 | [lacework_integration_aws_agentless_scanning.lacework_cloud_account](https://registry.terraform.io/providers/lacework/lacework/latest/docs/resources/integration_aws_agentless_scanning) | resource |
+| [random_id.uniq](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
 | [random_string.external_id](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.agentless_scan_bucket_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.agentless_scan_cross_account_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.agentless_scan_task_policy_document](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cross_account_inline_policy_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cross_account_inline_policy_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [lacework_user_profile.current](https://registry.terraform.io/providers/lacework/lacework/latest/docs/data-sources/user_profile) | data source |
 
 ## Inputs
 
@@ -71,21 +72,22 @@ No modules.
 | <a name="input_agentless_scan_ecs_event_role_arn"></a> [agentless\_scan\_ecs\_event\_role\_arn](#input\_agentless\_scan\_ecs\_event\_role\_arn) | ECS event role ARN. Required input for regional resources. | `string` | `""` | no |
 | <a name="input_agentless_scan_ecs_execution_role_arn"></a> [agentless\_scan\_ecs\_execution\_role\_arn](#input\_agentless\_scan\_ecs\_execution\_role\_arn) | ECS execution role ARN. Required input for regional resources. | `string` | `""` | no |
 | <a name="input_agentless_scan_ecs_task_role_arn"></a> [agentless\_scan\_ecs\_task\_role\_arn](#input\_agentless\_scan\_ecs\_task\_role\_arn) | ECS task role ARN. Required input for regional resources. | `string` | `""` | no |
-| <a name="input_bucket_force_destroy"></a> [bucket\_force\_destroy](#input\_bucket\_force\_destroy) | Force destroy S3 bucket when removing the module. | `bool` | `true` | no |
+| <a name="input_agentless_scan_secret_arn"></a> [agentless\_scan\_secret\_arn](#input\_agentless\_scan\_secret\_arn) | AWS SecretsManager Secret ARN for Lacework Account/Token. *Required if Global is `false` and Regional is `true`* | `string` | `""` | no |
+| <a name="input_bucket_force_destroy"></a> [bucket\_force\_destroy](#input\_bucket\_force\_destroy) | Force destroy bucket. (Required when bucket not empty) | `bool` | `true` | no |
 | <a name="input_filter_query_text"></a> [filter\_query\_text](#input\_filter\_query\_text) | The LQL query text. | `string` | `""` | no |
 | <a name="input_global"></a> [global](#input\_global) | Whether or not to create global resources. Defaults to `false`. | `bool` | `false` | no |
 | <a name="input_iam_service_linked_role"></a> [iam\_service\_linked\_role](#input\_iam\_service\_linked\_role) | Whether or not to create aws\_iam\_service\_linked\_role. Defaults to `false`. | `bool` | `false` | no |
 | <a name="input_image_url"></a> [image\_url](#input\_image\_url) | The container image url for Lacework sidekick. | `string` | `"public.ecr.aws/p5r4i7k7/sidekick:latest"` | no |
-| <a name="input_lacework_account"></a> [lacework\_account](#input\_lacework\_account) | Your Lacework account name. | `string` | `"youraccountname"` | yes |
+| <a name="input_lacework_account"></a> [lacework\_account](#input\_lacework\_account) | The name of the Lacework account with which to integrate. | `string` | `""` | no |
 | <a name="input_lacework_aws_account_id"></a> [lacework\_aws\_account\_id](#input\_lacework\_aws\_account\_id) | The Lacework AWS account that the IAM role will grant access. | `string` | `"434813966438"` | no |
-| <a name="input_lacework_domain"></a> [lacework\_domain](#input\_lacework\_domain) | The Lacework domain name. Defaults to `lacework.net`. | `string` | `"lacework.net"` | no |
+| <a name="input_lacework_domain"></a> [lacework\_domain](#input\_lacework\_domain) | The domain of the Lacework account with with to integrate. | `string` | `"lacework.net"` | no |
 | <a name="input_lacework_integration_name"></a> [lacework\_integration\_name](#input\_lacework\_integration\_name) | The name of the Lacework cloud account integration. | `string` | `"aws-agentless-scanning"` | no |
+| <a name="input_prefix"></a> [prefix](#input\_prefix) | A string to be prefixed to the name of all new resources. | `string` | `"lacework-agentless-scanning"` | no |
 | <a name="input_regional"></a> [regional](#input\_regional) | Whether or not to create regional resources. Defaults to `false`. | `bool` | `false` | no |
-| <a name="input_prefix"></a> [prefix](#input\_prefix) | A string to be prefixed to the name of all new resources. | `string` | `"lacework-agentless-scanning"`| no |
-| <a name="input_suffix"></a> [suffix](#input\_suffix) | A string to be appended to the end of the name of all new resources. | `string` | n/a | no |
 | <a name="input_scan_containers"></a> [scan\_containers](#input\_scan\_containers) | Whether to includes scanning for containers.  Defaults to `true`. | `bool` | `true` | no |
 | <a name="input_scan_frequency_hours"></a> [scan\_frequency\_hours](#input\_scan\_frequency\_hours) | How often in hours the scan will run in hours. Defaults to `24`. | `number` | `24` | no |
 | <a name="input_scan_host_vulnerabilities"></a> [scan\_host\_vulnerabilities](#input\_scan\_host\_vulnerabilities) | Whether to includes scanning for host vulnerabilities.  Defaults to `true`. | `bool` | `true` | no |
+| <a name="input_suffix"></a> [suffix](#input\_suffix) | A string to be appended to the end of the name of all new resources. | `string` | `""` | no |
 
 ## Outputs
 
@@ -94,8 +96,8 @@ No modules.
 | <a name="output_agentless_scan_ecs_event_role_arn"></a> [agentless\_scan\_ecs\_event\_role\_arn](#output\_agentless\_scan\_ecs\_event\_role\_arn) | Output ECS event role ARN. |
 | <a name="output_agentless_scan_ecs_execution_role_arn"></a> [agentless\_scan\_ecs\_execution\_role\_arn](#output\_agentless\_scan\_ecs\_execution\_role\_arn) | Output ECS execution role ARN. |
 | <a name="output_agentless_scan_ecs_task_role_arn"></a> [agentless\_scan\_ecs\_task\_role\_arn](#output\_agentless\_scan\_ecs\_task\_role\_arn) | Output ECS task role ARN. |
-| <a name="output_agentless_scan_secret_arn"></a> [agentless\_scan\_secret\_arn](#output\_agentless\_scan\_secret\_arn) | Output Secret Manager Secret ARN. |
-| <a name="output_prefix"></a> [prefix](#output\_prefix) | Output prefix value. |
-| <a name="output_suffix"></a> [suffix](#output\_suffix) | Output suffix value. |
-| <a name="output_lacework_account"></a> [lacework\_account](#output\_lacework\_account) | Output Lacework account name. |
-| <a name="output_lacework_domain"></a> [lacework\_domain](#output\_lacework\_domain) | Output Lacework domain name. |
+| <a name="output_agentless_scan_secret_arn"></a> [agentless\_scan\_secret\_arn](#output\_agentless\_scan\_secret\_arn) | AWS SecretsManager Secret ARN for Lacework Account and Token. |
+| <a name="output_lacework_account"></a> [lacework\_account](#output\_lacework\_account) | Lacework Account Name for Integration. |
+| <a name="output_lacework_domain"></a> [lacework\_domain](#output\_lacework\_domain) | Lacework Domain Name for Integration. |
+| <a name="output_prefix"></a> [prefix](#output\_prefix) | Prefix used to add uniqueness to resource names. |
+| <a name="output_suffix"></a> [suffix](#output\_suffix) | Suffix used to add uniqueness to resource names. |
