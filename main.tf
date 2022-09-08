@@ -577,9 +577,17 @@ resource "aws_route" "agentless_scan_route" {
   route_table_id         = aws_route_table.agentless_scan_route_table[0].id
 }
 
-resource "aws_security_group" "agentless_scan_vpc_egress" {
-  count = var.regional ? 1 : 0
-  name  = "AgentlessScanVPCEgress"
+resource "aws_default_security_group" "default" {
+  count  = var.regional ? 1 : 0
+  vpc_id = aws_vpc.agentless_scan_vpc[0].id
+
+  ingress {
+    protocol  = -1
+    self      = true
+    from_port = 0
+    to_port   = 0
+  }
+
   egress {
     from_port   = 443
     to_port     = 443
