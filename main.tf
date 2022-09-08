@@ -67,9 +67,11 @@ resource "aws_iam_service_linked_role" "agentless_scan_linked_role" {
 data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
   count = var.global ? 1 : 0
   statement {
-    sid       = "AllowControlOfBucket"
-    effect    = "Allow"
-    actions   = ["s3:*"]
+    sid    = "AllowControlOfBucket"
+    effect = "Allow"
+    actions = [
+      "s3:*"
+    ]
     resources = [
       "${aws_s3_bucket.agentless_scan_bucket[0].arn}",
       "${aws_s3_bucket.agentless_scan_bucket[0].arn}/*"
@@ -263,6 +265,7 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
       },
     ]
   })
+
   tags = {
     Name                     = "${var.prefix}-task-role"
     LWTAG_SIDEKICK           = "1"
@@ -288,6 +291,7 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
       },
     ]
   })
+
   tags = {
     Name                     = "${var.prefix}-task-event-role"
     LWTAG_SIDEKICK           = "1"
@@ -313,6 +317,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
       },
     ]
   })
+
   inline_policy {
     name = "AllowCloudWatch"
     policy = jsonencode({
@@ -392,9 +397,11 @@ resource "aws_s3_bucket_policy" "agentless_scan_bucket_policy" {
 data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
   count = var.global ? 1 : 0
   statement {
-    sid     = "ForceSSLOnlyAccess"
-    effect  = "Deny"
-    actions = ["s3:*"]
+    sid    = "ForceSSLOnlyAccess"
+    effect = "Deny"
+    actions = [
+      "s3:*"
+    ]
     principals {
       type        = "AWS"
       identifiers = ["*"]
@@ -457,9 +464,9 @@ data "aws_iam_policy_document" "cross_account_inline_policy_bucket" {
 data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
   count = var.global ? 1 : 0
   statement {
-    sid       = "AllowEcsStopTask"
-    effect    = "Allow"
-    actions   = [
+    sid    = "AllowEcsStopTask"
+    effect = "Allow"
+    actions = [
       "ecs:StopTask",
       "ecs:RunTask"
     ]
@@ -475,9 +482,9 @@ data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
   }
 
   statement {
-    sid       = "AllowEcsTaskManagementPassRole"
-    effect    = "Allow"
-    actions   = [
+    sid    = "AllowEcsTaskManagementPassRole"
+    effect = "Allow"
+    actions = [
       "iam:PassRole"
     ]
     resources = [
@@ -487,9 +494,9 @@ data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
   }
 
   statement {
-    sid       = "AllowEcsTaskSubnetLookup"
-    effect    = "Allow"
-    actions   = [
+    sid    = "AllowEcsTaskSubnetLookup"
+    effect = "Allow"
+    actions = [
       "ec2:DescribeSubnets"
     ]
     resources = ["arn:aws:ec2:*:*:subnet/subnet-*"]
@@ -602,10 +609,9 @@ resource "aws_subnet" "agentless_scan_public_subnet" {
   cidr_block              = "10.10.1.0/24"
   map_public_ip_on_launch = false
 
-
   tags = {
-    Name           = "${var.prefix}-vpc"
-    LWTAG_SIDEKICK = "1"
+    Name                     = "${var.prefix}-vpc"
+    LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
   }
 }
@@ -650,7 +656,6 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
     Name                     = "${var.prefix}-task-definition"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-
   }
 
   container_definitions = jsonencode([
@@ -745,11 +750,13 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
     task_definition_arn = aws_ecs_task_definition.agentless_scan_task_definition[0].arn
     launch_type         = "FARGATE"
     platform_version    = "LATEST"
+
     network_configuration {
       subnets          = [aws_subnet.agentless_scan_public_subnet[0].id]
       security_groups  = [aws_vpc.agentless_scan_vpc[0].default_security_group_id]
       assign_public_ip = true
     }
+
     tags = {
       LWTAG_SIDEKICK           = "1"
       LWTAG_LACEWORK_AGENTLESS = "1"

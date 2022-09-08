@@ -83,7 +83,7 @@ variable "global" {
 variable "regional" {
   type        = bool
   default     = false
-  description = "Whether or not to create regional resources. Defaults to `true`."
+  description = "Whether or not to create regional resources. Defaults to `false`."
 }
 
 variable "iam_service_linked_role" {
@@ -95,19 +95,19 @@ variable "iam_service_linked_role" {
 variable "agentless_scan_ecs_task_role_arn" {
   type        = string
   default     = ""
-  description = "Ecs task role arn. Required input for regional resources"
+  description = "ECS task role ARN. Required input for regional resources."
 }
 
 variable "agentless_scan_ecs_execution_role_arn" {
   type        = string
   default     = ""
-  description = "Ecs execution role arn. Required input for regional resources"
+  description = "ECS execution role ARN. Required input for regional resources."
 }
 
 variable "agentless_scan_ecs_event_role_arn" {
   type        = string
   default     = ""
-  description = "Ecs event role arn. Required input for regional resources"
+  description = "ECS event role ARN. Required input for regional resources."
 }
 
 variable "agentless_scan_secret_arn" {
@@ -119,5 +119,5 @@ variable "agentless_scan_secret_arn" {
 variable "bucket_force_destroy" {
   type        = bool
   default     = true
-  description = "Force destroy bucket (Required when bucket not empty)"
+  description = "Force destroy bucket. (Required when bucket not empty)"
 }
