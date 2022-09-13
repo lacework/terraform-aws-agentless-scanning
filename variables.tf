@@ -1,35 +1,52 @@
-variable "image_url" {
-  type        = string
-  default     = "public.ecr.aws/p5r4i7k7/sidekick:latest"
-  description = "The container image url for Lacework sidekick."
-}
-
-variable "prefix" {
-  type        = string
-  description = "A string to be prefixed to the name of all new resources."
-  default     = "lacework-agentless-scanning"
-
-  validation {
-    condition     = length(regexall(".*lacework.*", var.prefix)) > 0
-    error_message = "The prefix value must include the term 'lacework'."
-  }
-}
-
-variable "suffix" {
-  type        = string
-  description = "A string to be appended to the end of the name of all new resources."
-  default     = ""
-
-  validation {
-    condition     = length(var.suffix) == 0 || length(var.suffix) > 4
-    error_message = "If the suffix value is set then it must be at least 4 characters long."
-  }
-}
-
 variable "lacework_integration_name" {
   type        = string
   description = "The name of the Lacework cloud account integration."
   default     = "aws-agentless-scanning"
+}
+
+variable "global" {
+  type        = bool
+  default     = false
+  description = "Whether or not to create global resources. Defaults to `false`."
+}
+
+variable "regional" {
+  type        = bool
+  default     = false
+  description = "Whether or not to create regional resources. Defaults to `false`."
+}
+
+variable "global_module_reference" {
+  type = object({
+    agentless_scan_ecs_task_role_arn      = string
+    agentless_scan_ecs_execution_role_arn = string
+    agentless_scan_ecs_event_role_arn     = string
+    agentless_scan_secret_arn             = string
+    lacework_account                      = string
+    lacework_domain                       = string
+    prefix                                = string
+    suffix                                = string
+  })
+  default = {
+    agentless_scan_ecs_task_role_arn      = ""
+    agentless_scan_ecs_execution_role_arn = ""
+    agentless_scan_ecs_event_role_arn     = ""
+    agentless_scan_secret_arn             = ""
+    lacework_account                      = ""
+    lacework_domain                       = ""
+    prefix                                = ""
+    suffix                                = ""
+  }
+  description = "A reference to the global lacework_aws_agentless_scanning module for this account."
+}
+
+// The following variables are optional and considered advanced configuration.
+// Changing values like prefix and suffix might have adverse impact.
+
+variable "image_url" {
+  type        = string
+  default     = "public.ecr.aws/p5r4i7k7/sidekick:latest"
+  description = "The container image url for Lacework sidekick."
 }
 
 variable "scan_frequency_hours" {
@@ -56,6 +73,12 @@ variable "scan_host_vulnerabilities" {
   default     = true
 }
 
+variable "bucket_force_destroy" {
+  type        = bool
+  default     = true
+  description = "Force destroy bucket. (Required when bucket not empty)"
+}
+
 variable "lacework_account" {
   type        = string
   description = "The name of the Lacework account with which to integrate."
@@ -74,50 +97,57 @@ variable "lacework_aws_account_id" {
   description = "The Lacework AWS account that the IAM role will grant access."
 }
 
-variable "global" {
-  type        = bool
-  default     = false
-  description = "Whether or not to create global resources. Defaults to `false`."
-}
-
-variable "regional" {
-  type        = bool
-  default     = false
-  description = "Whether or not to create regional resources. Defaults to `false`."
-}
-
 variable "iam_service_linked_role" {
   type        = bool
   default     = false
   description = "Whether or not to create aws_iam_service_linked_role. Defaults to `false`."
 }
 
+// The following inputs are considered deprecated.
+// Instead of providing these directly, the `global_module_reference` should supply them.
+
 variable "agentless_scan_ecs_task_role_arn" {
   type        = string
   default     = ""
-  description = "ECS task role ARN. Required input for regional resources."
+  description = "ECS task role ARN. Required input for regional resources. (Deprecated: use global_module_reference)"
 }
 
 variable "agentless_scan_ecs_execution_role_arn" {
   type        = string
   default     = ""
-  description = "ECS execution role ARN. Required input for regional resources."
+  description = "ECS execution role ARN. Required input for regional resources. (Deprecated: use global_module_reference)"
 }
 
 variable "agentless_scan_ecs_event_role_arn" {
   type        = string
   default     = ""
-  description = "ECS event role ARN. Required input for regional resources."
+  description = "ECS event role ARN. Required input for regional resources. (Deprecated: use global_module_reference)"
 }
 
 variable "agentless_scan_secret_arn" {
   type        = string
   default     = ""
-  description = "AWS SecretsManager Secret ARN for Lacework Account/Token. *Required if Global is `false` and Regional is `true`*"
+  description = "AWS SecretsManager Secret ARN for Lacework Account/Token. *Required if Global is `false` and Regional is `true`*. (Deprecated: use global_module_reference)"
 }
 
-variable "bucket_force_destroy" {
-  type        = bool
-  default     = true
-  description = "Force destroy bucket. (Required when bucket not empty)"
+variable "prefix" {
+  type        = string
+  description = "A string to be prefixed to the name of all new resources."
+  default     = "lacework-agentless-scanning"
+
+  validation {
+    condition     = length(regexall(".*lacework.*", var.prefix)) > 0
+    error_message = "The prefix value must include the term 'lacework'."
+  }
+}
+
+variable "suffix" {
+  type        = string
+  description = "A string to be appended to the end of the name of all new resources."
+  default     = ""
+
+  validation {
+    condition     = length(var.suffix) == 0 || length(var.suffix) > 4
+    error_message = "If the suffix value is set then it must be at least 4 characters long."
+  }
 }
