@@ -1,4 +1,4 @@
-# Default Example
+# Single Account with Multiple Regions Example
 
 ```hcl
 
@@ -18,7 +18,7 @@ module "lacework_aws_agentless_scanning_global" {
   version = ">= 0.3.2"
 
   global                    = true
-  lacework_integration_name = "sidekick_from_terraform"
+  lacework_integration_name = "agentless_from_terraform"
 }
 
 // Create regional resources in our first region

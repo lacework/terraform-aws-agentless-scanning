@@ -1,0 +1,100 @@
+# AWS Organizations integration Example
+
+In this example we add Terraform modules to two AWS accounts.
+- Scanning account, or Security account, where the scanning infrasturcture is installed.
+- Monitored account where a role used to create snapshots, and access snapshot data, is installed.
+
+For the Scanning Account the same process is followed compared to the Single Account Multi Region example.
+However, this Scanning Account must know the AWS organization identifier or set of OUs that will be scanned.
+
+For all accounts that will be the target of scanning, the role installed must be known (by name)
+to the Scanning Account. This example demonstrates how to do this properly.
+
+## Sample Code
+
+### scanning_account.tf
+
+```hcl
+provider "lacework" {}
+
+provider "aws" {
+  profile = "scanning-account"
+  alias   = "scanning-account-usw1"
+  region  = "us-west-1"
+}
+
+provider "aws" {
+  profile = "scanning-account"
+  alias   = "scanning-account-usw2"
+  region  = "us-west-2"
+}
+
+// Create global resources, includes lacework cloud integration
+module "lacework_aws_agentless_scanning_global" {
+  source  = "lacework/agentless-scanning/aws"
+  version = "~> 0.5.0"
+
+  providers = {
+    aws = aws.scanning-account-usw1
+  }
+
+  global = true
+  org    = true
+
+  // This list may contain account IDs, OUs, or the organization root.
+  monitored_account_list    = ["1234567890", "ou-abcd"] 
+  lacework_integration_name = "agentless_org_from_terraform"
+}
+
+// Create regional resources in our first region
+module "lacework_aws_agentless_scanning_region_usw1" {
+  source  = "lacework/agentless-scanning/aws"
+  version = "~> 0.5.0"
+
+  providers = {
+    aws = aws.scanning-account-usw1
+  }
+
+  regional                = true
+  global_module_reference = module.lacework_aws_agentless_scanning_global
+}
+
+// Create regional resources in our second region
+module "lacework_aws_agentless_scanning_region_usw2" {
+  source  = "lacework/agentless-scanning/aws"
+  version = "~> 0.5.0"
+
+  providers = {
+    aws = aws.scanning-account-usw2
+  }
+
+  regional                = true
+  global_module_reference = module.lacework_aws_agentless_scanning_global
+}
+```
+
+### monitored_account.tf
+
+```hcl
+provider "lacework" {}
+
+provider "aws" {
+  profile = "monitored-account"
+  alias   = "monitored-account-usw1"
+  region  = "us-west-1"
+}
+
+// Create the required role for the scanning account.
+module "lacework_aws_agentless_scanning_role" {
+  source  = "lacework/agentless-scanning/aws"
+  version = "~> 0.5.0"
+
+  providers = {
+    aws = aws.monitored-account-usw1
+  }
+
+  snapshot_role           = true
+  global_module_reference = module.lacework_aws_agentless_scanning_global
+}
+
+```

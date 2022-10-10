@@ -30,6 +30,7 @@ resource "random_id" "uniq" {
 // count = var.global ? 1 : 0
 
 resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" {
+  // And if org == false
   count                     = var.global ? 1 : 0
   name                      = var.lacework_integration_name
   scan_frequency            = var.scan_frequency_hours
