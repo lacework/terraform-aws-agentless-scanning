@@ -14,7 +14,7 @@ module "lacework_aws_agentless_scanning_global" {
   source = "../.."
 
   global                    = true
-  lacework_integration_name = "sidekick_from_terraform"
+  lacework_integration_name = "agentless_from_terraform"
 }
 
 // Create regional resources in our first region

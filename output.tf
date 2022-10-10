@@ -37,3 +37,8 @@ output "lacework_domain" {
   value       = var.lacework_domain
   description = "Lacework Domain Name for Integration."
 }
+
+output "external_id" {
+  value       = local.external_id
+  description = "External ID used for assuming snapshot creation and cross-account roles."
+}

@@ -1,4 +1,4 @@
-# Single Region Example
+# Single Account with Single Region Example
 
 ```hcl
 
@@ -14,7 +14,7 @@ module "lacework_aws_agentless_scanning_singleregion" {
 
   global                    = true
   regional                  = true
-  lacework_integration_name = "sidekick_from_terraform"
+  lacework_integration_name = "agentless_from_terraform"
 }
 ```
 

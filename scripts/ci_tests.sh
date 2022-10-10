@@ -9,8 +9,9 @@ set -eou pipefail
 readonly project_name=terraform-aws-agentless-scanning
 
 TEST_CASES=(
-  examples/default
-  examples/singleregion
+  examples/multi-account-multi-region
+  examples/single-account-multi-region
+  examples/single-account-single-region
 )
 
 log() {
