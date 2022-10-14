@@ -103,7 +103,7 @@ variable "iam_service_linked_role" {
   description = "Whether or not to create aws_iam_service_linked_role. Defaults to `false`."
 }
 
-variable "kms_key_id" {
+variable "secretsmanager_kms_key_id" {
   type        = string 
   default     = null
   description = "ARN or Id of the AWS KMS key to be used to encrypt the secret values in the versions stored in this secret."
