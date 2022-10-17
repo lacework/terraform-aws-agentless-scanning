@@ -45,8 +45,9 @@ resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" 
 }
 
 resource "aws_secretsmanager_secret" "agentless_scan_secret" {
-  count = var.global ? 1 : 0
-  name  = "${local.prefix}-secret-${local.suffix}"
+  count      = var.global ? 1 : 0
+  name       = "${local.prefix}-secret-${local.suffix}"
+  kms_key_id = var.secretsmanager_kms_key_id
 }
 
 resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {

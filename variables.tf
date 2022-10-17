@@ -103,6 +103,12 @@ variable "iam_service_linked_role" {
   description = "Whether or not to create aws_iam_service_linked_role. Defaults to `false`."
 }
 
+variable "secretsmanager_kms_key_id" {
+  type        = string 
+  default     = null
+  description = "ARN or Id of the AWS KMS key to be used to encrypt the secret values in the versions stored in this secret."
+}
+
 // The following inputs are considered deprecated.
 // Instead of providing these directly, the `global_module_reference` should supply them.
 
