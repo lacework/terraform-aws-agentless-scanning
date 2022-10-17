@@ -104,9 +104,20 @@ variable "iam_service_linked_role" {
 }
 
 variable "secretsmanager_kms_key_id" {
-  type        = string 
+  type        = string
   default     = null
   description = "ARN or Id of the AWS KMS key to be used to encrypt the secret values in the versions stored in this secret."
+}
+
+variable "vpc_cidr_block" {
+  type        = string
+  default     = "10.10.32.0/24"
+  description = "VPC CIDR block used by isolate scanning VPC and single subnet."
+
+  validation {
+    condition     = can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))$", var.vpc_cidr_block))
+    error_message = "The VPC CIDR block must match the regex \"([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))\"."
+  }
 }
 
 // The following inputs are considered deprecated.
