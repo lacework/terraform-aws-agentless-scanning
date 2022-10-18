@@ -541,7 +541,7 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
 
 resource "aws_vpc" "agentless_scan_vpc" {
   count                = var.regional ? 1 : 0
-  cidr_block           = "10.10.0.0/16"
+  cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true
   enable_dns_hostnames = true
   instance_tenancy     = "default"
@@ -609,7 +609,7 @@ resource "aws_default_security_group" "default" {
 resource "aws_subnet" "agentless_scan_public_subnet" {
   count                   = var.regional ? 1 : 0
   vpc_id                  = aws_vpc.agentless_scan_vpc[0].id
-  cidr_block              = "10.10.1.0/24"
+  cidr_block              = var.vpc_cidr_block
   map_public_ip_on_launch = false
 
   tags = {

@@ -13,4 +13,6 @@ module "lacework_aws_agentless_scanning_singleregion" {
   global                    = true
   regional                  = true
   lacework_integration_name = "sidekick_from_terraform"
+  // In this example the default VPC CIDR block is customized.
+  vpc_cidr_block            = "10.10.34.0/24"
 }

@@ -24,6 +24,10 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | <a name="provider_lacework"></a> [lacework](#provider\_lacework) | ~> 0.25 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 2.1 |
 
+## Modules
+
+No modules.
+
 ## Resources
 
 | Name | Type |
@@ -79,7 +83,6 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | <a name="input_global_module_reference"></a> [global\_module\_reference](#input\_global\_module\_reference) | A reference to the global lacework\_aws\_agentless\_scanning module for this account. | <pre>object({<br>    agentless_scan_ecs_task_role_arn      = string<br>    agentless_scan_ecs_execution_role_arn = string<br>    agentless_scan_ecs_event_role_arn     = string<br>    agentless_scan_secret_arn             = string<br>    lacework_account                      = string<br>    lacework_domain                       = string<br>    prefix                                = string<br>    suffix                                = string<br>  })</pre> | <pre>{<br>  "agentless_scan_ecs_event_role_arn": "",<br>  "agentless_scan_ecs_execution_role_arn": "",<br>  "agentless_scan_ecs_task_role_arn": "",<br>  "agentless_scan_secret_arn": "",<br>  "lacework_account": "",<br>  "lacework_domain": "",<br>  "prefix": "",<br>  "suffix": ""<br>}</pre> | no |
 | <a name="input_iam_service_linked_role"></a> [iam\_service\_linked\_role](#input\_iam\_service\_linked\_role) | Whether or not to create aws\_iam\_service\_linked\_role. Defaults to `false`. | `bool` | `false` | no |
 | <a name="input_image_url"></a> [image\_url](#input\_image\_url) | The container image url for Lacework sidekick. | `string` | `"public.ecr.aws/p5r4i7k7/sidekick:latest"` | no |
-| <a name="input_secretsmanager_kms_key_id"></a> [secretsmanager\_kms\_key\_id](#input\_secretsmanager\_kms\_key\_id) | ARN or Id of the AWS KMS key to be used to encrypt the secret values in the versions stored in this secret. Defaults to `null`. | `string` | | `null` | no |
 | <a name="input_lacework_account"></a> [lacework\_account](#input\_lacework\_account) | The name of the Lacework account with which to integrate. | `string` | `""` | no |
 | <a name="input_lacework_aws_account_id"></a> [lacework\_aws\_account\_id](#input\_lacework\_aws\_account\_id) | The Lacework AWS account that the IAM role will grant access. | `string` | `"434813966438"` | no |
 | <a name="input_lacework_domain"></a> [lacework\_domain](#input\_lacework\_domain) | The domain of the Lacework account with with to integrate. | `string` | `"lacework.net"` | no |
@@ -89,7 +92,9 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | <a name="input_scan_containers"></a> [scan\_containers](#input\_scan\_containers) | Whether to includes scanning for containers.  Defaults to `true`. | `bool` | `true` | no |
 | <a name="input_scan_frequency_hours"></a> [scan\_frequency\_hours](#input\_scan\_frequency\_hours) | How often in hours the scan will run in hours. Defaults to `24`. | `number` | `24` | no |
 | <a name="input_scan_host_vulnerabilities"></a> [scan\_host\_vulnerabilities](#input\_scan\_host\_vulnerabilities) | Whether to includes scanning for host vulnerabilities.  Defaults to `true`. | `bool` | `true` | no |
+| <a name="input_secretsmanager_kms_key_id"></a> [secretsmanager\_kms\_key\_id](#input\_secretsmanager\_kms\_key\_id) | ARN or Id of the AWS KMS key to be used to encrypt the secret values in the versions stored in this secret. | `string` | `null` | no |
 | <a name="input_suffix"></a> [suffix](#input\_suffix) | A string to be appended to the end of the name of all new resources. | `string` | `""` | no |
+| <a name="input_vpc_cidr_block"></a> [vpc\_cidr\_block](#input\_vpc\_cidr\_block) | VPC CIDR block used by isolate scanning VPC and single subnet. | `string` | `"10.10.32.0/24"` | no |
 
 ## Outputs
 
