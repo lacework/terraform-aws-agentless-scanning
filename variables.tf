@@ -10,12 +10,6 @@ variable "global" {
   description = "Whether or not to create global resources. Defaults to `false`."
 }
 
-variable "org" {
-  type        = bool
-  default     = false
-  description = "Whether or not to create an AWS Organization scanning integration. Defaults to `false`."
-}
-
 variable "regional" {
   type        = bool
   default     = false
@@ -135,18 +129,6 @@ variable "vpc_cidr_block" {
 }
 
 // The following inputs are use for organization (or multi-account) scanning.
-
-variable "management_account" {
-  type = string
-  default = ""
-  description = "The AWS Account ID for the AWS Organizations management account."
-}
-
-variable "monitored_accounts" {
-  type = list(string)
-  default = []
-  description = "List of AWS Account IDs and Organizational Units for the AWS Organization integration type."
-}
 
 variable "organization" {
   type = object({

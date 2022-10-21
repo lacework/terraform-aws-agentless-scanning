@@ -56,8 +56,8 @@ resource "lacework_integration_aws_org_agentless_scanning" "lacework_cloud_accou
   scan_host_vulnerabilities = var.scan_host_vulnerabilities
   account_id                = data.aws_caller_identity.current.account_id
   bucket_arn                = aws_s3_bucket.agentless_scan_bucket[0].arn
-  monitored_accounts        = var.monitored_accounts
-  management_account        = var.management_account
+  monitored_accounts        = var.organization.monitored_accounts
+  management_account        = var.organization.management_account
   scanning_account          = data.aws_caller_identity.current.account_id
   credentials {
     role_arn    = aws_iam_role.agentless_scan_cross_account_role[0].arn
