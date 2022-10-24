@@ -7,6 +7,8 @@ locals {
   agentless_scan_secret_arn             = var.global ? aws_secretsmanager_secret.agentless_scan_secret[0].id : (length(var.global_module_reference.agentless_scan_secret_arn) > 0 ? var.global_module_reference.agentless_scan_secret_arn : var.agentless_scan_secret_arn)
   lacework_domain                       = length(var.global_module_reference.lacework_domain) > 0 ? var.global_module_reference.lacework_domain : var.lacework_domain
   lacework_account                      = length(var.global_module_reference.lacework_account) > 0 ? var.global_module_reference.lacework_account : (length(var.lacework_account) > 0 ? var.lacework_account : trimsuffix(data.lacework_user_profile.current.url, ".${local.lacework_domain}"))
+  external_id                           = length(var.global_module_reference.external_id) > 0 ? var.global_module_reference.external_id : random_string.external_id.result
+  is_org_integration                    = var.global && length(var.organization.monitored_accounts) > 0 ? true : false
 }
 
 data "aws_region" "current" {}
@@ -30,7 +32,7 @@ resource "random_id" "uniq" {
 // count = var.global ? 1 : 0
 
 resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" {
-  count                     = var.global ? 1 : 0
+  count                     = var.global && !local.is_org_integration ? 1 : 0
   name                      = var.lacework_integration_name
   scan_frequency            = var.scan_frequency_hours
   query_text                = var.filter_query_text
@@ -40,7 +42,26 @@ resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" 
   bucket_arn                = aws_s3_bucket.agentless_scan_bucket[0].arn
   credentials {
     role_arn    = aws_iam_role.agentless_scan_cross_account_role[0].arn
-    external_id = random_string.external_id.result
+    external_id = local.external_id
+  }
+}
+
+resource "lacework_integration_aws_org_agentless_scanning" "lacework_cloud_account" {
+  // If var.organization is used then also add monitored accounts and scanning account as the caller.
+  count                     = var.global && local.is_org_integration ? 1 : 0
+  name                      = var.lacework_integration_name
+  scan_frequency            = var.scan_frequency_hours
+  query_text                = var.filter_query_text
+  scan_containers           = var.scan_containers
+  scan_host_vulnerabilities = var.scan_host_vulnerabilities
+  account_id                = data.aws_caller_identity.current.account_id
+  bucket_arn                = aws_s3_bucket.agentless_scan_bucket[0].arn
+  monitored_accounts        = var.organization.monitored_accounts
+  management_account        = var.organization.management_account
+  scanning_account          = data.aws_caller_identity.current.account_id
+  credentials {
+    role_arn    = aws_iam_role.agentless_scan_cross_account_role[0].arn
+    external_id = local.external_id
   }
 }
 
@@ -56,7 +77,7 @@ resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
   secret_string = <<EOF
    {
     "account": "${local.lacework_account}",
-    "token": "${lacework_integration_aws_agentless_scanning.lacework_cloud_account[0].server_token}"
+    "token": "${local.is_org_integration ? lacework_integration_aws_org_agentless_scanning.lacework_cloud_account[0].server_token : lacework_integration_aws_agentless_scanning.lacework_cloud_account[0].server_token}"
    }
 EOF
 }
@@ -343,6 +364,102 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   }
 }
 
+resource "aws_iam_role" "agentless_scan_snapshot_role" {
+  count                = var.snapshot_role ? 1 : 0
+  name                 = "${local.prefix}-snapshot-role-${local.suffix}"
+  max_session_duration = 43200
+  path                 = "/"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          AWS = local.agentless_scan_ecs_task_role_arn
+        },
+        Condition = {
+          StringEquals = {
+             "sts:ExternalId" = local.external_id
+          }
+        }
+      },
+    ]
+  })
+
+  inline_policy {
+    name = "LaceworkAgentlessWorkloadSnapshots"
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid      = "DescribeInstances"
+          Action   = ["ec2:Describe*"]
+          Effect   = "Allow"
+          Resource = "*"
+        },
+        {
+          Sid      = "CreateSnapshots"
+          Action   = ["ec2:CreateTags", "ec2:CreateSnapshot"]
+          Effect   = "Allow"
+          Resource = "*"
+        },
+        {
+          Sid       = "SnapshotManagement"
+          Action    = [
+            "ec2:DeleteSnapshot",
+            "ec2:ModifySnapshotAttribute",
+            "ec2:ResetSnapshotAttribute",
+            "ebs:ListChangedBlocks",
+            "ebs:ListSnapshotBlocks",
+            "ebs:GetSnapshotBlock",
+            "ebs:CompleteSnapshot"
+          ]
+          Effect    = "Allow"
+          Resource  = "*",
+          Condition = {
+            StringLike = {
+              "aws:ResourceTag/LWTAG_SIDEKICK" = "*"
+            }
+          }
+        },
+        {
+          Sid      = "SnapshotEncryption"
+          Action   = [
+            "kms:Decrypt",
+            "kms:Encrypt",
+            "kms:ReEncrypt*",
+            "kms:CreateGrant",
+            "kms:GenerateDataKey*",
+            "kms:PutKeyPolicy"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        },
+        {
+          Sid      = "SnapshotKms"
+          Action   = ["kms:Describe*", "kms:List*", "kms:Get*"]
+          Effect   = "Allow"
+          Resource = "*"
+        },
+        {
+          Sid      = "OrgPermissions"
+          Action   = ["organizations:Describe*", "organizations:List*"]
+          Effect   = "Allow"
+          Resource = "*"
+        },
+      ]
+    })
+  }
+
+  tags = {
+    Name                     = "${local.prefix}-task-execution-role"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
+  }
+}
+
+
 resource "aws_s3_bucket" "agentless_scan_bucket" {
   count  = var.global ? 1 : 0
   bucket = "${local.prefix}-bucket-${local.suffix}"
@@ -433,7 +550,7 @@ data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
     condition {
       test     = "StringEquals"
       variable = "sts:ExternalId"
-      values   = [random_string.external_id.result]
+      values   = [local.external_id]
     }
   }
 }
@@ -633,7 +750,6 @@ resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
     Name                     = "${local.prefix}-cluster"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-
   }
 
   lifecycle {
@@ -765,4 +881,10 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
       LWTAG_LACEWORK_AGENTLESS = "1"
     }
   }
+}
+
+// Complex input validation checks.
+
+resource "null_resource" "check_organization_requires_global_input" {
+  count = length(var.organization.monitored_accounts) > 0 ? (var.global ? 0 : "Error: When var.organiation is used then var.global must also = true") : 0
 }

@@ -16,6 +16,12 @@ variable "regional" {
   description = "Whether or not to create regional resources. Defaults to `false`."
 }
 
+variable "snapshot_role" {
+  type        = bool
+  default     = false
+  description = "Whether or not to create an AWS Organization snapshot role. Defaults to `false`."
+}
+
 variable "global_module_reference" {
   type = object({
     agentless_scan_ecs_task_role_arn      = string
@@ -24,6 +30,7 @@ variable "global_module_reference" {
     agentless_scan_secret_arn             = string
     lacework_account                      = string
     lacework_domain                       = string
+    external_id                           = string
     prefix                                = string
     suffix                                = string
   })
@@ -34,6 +41,7 @@ variable "global_module_reference" {
     agentless_scan_secret_arn             = ""
     lacework_account                      = ""
     lacework_domain                       = ""
+    external_id                           = ""
     prefix                                = ""
     suffix                                = ""
   }
@@ -117,6 +125,28 @@ variable "vpc_cidr_block" {
   validation {
     condition     = can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))$", var.vpc_cidr_block))
     error_message = "The VPC CIDR block must match the regex \"([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))\"."
+  }
+}
+
+// The following inputs are use for organization (or multi-account) scanning.
+
+variable "organization" {
+  type = object({
+    management_account = string
+    monitored_accounts = list(string)
+  })
+  default = {
+    management_account = ""
+    monitored_accounts = []
+  }
+  description = "Used for multi-account scanning. Set management_account to the AWS Organizations management account. Set the monitored_accounts list to a list of AWS account IDs or OUs."
+  validation {
+    condition     = (
+      length(var.organization.management_account) > 0
+        ? length(var.organization.monitored_accounts) > 0 ? true : false
+        : length(var.organization.monitored_accounts) == 0
+    )
+    error_message = "Both management_account and monitored_accounts must be set if either is set."
   }
 }
 
