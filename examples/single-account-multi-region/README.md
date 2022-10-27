@@ -15,7 +15,7 @@ provider "aws" {
 
 module "lacework_aws_agentless_scanning_global" {
   source  = "lacework/agentless-scanning/aws"
-  version = ">= 0.3.2"
+  version = "~> 0.5.0"
 
   global                    = true
   lacework_integration_name = "agentless_from_terraform"
@@ -24,7 +24,7 @@ module "lacework_aws_agentless_scanning_global" {
 // Create regional resources in our first region
 module "lacework_aws_agentless_scanning_region" {
   source  = "lacework/agentless-scanning/aws"
-  version = ">= 0.3.2"
+  version = "~> 0.5.0"
 
   regional                = true
   global_module_reference = module.lacework_aws_agentless_scanning_global
@@ -33,7 +33,7 @@ module "lacework_aws_agentless_scanning_region" {
 // Create regional resources in our second region
 module "lacework_aws_agentless_scanning_region_usw2" {
   source  = "lacework/agentless-scanning/aws"
-  version = ">= 0.3.2"
+  version = "~> 0.5.0"
 
   providers = {
     aws = aws.usw2
@@ -41,6 +41,9 @@ module "lacework_aws_agentless_scanning_region_usw2" {
 
   regional                = true
   global_module_reference = module.lacework_aws_agentless_scanning_global
+
+  // In this example the default VPC CIDR block is customized only for the us-west-2 region.
+  vpc_cidr_block            = "10.10.34.0/24"
 }
 ```
 

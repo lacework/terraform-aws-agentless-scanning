@@ -141,12 +141,16 @@ variable "organization" {
   }
   description = "Used for multi-account scanning. Set management_account to the AWS Organizations management account. Set the monitored_accounts list to a list of AWS account IDs or OUs."
   validation {
-    condition     = (
-      length(var.organization.management_account) > 0
-        ? length(var.organization.monitored_accounts) > 0 ? true : false
-        : length(var.organization.monitored_accounts) == 0
-    )
-    error_message = "Both management_account and monitored_accounts must be set if either is set."
+    condition = length(var.organization.management_account) > 0 ? (
+      alltrue([
+        length(var.organization.monitored_accounts) > 0,
+        alltrue([
+          for account in var.organization.monitored_accounts : can(regex("^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$|^[0-9]{8,32}$|^r-[0-9a-z]{4,32}$", account))
+        ]),
+        can(regex("^[0-9]{8,32}$", var.organization.management_account))
+      ])
+    ) : length(var.organization.monitored_accounts) == 0
+    error_message = "Both management_account and monitored_accounts must be set if either is set; monitored_accounts can only contain AWS Account IDs, OUs, or the Root ID; and the management_account must be an AWS Account ID."
   }
 }
 

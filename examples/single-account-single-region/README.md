@@ -10,7 +10,7 @@ provider "aws" {
 
 module "lacework_aws_agentless_scanning_singleregion" {
   source  = "lacework/agentless-scanning/aws"
-  version = ">= 0.3.2"
+  version = "~> 0.5.0"
 
   global                    = true
   regional                  = true
