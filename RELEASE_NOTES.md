@@ -1,9 +1,11 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.5.0`.
+Another day, another release. These are the release notes for the version `v0.5.1`.
 
-## Features
-* feat: Add AWS Org integration or multi-account mode (#33) (Teddy Reed)([5b466ca](https://github.com/lacework/terraform-aws-agentless-scanning/commit/5b466ca4b9bde1ec05554e62c0e71c5ec23d0841))
-* feat: Allow VPC CIDR to be set (#32) (Teddy Reed)([fc5864c](https://github.com/lacework/terraform-aws-agentless-scanning/commit/fc5864c4c6804a8662ae7d5d25e9c30f277ce8b6))
-* feat: Add option to encrypt Secrets Manager secret using KMS Customer Managed Key (#31) (Matthew Grotheer)([b220d45](https://github.com/lacework/terraform-aws-agentless-scanning/commit/b220d4546ff3a5695798920f6172f1a700d5ab62))
+## Bug Fixes
+* fix: Add more validations to organization inputs (#36) (Teddy Reed)([3eccaa5](https://github.com/lacework/terraform-aws-agentless-scanning/commit/3eccaa53b024c97dbe5d41fd24039c7fb3c57449))
+* fix: Update Lacework provider requirement to 0.27 (#35) (Finn Ellis)([6ef952c](https://github.com/lacework/terraform-aws-agentless-scanning/commit/6ef952c8b2b6291151b4ea5d49b6748246eadd4f))
+## Documentation Updates
+* docs: update Lacework provider version in readme (#39) (Darren)([778886d](https://github.com/lacework/terraform-aws-agentless-scanning/commit/778886d0320f1bebe52754552ac62dbb6ced16b6))
 ## Other Changes
-* ci: version bump to v0.4.1-dev (Lacework)([fc6875a](https://github.com/lacework/terraform-aws-agentless-scanning/commit/fc6875a09d7c0e6fc291a123eeace16fcc733ab6))
+* chore: update Lacework provider version to v1 (#38) (Darren)([c9bd456](https://github.com/lacework/terraform-aws-agentless-scanning/commit/c9bd456151961af61de2377f9f1a04851e6dd3c5))
+* ci: version bump to v0.5.1-dev (Lacework)([367daa4](https://github.com/lacework/terraform-aws-agentless-scanning/commit/367daa43e120111175eb23ec6e4a250db3ca8594))
