@@ -730,10 +730,10 @@ resource "aws_default_security_group" "default" {
   vpc_id = aws_vpc.agentless_scan_vpc[0].id
 
   ingress {
-    protocol  = -1
+    protocol  = "tcp"
     self      = true
-    from_port = 0
-    to_port   = 0
+    from_port = 13737
+    to_port   = 14737
   }
 
   egress {
