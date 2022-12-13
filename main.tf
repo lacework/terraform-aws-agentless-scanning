@@ -1,14 +1,16 @@
 locals {
   suffix                                = length(var.global_module_reference.suffix) > 0 ? var.global_module_reference.suffix : (length(var.suffix) > 0 ? var.suffix : random_id.uniq.hex)
   prefix                                = length(var.global_module_reference.prefix) > 0 ? var.global_module_reference.prefix : var.prefix
-  agentless_scan_ecs_task_role_arn      = var.global ? aws_iam_role.agentless_scan_ecs_task_role[0].arn : (length(var.global_module_reference.agentless_scan_ecs_task_role_arn) > 0 ? var.global_module_reference.agentless_scan_ecs_task_role_arn : var.agentless_scan_ecs_task_role_arn)
-  agentless_scan_ecs_execution_role_arn = var.global ? aws_iam_role.agentless_scan_ecs_execution_role[0].arn : (length(var.global_module_reference.agentless_scan_ecs_execution_role_arn) > 0 ? var.global_module_reference.agentless_scan_ecs_execution_role_arn : var.agentless_scan_ecs_execution_role_arn)
-  agentless_scan_ecs_event_role_arn     = var.global ? aws_iam_role.agentless_scan_ecs_event_role[0].arn : (length(var.global_module_reference.agentless_scan_ecs_event_role_arn) > 0 ? var.global_module_reference.agentless_scan_ecs_event_role_arn : var.agentless_scan_ecs_event_role_arn)
+  agentless_scan_ecs_task_role_arn      = var.global ? (var.use_existing_task_role ? var.agentless_scan_ecs_task_role_arn : aws_iam_role.agentless_scan_ecs_task_role[0].arn) : (length(var.global_module_reference.agentless_scan_ecs_task_role_arn) > 0 ? var.global_module_reference.agentless_scan_ecs_task_role_arn : var.agentless_scan_ecs_task_role_arn)
+  agentless_scan_ecs_execution_role_arn = var.global ? (var.use_existing_execution_role ? var.agentless_scan_ecs_execution_role_arn : aws_iam_role.agentless_scan_ecs_execution_role[0].arn) : (length(var.global_module_reference.agentless_scan_ecs_execution_role_arn) > 0 ? var.global_module_reference.agentless_scan_ecs_execution_role_arn : var.agentless_scan_ecs_execution_role_arn)
+  agentless_scan_ecs_event_role_arn     = var.global ? (var.use_existing_event_role ? var.agentless_scan_ecs_event_role_arn : aws_iam_role.agentless_scan_ecs_event_role[0].arn) : (length(var.global_module_reference.agentless_scan_ecs_event_role_arn) > 0 ? var.global_module_reference.agentless_scan_ecs_event_role_arn : var.agentless_scan_ecs_event_role_arn)
   agentless_scan_secret_arn             = var.global ? aws_secretsmanager_secret.agentless_scan_secret[0].id : (length(var.global_module_reference.agentless_scan_secret_arn) > 0 ? var.global_module_reference.agentless_scan_secret_arn : var.agentless_scan_secret_arn)
   lacework_domain                       = length(var.global_module_reference.lacework_domain) > 0 ? var.global_module_reference.lacework_domain : var.lacework_domain
   lacework_account                      = length(var.global_module_reference.lacework_account) > 0 ? var.global_module_reference.lacework_account : (length(var.lacework_account) > 0 ? var.lacework_account : trimsuffix(data.lacework_user_profile.current.url, ".${local.lacework_domain}"))
-  external_id                           = length(var.global_module_reference.external_id) > 0 ? var.global_module_reference.external_id : random_string.external_id.result
+  external_id                           = length(var.global_module_reference.external_id) > 0 ? var.global_module_reference.external_id : (length(var.external_id) > 0 ? var.external_id : random_string.external_id[0].result)
   is_org_integration                    = var.global && length(var.organization.monitored_accounts) > 0 ? true : false
+  cross_account_role_arn                = var.use_existing_cross_account_role ? var.cross_account_role_arn : (var.global ? aws_iam_role.agentless_scan_cross_account_role[0].arn : "")
+  cross_account_role_name               = length(var.cross_account_role_name) > 0 ? var.cross_account_role_name : "${local.prefix}-cross-account-role-${local.suffix}"
 }
 
 data "aws_region" "current" {}
@@ -18,6 +20,7 @@ data "aws_caller_identity" "current" {}
 data "lacework_user_profile" "current" {}
 
 resource "random_string" "external_id" {
+  count = length(var.external_id) > 0 ? 0 : 1
   length           = 16
   override_special = "=,.@:/-"
 }
@@ -41,7 +44,7 @@ resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" 
   account_id                = data.aws_caller_identity.current.account_id
   bucket_arn                = aws_s3_bucket.agentless_scan_bucket[0].arn
   credentials {
-    role_arn    = aws_iam_role.agentless_scan_cross_account_role[0].arn
+    role_arn    = local.cross_account_role_arn
     external_id = local.external_id
   }
 }
@@ -60,7 +63,7 @@ resource "lacework_integration_aws_org_agentless_scanning" "lacework_cloud_accou
   management_account        = var.organization.management_account
   scanning_account          = data.aws_caller_identity.current.account_id
   credentials {
-    role_arn    = aws_iam_role.agentless_scan_cross_account_role[0].arn
+    role_arn    = local.cross_account_role_arn
     external_id = local.external_id
   }
 }
@@ -266,13 +269,13 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
 }
 
 resource "aws_iam_policy" "agentless_scan_task_policy" {
-  count  = var.global ? 1 : 0
+  count  = var.global ? (var.use_existing_task_role ? 0 : 1) : 0
   name   = "${local.prefix}-task-policy-${local.suffix}"
   policy = data.aws_iam_policy_document.agentless_scan_task_policy_document[0].json
 }
 
 resource "aws_iam_role" "agentless_scan_ecs_task_role" {
-  count                = var.global ? 1 : 0
+  count                = var.global ? (var.use_existing_task_role ? 0 : 1) : 0
   name                 = "${local.prefix}-task-role-${local.suffix}"
   max_session_duration = 43200
   path                 = "/"
@@ -298,7 +301,7 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
 }
 
 resource "aws_iam_role" "agentless_scan_ecs_event_role" {
-  count                = var.global ? 1 : 0
+  count                = var.global ? (var.use_existing_event_role ? 0 : 1) : 0
   name                 = "${local.prefix}-task-event-role-${local.suffix}"
   max_session_duration = 3600
   path                 = "/service-role/"
@@ -324,7 +327,7 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
 }
 
 resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
-  count                = var.global ? 1 : 0
+  count                = var.global ? (var.use_existing_execution_role ? 0 : 1) : 0
   name                 = "${local.prefix}-task-execution-role-${local.suffix}"
   max_session_duration = 3600
   path                 = "/"
@@ -380,7 +383,7 @@ resource "aws_iam_role" "agentless_scan_snapshot_role" {
         },
         Condition = {
           StringEquals = {
-             "sts:ExternalId" = local.external_id
+            "sts:ExternalId" = local.external_id
           }
         }
       },
@@ -405,8 +408,8 @@ resource "aws_iam_role" "agentless_scan_snapshot_role" {
           Resource = "*"
         },
         {
-          Sid       = "SnapshotManagement"
-          Action    = [
+          Sid = "SnapshotManagement"
+          Action = [
             "ec2:DeleteSnapshot",
             "ec2:ModifySnapshotAttribute",
             "ec2:ResetSnapshotAttribute",
@@ -415,8 +418,8 @@ resource "aws_iam_role" "agentless_scan_snapshot_role" {
             "ebs:GetSnapshotBlock",
             "ebs:CompleteSnapshot"
           ]
-          Effect    = "Allow"
-          Resource  = "*",
+          Effect   = "Allow"
+          Resource = "*",
           Condition = {
             StringLike = {
               "aws:ResourceTag/LWTAG_SIDEKICK" = "*"
@@ -424,8 +427,8 @@ resource "aws_iam_role" "agentless_scan_snapshot_role" {
           }
         },
         {
-          Sid      = "SnapshotEncryption"
-          Action   = [
+          Sid = "SnapshotEncryption"
+          Action = [
             "kms:Decrypt",
             "kms:Encrypt",
             "kms:ReEncrypt*",
@@ -489,7 +492,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "agentless_scan_bu
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "AES256"
+      sse_algorithm = "AES256"
     }
   }
 }
@@ -650,8 +653,8 @@ data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
 }
 
 resource "aws_iam_role" "agentless_scan_cross_account_role" {
-  count                = var.global ? 1 : 0
-  name                 = "${local.prefix}-cross-account-role-${local.suffix}"
+  count                = var.global ? (var.use_existing_cross_account_role ? 0 : 1) : 0
+  name                 = local.cross_account_role_name
   max_session_duration = 3600
   path                 = "/"
   assume_role_policy   = data.aws_iam_policy_document.agentless_scan_cross_account_policy[0].json

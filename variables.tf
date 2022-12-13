@@ -202,3 +202,46 @@ variable "suffix" {
     error_message = "If the suffix value is set then it must be at least 4 characters long."
   }
 }
+
+variable "use_existing_cross_account_role" {
+  type        = bool
+  default     = false
+  description = "Set this to true to use an existing IAM cross account role"
+}
+
+variable "use_existing_task_role" {
+  type        = bool
+  default     = false
+  description = "Set this to true to use an existing IAM task role"
+}
+
+variable "use_existing_execution_role" {
+  type        = bool
+  default     = false
+  description = "Set this to true to use an existing IAM execution role"
+}
+
+variable "use_existing_event_role" {
+  type        = bool
+  default     = false
+  description = "Set this to true to use an existing IAM event role"
+}
+
+variable "cross_account_role_arn" {
+  type        = string
+  default     = ""
+  description = "The IAM cross account role ARN is required when setting use_existing_cross_account_role to true"
+}
+
+variable "cross_account_role_name" {
+  type        = string
+  default     = ""
+  description = "The IAM cross account role name. Required to match with cross_account_role_arn if use_existing_cross_account_role is set to true"
+}
+
+variable "external_id" {
+  type        = string
+  default     = ""
+  description = "The external ID configured inside the IAM role used for cross account access"
+}
+
