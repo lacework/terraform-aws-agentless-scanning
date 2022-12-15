@@ -12,6 +12,8 @@ TEST_CASES=(
   examples/multi-account-multi-region
   examples/single-account-multi-region
   examples/single-account-single-region
+  examples/use-existing-iam-roles-single-region
+  examples/use-existing-iam-roles-multi-region
 )
 
 log() {
