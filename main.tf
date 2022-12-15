@@ -20,7 +20,7 @@ data "aws_caller_identity" "current" {}
 data "lacework_user_profile" "current" {}
 
 resource "random_string" "external_id" {
-  count = length(var.external_id) > 0 ? 0 : 1
+  count            = length(var.external_id) > 0 ? 0 : 1
   length           = 16
   override_special = "=,.@:/-"
 }
