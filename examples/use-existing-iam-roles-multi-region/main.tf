@@ -10,7 +10,7 @@ provider "aws" {
 }
 
 // Create global resouces, includes lacework cloud integration
-// Use existing cross account IAM role
+// Use existing IAM roles for cross account, event, execution, and task
 module "lacework_aws_agentless_scanning_global" {
   source = "../.."
 
