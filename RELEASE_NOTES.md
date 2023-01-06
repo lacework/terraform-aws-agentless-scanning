@@ -1,7 +1,8 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.6.0`.
+Another day, another release. These are the release notes for the version `v0.7.0`.
 
 ## Features
-* feat: Add default encryption and public access block to S3 (#40) (Teddy Reed)([cfd8c6d](https://github.com/lacework/terraform-aws-agentless-scanning/commit/cfd8c6d754cf101720fcfc28402ed1fadd6c7a1f))
+* feat: allow use of an existing VPC for deploying regional scan resources (#46) (Alan Nix)([da76d5c](https://github.com/lacework/terraform-aws-agentless-scanning/commit/da76d5c67278579a708cea35acbea4dc35ba7401))
+* feat: add support for using existing IAM roles and policies (#44) (Steve)([febf745](https://github.com/lacework/terraform-aws-agentless-scanning/commit/febf745865f44a61830969c4e862a18ed417f62a))
 ## Other Changes
-* ci: version bump to v0.5.2-dev (Lacework)([4caed03](https://github.com/lacework/terraform-aws-agentless-scanning/commit/4caed03fd53d081c8a33e803e46ef05db0e81d9c))
+* ci: version bump to v0.6.1-dev (Lacework)([75c39a6](https://github.com/lacework/terraform-aws-agentless-scanning/commit/75c39a6c77ff72789e639fb7069815ce87381e3f))
