@@ -1,6 +1,7 @@
 # AWS Organizations integration Example
 
 In this example we add Terraform modules to three AWS accounts.
+
 - Scanning account, or Security account, where the scanning infrasturcture is installed.
 - Monitored account where a role used to create snapshots, and access snapshot data, is installed.
 - The AWS Organizations Management account so that accounts and OUs can be enumerated for each scan.
@@ -33,7 +34,7 @@ provider "aws" {
 // Create global resources, includes lacework cloud integration
 module "lacework_aws_agentless_scanning_global" {
   source  = "lacework/agentless-scanning/aws"
-  version = "~> 0.5.0"
+  version = "~> 0.5"
 
   providers = {
     aws = aws.scanning-account-usw1
@@ -55,7 +56,7 @@ module "lacework_aws_agentless_scanning_global" {
 // Create regional resources in our first region
 module "lacework_aws_agentless_scanning_region_usw1" {
   source  = "lacework/agentless-scanning/aws"
-  version = "~> 0.5.0"
+  version = "~> 0.5"
 
   providers = {
     aws = aws.scanning-account-usw1
@@ -68,7 +69,7 @@ module "lacework_aws_agentless_scanning_region_usw1" {
 // Create regional resources in our second region
 module "lacework_aws_agentless_scanning_region_usw2" {
   source  = "lacework/agentless-scanning/aws"
-  version = "~> 0.5.0"
+  version = "~> 0.5"
 
   providers = {
     aws = aws.scanning-account-usw2
@@ -91,7 +92,7 @@ provider "aws" {
 // Create the required role for the monitored account.
 module "lacework_aws_agentless_monitored_scanning_role" {
   source  = "lacework/agentless-scanning/aws"
-  version = "~> 0.5.0"
+  version = "~> 0.5"
 
   providers = {
     aws = aws.monitored-account-usw1
@@ -114,7 +115,7 @@ provider "aws" {
 // Create the required role for the management account.
 module "lacework_aws_agentless_management_scanning_role" {
   source  = "lacework/agentless-scanning/aws"
-  version = "~> 0.5.0"
+  version = "~> 0.5"
 
   providers = {
     aws = aws.management-account-usw1

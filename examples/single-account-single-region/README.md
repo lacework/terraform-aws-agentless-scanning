@@ -10,7 +10,7 @@ provider "aws" {
 
 module "lacework_aws_agentless_scanning_singleregion" {
   source  = "lacework/agentless-scanning/aws"
-  version = "~> 0.5.0"
+  version = "~> 0.5"
 
   global                    = true
   regional                  = true
@@ -24,4 +24,4 @@ policies, and S3 bucket. Regional resources include a VPC, and ECS cluster.
 This example uses a single module to add both types of resources.
 This is the simplest usage but only supports a single account and single region.
 
-Refer to the *default* example for adding scanning to multiple regions.
+Refer to the _default_ example for adding scanning to multiple regions.
