@@ -55,6 +55,7 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | [aws_s3_bucket_versioning.versioning_example](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_secretsmanager_secret.agentless_scan_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret_version.agentless_scan_secret_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
+| [aws_security_group.agentless_scan_sec_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_subnet.agentless_scan_public_subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.agentless_scan_vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
 | [lacework_integration_aws_agentless_scanning.lacework_cloud_account](https://registry.terraform.io/providers/lacework/lacework/latest/docs/resources/integration_aws_agentless_scanning) | resource |
@@ -68,7 +69,9 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | [aws_iam_policy_document.agentless_scan_task_policy_document](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cross_account_inline_policy_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cross_account_inline_policy_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_internet_gateway.selected](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/internet_gateway) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [aws_vpc.selected](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 | [lacework_user_profile.current](https://registry.terraform.io/providers/lacework/lacework/latest/docs/data-sources/user_profile) | data source |
 
 ## Inputs
@@ -80,6 +83,9 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | <a name="input_agentless_scan_ecs_task_role_arn"></a> [agentless\_scan\_ecs\_task\_role\_arn](#input\_agentless\_scan\_ecs\_task\_role\_arn) | ECS task role ARN. Required input for regional resources. (Deprecated: use global\_module\_reference) | `string` | `""` | no |
 | <a name="input_agentless_scan_secret_arn"></a> [agentless\_scan\_secret\_arn](#input\_agentless\_scan\_secret\_arn) | AWS SecretsManager Secret ARN for Lacework Account/Token. *Required if Global is `false` and Regional is `true`*. (Deprecated: use global\_module\_reference) | `string` | `""` | no |
 | <a name="input_bucket_force_destroy"></a> [bucket\_force\_destroy](#input\_bucket\_force\_destroy) | Force destroy bucket. (Required when bucket not empty) | `bool` | `true` | no |
+| <a name="input_cross_account_role_arn"></a> [cross\_account\_role\_arn](#input\_cross\_account\_role\_arn) | The IAM cross account role ARN is required when setting use\_existing\_cross\_account\_role to true | `string` | `""` | no |
+| <a name="input_cross_account_role_name"></a> [cross\_account\_role\_name](#input\_cross\_account\_role\_name) | The IAM cross account role name. Required to match with cross\_account\_role\_arn if use\_existing\_cross\_account\_role is set to true | `string` | `""` | no |
+| <a name="input_external_id"></a> [external\_id](#input\_external\_id) | The external ID configured inside the IAM role used for cross account access | `string` | `""` | no |
 | <a name="input_filter_query_text"></a> [filter\_query\_text](#input\_filter\_query\_text) | The LQL query text. | `string` | `""` | no |
 | <a name="input_global"></a> [global](#input\_global) | Whether or not to create global resources. Defaults to `false`. | `bool` | `false` | no |
 | <a name="input_global_module_reference"></a> [global\_module\_reference](#input\_global\_module\_reference) | A reference to the global lacework\_aws\_agentless\_scanning module for this account. | <pre>object({<br>    agentless_scan_ecs_task_role_arn      = string<br>    agentless_scan_ecs_execution_role_arn = string<br>    agentless_scan_ecs_event_role_arn     = string<br>    agentless_scan_secret_arn             = string<br>    lacework_account                      = string<br>    lacework_domain                       = string<br>    external_id                           = string<br>    prefix                                = string<br>    suffix                                = string<br>  })</pre> | <pre>{<br>  "agentless_scan_ecs_event_role_arn": "",<br>  "agentless_scan_ecs_execution_role_arn": "",<br>  "agentless_scan_ecs_task_role_arn": "",<br>  "agentless_scan_secret_arn": "",<br>  "external_id": "",<br>  "lacework_account": "",<br>  "lacework_domain": "",<br>  "prefix": "",<br>  "suffix": ""<br>}</pre> | no |
@@ -98,7 +104,13 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | <a name="input_secretsmanager_kms_key_id"></a> [secretsmanager\_kms\_key\_id](#input\_secretsmanager\_kms\_key\_id) | ARN or Id of the AWS KMS key to be used to encrypt the secret values in the versions stored in this secret. | `string` | `null` | no |
 | <a name="input_snapshot_role"></a> [snapshot\_role](#input\_snapshot\_role) | Whether or not to create an AWS Organization snapshot role. Defaults to `false`. | `bool` | `false` | no |
 | <a name="input_suffix"></a> [suffix](#input\_suffix) | A string to be appended to the end of the name of all new resources. | `string` | `""` | no |
-| <a name="input_vpc_cidr_block"></a> [vpc\_cidr\_block](#input\_vpc\_cidr\_block) | VPC CIDR block used by isolate scanning VPC and single subnet. | `string` | `"10.10.32.0/24"` | no |
+| <a name="input_use_existing_cross_account_role"></a> [use\_existing\_cross\_account\_role](#input\_use\_existing\_cross\_account\_role) | Set this to true to use an existing IAM cross account role | `bool` | `false` | no |
+| <a name="input_use_existing_event_role"></a> [use\_existing\_event\_role](#input\_use\_existing\_event\_role) | Set this to true to use an existing IAM event role | `bool` | `false` | no |
+| <a name="input_use_existing_execution_role"></a> [use\_existing\_execution\_role](#input\_use\_existing\_execution\_role) | Set this to true to use an existing IAM execution role | `bool` | `false` | no |
+| <a name="input_use_existing_task_role"></a> [use\_existing\_task\_role](#input\_use\_existing\_task\_role) | Set this to true to use an existing IAM task role | `bool` | `false` | no |
+| <a name="input_use_existing_vpc"></a> [use\_existing\_vpc](#input\_use\_existing\_vpc) | Set this to true to use an existing VPC.  The VPC must have a Internet Gateway attached, and `vpc_cidr_block` will be used to create new subnet to isolate scanning resources. | `bool` | `false` | no |
+| <a name="input_vpc_cidr_block"></a> [vpc\_cidr\_block](#input\_vpc\_cidr\_block) | VPC CIDR block used to isolate scanning VPC and single subnet. | `string` | `"10.10.32.0/24"` | no |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of an existing AWS VPC to use for deploying regional scan resources.  Must have an Internet Gateway attached. | `string` | `""` | no |
 
 ## Outputs
 

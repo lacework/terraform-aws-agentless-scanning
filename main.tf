@@ -11,16 +11,34 @@ locals {
   is_org_integration                    = var.global && length(var.organization.monitored_accounts) > 0 ? true : false
   cross_account_role_arn                = var.use_existing_cross_account_role ? var.cross_account_role_arn : (var.global ? aws_iam_role.agentless_scan_cross_account_role[0].arn : "")
   cross_account_role_name               = length(var.cross_account_role_name) > 0 ? var.cross_account_role_name : "${local.prefix}-cross-account-role-${local.suffix}"
+
+  // Existing VPC abstraction
+  internet_gateway_id = var.regional ? (var.use_existing_vpc ? data.aws_internet_gateway.selected[0].id : aws_internet_gateway.agentless_scan_gateway[0].id) : ""
+  security_group_id   = var.regional ? (var.use_existing_vpc ? aws_security_group.agentless_scan_sec_group[0].id : aws_default_security_group.default[0].id) : ""
+  vpc_id              = var.regional ? (var.use_existing_vpc ? data.aws_vpc.selected[0].id : aws_vpc.agentless_scan_vpc[0].id) : ""
 }
 
 data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
+data "aws_vpc" "selected" {
+  count = var.regional && var.use_existing_vpc ? 1 : 0
+  id    = var.vpc_id
+}
+
+data "aws_internet_gateway" "selected" {
+  count = var.regional && var.use_existing_vpc ? 1 : 0
+  filter {
+    name   = "attachment.vpc-id"
+    values = [var.vpc_id]
+  }
+}
+
 data "lacework_user_profile" "current" {}
 
 resource "random_string" "external_id" {
-  count = length(var.external_id) > 0 ? 0 : 1
+  count            = length(var.external_id) > 0 ? 0 : 1
   length           = 16
   override_special = "=,.@:/-"
 }
@@ -681,7 +699,7 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
 // count = var.regional ? 1 : 0
 
 resource "aws_vpc" "agentless_scan_vpc" {
-  count                = var.regional ? 1 : 0
+  count                = var.regional && !var.use_existing_vpc ? 1 : 0
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true
   enable_dns_hostnames = true
@@ -696,7 +714,7 @@ resource "aws_vpc" "agentless_scan_vpc" {
 
 resource "aws_route_table" "agentless_scan_route_table" {
   count  = var.regional ? 1 : 0
-  vpc_id = aws_vpc.agentless_scan_vpc[0].id
+  vpc_id = local.vpc_id
   tags = {
     Name                     = "${local.prefix}-vpc"
     LWTAG_SIDEKICK           = "1"
@@ -711,8 +729,8 @@ resource "aws_route_table_association" "agentless_scan_route_table_association" 
 }
 
 resource "aws_internet_gateway" "agentless_scan_gateway" {
-  count  = var.regional ? 1 : 0
-  vpc_id = aws_vpc.agentless_scan_vpc[0].id
+  count  = var.regional && !var.use_existing_vpc ? 1 : 0
+  vpc_id = local.vpc_id
 
   tags = {
     Name                     = "${local.prefix}-gw"
@@ -724,13 +742,34 @@ resource "aws_internet_gateway" "agentless_scan_gateway" {
 resource "aws_route" "agentless_scan_route" {
   count                  = var.regional ? 1 : 0
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.agentless_scan_gateway[0].id
+  gateway_id             = local.internet_gateway_id
   route_table_id         = aws_route_table.agentless_scan_route_table[0].id
 }
 
 resource "aws_default_security_group" "default" {
-  count  = var.regional ? 1 : 0
-  vpc_id = aws_vpc.agentless_scan_vpc[0].id
+  count  = var.regional && !var.use_existing_vpc ? 1 : 0
+  vpc_id = local.vpc_id
+
+  ingress {
+    protocol  = -1
+    self      = true
+    from_port = 0
+    to_port   = 0
+  }
+
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "agentless_scan_sec_group" {
+  count       = var.regional && var.use_existing_vpc ? 1 : 0
+  name        = "${local.prefix}-security-group"
+  description = "A security group to allow Lacework Agentless Workload Scanning communication."
+  vpc_id      = local.vpc_id
 
   ingress {
     protocol  = -1
@@ -749,7 +788,7 @@ resource "aws_default_security_group" "default" {
 
 resource "aws_subnet" "agentless_scan_public_subnet" {
   count                   = var.regional ? 1 : 0
-  vpc_id                  = aws_vpc.agentless_scan_vpc[0].id
+  vpc_id                  = local.vpc_id
   cidr_block              = var.vpc_cidr_block
   map_public_ip_on_launch = false
 
@@ -896,7 +935,7 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
 
     network_configuration {
       subnets          = [aws_subnet.agentless_scan_public_subnet[0].id]
-      security_groups  = [aws_vpc.agentless_scan_vpc[0].default_security_group_id]
+      security_groups  = [local.security_group_id]
       assign_public_ip = true
     }
 
@@ -910,5 +949,5 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
 // Complex input validation checks.
 
 resource "null_resource" "check_organization_requires_global_input" {
-  count = length(var.organization.monitored_accounts) > 0 ? (var.global ? 0 : "Error: When var.organiation is used then var.global must also = true") : 0
+  count = length(var.organization.monitored_accounts) > 0 ? (var.global ? 0 : "Error: When var.organization is used then var.global must also = true") : 0
 }

@@ -10,6 +10,7 @@ readonly project_name=terraform-aws-agentless-scanning
 
 TEST_CASES=(
   examples/multi-account-multi-region
+  examples/single-account-existing-vpc
   examples/single-account-multi-region
   examples/single-account-single-region
 )
