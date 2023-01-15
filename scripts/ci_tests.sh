@@ -13,6 +13,8 @@ TEST_CASES=(
   examples/single-account-existing-vpc
   examples/single-account-multi-region
   examples/single-account-single-region
+  examples/use-existing-iam-roles-single-region
+  examples/use-existing-iam-roles-multi-region
 )
 
 log() {
