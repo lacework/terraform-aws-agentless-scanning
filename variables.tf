@@ -117,15 +117,27 @@ variable "secretsmanager_kms_key_id" {
   description = "ARN or Id of the AWS KMS key to be used to encrypt the secret values in the versions stored in this secret."
 }
 
+variable "vpc_id" {
+  type        = string
+  default     = ""
+  description = "The ID of an existing AWS VPC to use for deploying regional scan resources.  Must have an Internet Gateway attached."
+}
+
 variable "vpc_cidr_block" {
   type        = string
   default     = "10.10.32.0/24"
-  description = "VPC CIDR block used by isolate scanning VPC and single subnet."
+  description = "VPC CIDR block used to isolate scanning VPC and single subnet."
 
   validation {
     condition     = can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))$", var.vpc_cidr_block))
     error_message = "The VPC CIDR block must match the regex \"([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))\"."
   }
+}
+
+variable "use_existing_vpc" {
+  type        = bool
+  default     = false
+  description = "Set this to true to use an existing VPC.  The VPC must have a Internet Gateway attached, and `vpc_cidr_block` will be used to create new subnet to isolate scanning resources."
 }
 
 // The following inputs are use for organization (or multi-account) scanning.
