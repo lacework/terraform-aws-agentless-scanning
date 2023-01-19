@@ -578,6 +578,48 @@ data "aws_iam_policy_document" "agentless_scan_bucket_policy" {
       values   = ["false"]
     }
   }
+
+  statement {
+    sid    = "ForceSSEOnlyUploads"
+    effect = "Deny"
+    actions = [
+      "s3:PutObject"
+    ]
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+    resources = [
+      "${aws_s3_bucket.agentless_scan_bucket[0].arn}/*"
+    ]
+    condition {
+      test     = "Null"
+      variable = "s3:x-amz-server-side-encryption"
+      values   = ["true"]
+    }
+  }
+
+  # To make this more restrictive, we could force the types of SSE.
+  # Without this, we still Deny when SSE is Null (see above statement).
+  # statement {
+  #   sid    = "ForceSSEAES256OnlyUploads"
+  #   effect = "Deny"
+  #   actions = [
+  #     "s3:PutObject"
+  #   ]
+  #   principals {
+  #     type        = "AWS"
+  #     identifiers = ["*"]
+  #   }
+  #   resources = [
+  #     "${aws_s3_bucket.agentless_scan_bucket[0].arn}/*"
+  #   ]
+  #   condition {
+  #     test     = "StringNotEquals"
+  #     variable = "s3:x-amz-server-side-encryption"
+  #     values   = ["AES256"]
+  #   }
+  # }
 }
 
 data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
