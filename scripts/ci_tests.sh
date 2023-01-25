@@ -9,6 +9,7 @@ set -eou pipefail
 readonly project_name=terraform-aws-agentless-scanning
 
 TEST_CASES=(
+  exmaples/multi-account-multi-region-auto-snapshot
   examples/multi-account-multi-region
   examples/single-account-existing-vpc
   examples/single-account-multi-region
