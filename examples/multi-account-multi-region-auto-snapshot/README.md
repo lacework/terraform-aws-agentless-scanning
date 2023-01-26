@@ -53,7 +53,7 @@ module "lacework_aws_agentless_scanning_global" {
 // Create regional resources in our first region
 module "lacework_aws_agentless_scanning_region_usw1" {
   source  = "lacework/agentless-scanning/aws"
-  version = "~> 0.5"
+  version = "~> 0.6"
 
   providers = {
     aws = aws.scanning-account-usw1
