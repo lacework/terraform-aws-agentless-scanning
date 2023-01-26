@@ -89,7 +89,7 @@ provider "aws" {
 // Create the required role for the management account.
 module "lacework_aws_agentless_management_scanning_role" {
   source  = "lacework/agentless-scanning/aws"
-  version = "~> 0.5"
+  version = "~> 0.6"
 
   providers = {
     aws = aws.management-account-usw1
