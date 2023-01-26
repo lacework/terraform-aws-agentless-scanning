@@ -35,7 +35,7 @@ provider "aws" {
 // Create global resources, includes lacework cloud integration
 module "lacework_aws_agentless_scanning_global" {
   source  = "lacework/agentless-scanning/aws"
-  version = "~> 0.5"
+  version = "~> 0.6"
 
   providers = {
     aws = aws.scanning-account-usw1
