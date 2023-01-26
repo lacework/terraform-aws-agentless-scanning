@@ -5,13 +5,13 @@ In this example we add Terraform modules to two AWS accounts.
 - Scanning account, or Security account, where the scanning infrasturcture is installed.
 - The AWS Organizations Management account so that accounts and OUs can be enumerated for each scan.
 
-For the Scanning Account, the same process is followed compared to the Single Account Multi-Region example.
-However, this Scanning Account must know the AWS Organizations management account and set of OUs that will be scanned.
+For the Scanning account, the same process is followed compared to the Single Account Multi-Region example.
+However, this Scanning account must know the AWS Organizations management account and set of OUs that will be scanned.
 This example also deploys a CloudFormation StackSet in the management account which will automatically deploy the
 Snapshot Role to the root, or specified OUs, within the AWS Organization.
 
 For all accounts that will be the target of scanning, the role installed must be known (by name)
-to the Scanning Account. This example demonstrates how to do this properly.
+to the Scanning account. This example demonstrates how to do this properly.
 
 ## Sample Code
 
