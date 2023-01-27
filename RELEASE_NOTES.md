@@ -1,8 +1,10 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.7.0`.
+Another day, another release. These are the release notes for the version `v0.7.1`.
 
-## Features
-* feat: allow use of an existing VPC for deploying regional scan resources (#46) (Alan Nix)([da76d5c](https://github.com/lacework/terraform-aws-agentless-scanning/commit/da76d5c67278579a708cea35acbea4dc35ba7401))
-* feat: add support for using existing IAM roles and policies (#44) (Steve)([febf745](https://github.com/lacework/terraform-aws-agentless-scanning/commit/febf745865f44a61830969c4e862a18ed417f62a))
+## Bug Fixes
+* fix: Add AWS recommended statements to enforce bucket SSE (#48) (Teddy Reed)([3bb426d](https://github.com/lacework/terraform-aws-agentless-scanning/commit/3bb426d96a9447bd6f8fb8e56cbcfaaec8e37c25))
+## Documentation Updates
+* docs: added an example for automatic snapshot role deployment (#49) (Alan Nix)([b659f7e](https://github.com/lacework/terraform-aws-agentless-scanning/commit/b659f7edac3844e2fa1f392a0f3d826ff7e47f6e))
+* docs: Update readme, add examples, add CI tests for custom roles (#45) (Steve)([dc115f7](https://github.com/lacework/terraform-aws-agentless-scanning/commit/dc115f7230325640f52a690d329dc0e3fb0c4831))
 ## Other Changes
-* ci: version bump to v0.6.1-dev (Lacework)([75c39a6](https://github.com/lacework/terraform-aws-agentless-scanning/commit/75c39a6c77ff72789e639fb7069815ce87381e3f))
+* ci: version bump to v0.7.1-dev (Lacework)([d9a6cd2](https://github.com/lacework/terraform-aws-agentless-scanning/commit/d9a6cd2d044e550077dd4153428f791383e2496a))
