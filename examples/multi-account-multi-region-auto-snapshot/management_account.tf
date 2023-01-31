@@ -38,6 +38,13 @@ resource "aws_cloudformation_stack_set" "snapshot_role" {
   }
 
   template_url = "https://agentless-workload-scanner.s3.amazonaws.com/cloudformation-lacework/latest/snapshot-role.json"
+
+  # Prevent update loop, as per https://github.com/hashicorp/terraform-provider-aws/issues/23464
+  lifecycle {
+    ignore_changes = [
+      administration_role_arn
+    ]
+  }
 }
 
 resource "aws_cloudformation_stack_set_instance" "snapshot_role" {
