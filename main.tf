@@ -14,7 +14,7 @@ locals {
 
   // Existing VPC abstraction
   internet_gateway_id = var.regional ? (var.use_existing_vpc ? data.aws_internet_gateway.selected[0].id : aws_internet_gateway.agentless_scan_gateway[0].id) : ""
-  security_group_id   = var.regional ? (var.use_existing_vpc ? aws_security_group.agentless_scan_sec_group[0].id : aws_default_security_group.default[0].id) : ""
+  security_group_id   = var.regional ? aws_security_group.agentless_scan_sec_group[0].id : ""
   vpc_id              = var.regional ? (var.use_existing_vpc ? data.aws_vpc.selected[0].id : aws_vpc.agentless_scan_vpc[0].id) : ""
 }
 
@@ -792,23 +792,12 @@ resource "aws_default_security_group" "default" {
   count  = var.regional && !var.use_existing_vpc ? 1 : 0
   vpc_id = local.vpc_id
 
-  ingress {
-    protocol  = -1
-    self      = true
-    from_port = 0
-    to_port   = 0
-  }
-
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  ingress = []
+  egress  = []
 }
 
 resource "aws_security_group" "agentless_scan_sec_group" {
-  count       = var.regional && var.use_existing_vpc ? 1 : 0
+  count       = var.regional ? 1 : 0
   name        = "${local.prefix}-security-group"
   description = "A security group to allow Lacework Agentless Workload Scanning communication."
   vpc_id      = local.vpc_id
