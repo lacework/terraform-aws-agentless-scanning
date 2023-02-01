@@ -175,18 +175,6 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     resources = ["${aws_secretsmanager_secret.agentless_scan_secret[0].arn}"]
   }
 
-  # statement {
-  #   sid       = "AllowListSecrets"
-  #   effect    = "Allow"
-  #   actions   = ["secretsmanager:ListSecrets"]
-  #   resources = ["*"]
-  #   condition {
-  #     test     = "StringLike"
-  #     variable = "aws:ResourceTag/LWTAG_SIDEKICK"
-  #     values   = ["*"]
-  #   }
-  # }
-
   statement {
     sid       = "DescribeInstances"
     effect    = "Allow"
