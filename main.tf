@@ -180,6 +180,11 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     effect    = "Allow"
     actions   = ["secretsmanager:ListSecrets"]
     resources = ["*"]
+    condition {
+      test     = "StringLike"
+      variable = "aws:ResourceTag/LWTAG_SIDEKICK"
+      values   = ["*"]
+    }
   }
 
   statement {
