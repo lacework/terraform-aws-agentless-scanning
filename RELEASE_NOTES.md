@@ -1,10 +1,10 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.7.1`.
+Another day, another release. These are the release notes for the version `v0.7.2`.
 
 ## Bug Fixes
-* fix: Add AWS recommended statements to enforce bucket SSE (#48) (Teddy Reed)([3bb426d](https://github.com/lacework/terraform-aws-agentless-scanning/commit/3bb426d96a9447bd6f8fb8e56cbcfaaec8e37c25))
+* fix: Remove AllowListSecrets Permissions from scan task policy  (#55) (Whitney Smith)([f7b4a40](https://github.com/lacework/terraform-aws-agentless-scanning/commit/f7b4a40d7e5c7431e24036e5aab45b377c4e22b2))
+* fix: remove use the default security group (#52) (Alan Nix)([ac3f3b5](https://github.com/lacework/terraform-aws-agentless-scanning/commit/ac3f3b5769d2d316664a51ea0bcc4cc567df4e4d))
 ## Documentation Updates
-* docs: added an example for automatic snapshot role deployment (#49) (Alan Nix)([b659f7e](https://github.com/lacework/terraform-aws-agentless-scanning/commit/b659f7edac3844e2fa1f392a0f3d826ff7e47f6e))
-* docs: Update readme, add examples, add CI tests for custom roles (#45) (Steve)([dc115f7](https://github.com/lacework/terraform-aws-agentless-scanning/commit/dc115f7230325640f52a690d329dc0e3fb0c4831))
+* doc: adding workaround for update loop (#51) (Alan Nix)([5e96799](https://github.com/lacework/terraform-aws-agentless-scanning/commit/5e96799573aaddc562e84d34bb0f7ddab107fd4e))
 ## Other Changes
-* ci: version bump to v0.7.1-dev (Lacework)([d9a6cd2](https://github.com/lacework/terraform-aws-agentless-scanning/commit/d9a6cd2d044e550077dd4153428f791383e2496a))
+* ci: version bump to v0.7.2-dev (Lacework)([749fce2](https://github.com/lacework/terraform-aws-agentless-scanning/commit/749fce2cdc9ea29cb098a9fb85bf23060ef6ee4a))
