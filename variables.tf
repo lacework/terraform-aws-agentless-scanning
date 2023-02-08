@@ -140,6 +140,30 @@ variable "use_existing_vpc" {
   description = "Set this to true to use an existing VPC.  The VPC must have a Internet Gateway attached, and `vpc_cidr_block` will be used to create new subnet to isolate scanning resources."
 }
 
+variable "use_existing_security_group" {
+  type        = bool
+  default     = false
+  description = "Set this to `true` to use an existing security group for scanning compute resources."
+}
+
+variable "security_group_id" {
+  type        = string
+  default     = ""
+  description = "The ID of the security group to use for scanning compute resources.  Must also set `use_existing_security_group` to `true`."
+}
+
+variable "use_existing_subnet" {
+  type        = bool
+  default     = false
+  description = "Set this to `true` to use an existing subnet for scanning compute resources."
+}
+
+variable "subnet_id" {
+  type        = string
+  default     = ""
+  description = "The ID of the subnet to use for scanning compute resources.  Must also set `use_existing_subnet` to `true`."
+}
+
 // The following inputs are use for organization (or multi-account) scanning.
 
 variable "organization" {

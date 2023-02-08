@@ -14,7 +14,8 @@ locals {
 
   // Existing VPC abstraction
   internet_gateway_id = var.regional ? (var.use_existing_vpc ? data.aws_internet_gateway.selected[0].id : aws_internet_gateway.agentless_scan_gateway[0].id) : ""
-  security_group_id   = var.regional ? aws_security_group.agentless_scan_sec_group[0].id : ""
+  security_group_id   = var.regional ? (var.use_existing_security_group ? var.security_group_id : aws_security_group.agentless_scan_sec_group[0].id) : ""
+  subnet_id           = var.regional ? (var.use_existing_subnet ? var.subnet_id : aws_subnet.agentless_scan_public_subnet[0].id) : ""
   vpc_id              = var.regional ? (var.use_existing_vpc ? data.aws_vpc.selected[0].id : aws_vpc.agentless_scan_vpc[0].id) : ""
 }
 
@@ -755,7 +756,7 @@ resource "aws_vpc" "agentless_scan_vpc" {
 }
 
 resource "aws_route_table" "agentless_scan_route_table" {
-  count  = var.regional ? 1 : 0
+  count  = var.regional && !var.use_existing_subnet ? 1 : 0
   vpc_id = local.vpc_id
   tags = {
     Name                     = "${local.prefix}-vpc"
@@ -765,7 +766,7 @@ resource "aws_route_table" "agentless_scan_route_table" {
 }
 
 resource "aws_route_table_association" "agentless_scan_route_table_association" {
-  count          = var.regional ? 1 : 0
+  count          = var.regional && !var.use_existing_subnet ? 1 : 0
   subnet_id      = aws_subnet.agentless_scan_public_subnet[0].id
   route_table_id = aws_route_table.agentless_scan_route_table[0].id
 }
@@ -782,7 +783,7 @@ resource "aws_internet_gateway" "agentless_scan_gateway" {
 }
 
 resource "aws_route" "agentless_scan_route" {
-  count                  = var.regional ? 1 : 0
+  count                  = var.regional && !var.use_existing_subnet ? 1 : 0
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = local.internet_gateway_id
   route_table_id         = aws_route_table.agentless_scan_route_table[0].id
@@ -797,7 +798,7 @@ resource "aws_default_security_group" "default" {
 }
 
 resource "aws_security_group" "agentless_scan_sec_group" {
-  count       = var.regional ? 1 : 0
+  count       = var.regional && !var.use_existing_security_group ? 1 : 0
   name        = "${local.prefix}-security-group"
   description = "A security group to allow Lacework Agentless Workload Scanning communication."
   vpc_id      = local.vpc_id
@@ -818,7 +819,7 @@ resource "aws_security_group" "agentless_scan_sec_group" {
 }
 
 resource "aws_subnet" "agentless_scan_public_subnet" {
-  count                   = var.regional ? 1 : 0
+  count                   = var.regional && !var.use_existing_subnet ? 1 : 0
   vpc_id                  = local.vpc_id
   cidr_block              = var.vpc_cidr_block
   map_public_ip_on_launch = false
@@ -891,7 +892,7 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
         },
         {
           name  = "ECS_SUBNET_ID"
-          value = "${aws_subnet.agentless_scan_public_subnet[0].id}"
+          value = "${local.subnet_id}"
         },
         {
           name  = "S3_BUCKET"
@@ -965,7 +966,7 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
     platform_version    = "LATEST"
 
     network_configuration {
-      subnets          = [aws_subnet.agentless_scan_public_subnet[0].id]
+      subnets          = [local.subnet_id]
       security_groups  = [local.security_group_id]
       assign_public_ip = true
     }
