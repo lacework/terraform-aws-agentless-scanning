@@ -177,13 +177,6 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
   }
 
   statement {
-    sid       = "AllowListSecrets"
-    effect    = "Allow"
-    actions   = ["secretsmanager:ListSecrets"]
-    resources = ["*"]
-  }
-
-  statement {
     sid       = "DescribeInstances"
     effect    = "Allow"
     actions   = ["ec2:Describe*"]

@@ -61,6 +61,15 @@ variable "scan_frequency_hours" {
   type        = number
   description = "How often in hours the scan will run in hours. Defaults to `24`."
   default     = 24
+  
+  validation {
+    condition = ( 
+      var.scan_frequency_hours == 24 || 
+      var.scan_frequency_hours == 12 || 
+      var.scan_frequency_hours == 6
+    )
+    error_message = "The scan frequency must be 6, 12, or 24 hours."
+  }
 }
 
 variable "filter_query_text" {
