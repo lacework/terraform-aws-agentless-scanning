@@ -976,3 +976,11 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
 resource "null_resource" "check_organization_requires_global_input" {
   count = length(var.organization.monitored_accounts) > 0 ? (var.global ? 0 : "Error: When var.organization is used then var.global must also = true") : 0
 }
+
+resource "null_resource" "check_security_group_id" {
+  count = length(var.security_group_id) > 0 ? (var.use_existing_security_group ? 0 : "Error: When var.security_group_id is used then var.use_existing_security_group must also = true") : 0
+}
+
+resource "null_resource" "check_subnet_id" {
+  count = length(var.subnet_id) > 0 ? (var.use_existing_subnet ? 0 : "Error: When var.subnet_id is used then var.use_existing_subnet must also = true") : 0
+}
