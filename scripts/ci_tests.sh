@@ -12,6 +12,7 @@ TEST_CASES=(
   examples/multi-account-multi-region-auto-snapshot
   examples/multi-account-multi-region
   examples/single-account-existing-vpc
+  examples/single-account-existing-vpc-networking
   examples/single-account-multi-region
   examples/single-account-single-region
   examples/use-existing-iam-roles-single-region
