@@ -96,6 +96,18 @@ variable "bucket_force_destroy" {
   description = "Force destroy bucket. (Required when bucket not empty)"
 }
 
+variable "bucket_encryption_enabled" {
+  type        = bool
+  default     = true
+  description = "Set this to `false` to disable setting S3 SSE."
+}
+
+variable "bucket_sse_algorithm" {
+  type        = string
+  default     = "AES256"
+  description = "The encryption algorithm to use for S3 bucket server-side encryption."
+}
+
 variable "lacework_account" {
   type        = string
   description = "The name of the Lacework account with which to integrate."
