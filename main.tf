@@ -499,12 +499,13 @@ resource "aws_s3_bucket_public_access_block" "agentless_scan_bucket_public_acces
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "agentless_scan_bucket_encryption" {
-  count  = var.global ? 1 : 0
+  count  = var.global && var.bucket_encryption_enabled ? 1 : 0
   bucket = aws_s3_bucket.agentless_scan_bucket[0].id
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      kms_master_key_id = var.bucket_sse_key_arn
+      sse_algorithm     = var.bucket_sse_algorithm
     }
   }
 }
