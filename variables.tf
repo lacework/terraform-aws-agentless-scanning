@@ -290,3 +290,11 @@ variable "external_id" {
   description = "The external ID configured inside the IAM role used for cross account access"
 }
 
+variable "additional_environment_variables" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default     = []
+  description = "Optional list of additional environment variables passed to the ECS task."
+}

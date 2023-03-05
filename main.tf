@@ -17,6 +17,45 @@ locals {
   security_group_id   = var.regional ? (var.use_existing_security_group ? var.security_group_id : aws_security_group.agentless_scan_sec_group[0].id) : ""
   subnet_id           = var.regional ? (var.use_existing_subnet ? var.subnet_id : aws_subnet.agentless_scan_public_subnet[0].id) : ""
   vpc_id              = var.regional ? (var.use_existing_vpc ? data.aws_vpc.selected[0].id : aws_vpc.agentless_scan_vpc[0].id) : ""
+
+  default_ecs_task_environment_variables = [
+    {
+      name  = "STARTUP_PROVIDER"
+      value = "AWS"
+    },
+    {
+      name  = "STARTUP_RUNMODE"
+      value = "TASK"
+    },
+    {
+      name  = "ECS_CLUSTER_ARN"
+      value = aws_ecs_cluster.agentless_scan_ecs_cluster[0].arn
+    },
+    {
+      name  = "ECS_SUBNET_ID"
+      value = local.subnet_id
+    },
+    {
+      name  = "S3_BUCKET"
+      value = "${local.prefix}-bucket-${local.suffix}"
+    },
+    {
+      name  = "LACEWORK_APISERVER"
+      value = "${local.lacework_account}.${local.lacework_domain}"
+    },
+    {
+      name  = "SECRET_ARN"
+      value = local.agentless_scan_secret_arn
+    },
+    {
+      name  = "LOCAL_STORAGE"
+      value = "/tmp"
+    },
+    {
+      name  = "STARTUP_SERVICE"
+      value = "ORCHESTRATE"
+    },
+  ]
 }
 
 data "aws_region" "current" {}
@@ -870,44 +909,7 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
       name      = "sidekick"
       image     = var.image_url
       essential = true
-      environment = [
-        {
-          name  = "STARTUP_PROVIDER"
-          value = "AWS"
-        },
-        {
-          name  = "STARTUP_RUNMODE"
-          value = "TASK"
-        },
-        {
-          name  = "ECS_CLUSTER_ARN"
-          value = "${aws_ecs_cluster.agentless_scan_ecs_cluster[0].arn}"
-        },
-        {
-          name  = "ECS_SUBNET_ID"
-          value = "${local.subnet_id}"
-        },
-        {
-          name  = "S3_BUCKET"
-          value = "${local.prefix}-bucket-${local.suffix}"
-        },
-        {
-          name  = "LACEWORK_APISERVER"
-          value = "${local.lacework_account}.${local.lacework_domain}"
-        },
-        {
-          name  = "SECRET_ARN"
-          value = "${local.agentless_scan_secret_arn}"
-        },
-        {
-          name  = "LOCAL_STORAGE"
-          value = "/tmp"
-        },
-        {
-          name  = "STARTUP_SERVICE"
-          value = "ORCHESTRATE"
-        },
-      ]
+      environment = setunion(local.default_ecs_task_environment_variables, var.additional_environment_variables)
       linuxParameters = {
         capabilities = {
           Add = ["SYS_PTRACE"]
