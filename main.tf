@@ -28,10 +28,6 @@ locals {
       value = "TASK"
     },
     {
-      name  = "ECS_CLUSTER_ARN"
-      value = aws_ecs_cluster.agentless_scan_ecs_cluster[0].arn
-    },
-    {
       name  = "ECS_SUBNET_ID"
       value = local.subnet_id
     },
@@ -910,7 +906,16 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
       name      = "sidekick"
       image     = var.image_url
       essential = true
-      environment = setunion(local.default_ecs_task_environment_variables, var.additional_environment_variables)
+      environment = setunion(
+        local.default_ecs_task_environment_variables,
+        var.additional_environment_variables,
+        [
+          {
+            name  = "ECS_CLUSTER_ARN"
+            value = aws_ecs_cluster.agentless_scan_ecs_cluster[0].arn
+          },
+        ]
+      )
       linuxParameters = {
         capabilities = {
           Add = ["SYS_PTRACE"]

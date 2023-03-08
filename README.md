@@ -78,6 +78,7 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_additional_environment_variables"></a> [additional\_environment\_variables](#input\_additional\_environment\_variables) | Optional list of additional environment variables passed to the ECS task. | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | `[]` | no |
 | <a name="input_agentless_scan_ecs_event_role_arn"></a> [agentless\_scan\_ecs\_event\_role\_arn](#input\_agentless\_scan\_ecs\_event\_role\_arn) | ECS event role ARN. Required input for regional resources. (Deprecated: use global\_module\_reference) | `string` | `""` | no |
 | <a name="input_agentless_scan_ecs_execution_role_arn"></a> [agentless\_scan\_ecs\_execution\_role\_arn](#input\_agentless\_scan\_ecs\_execution\_role\_arn) | ECS execution role ARN. Required input for regional resources. (Deprecated: use global\_module\_reference) | `string` | `""` | no |
 | <a name="input_agentless_scan_ecs_task_role_arn"></a> [agentless\_scan\_ecs\_task\_role\_arn](#input\_agentless\_scan\_ecs\_task\_role\_arn) | ECS task role ARN. Required input for regional resources. (Deprecated: use global\_module\_reference) | `string` | `""` | no |
