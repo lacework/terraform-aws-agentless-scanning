@@ -1,12 +1,10 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.8.0`.
+Another day, another release. These are the release notes for the version `v0.9.0`.
 
 ## Features
-* feat: allow use of existing network resources (#57) (Alan Nix)([279c87a](https://github.com/lacework/terraform-aws-agentless-scanning/commit/279c87a40886d603eacda1ba2d38a94a208f82e9))
+* feat: Add S3 SSE configuration options (#59) (Teddy Reed)([678aef5](https://github.com/lacework/terraform-aws-agentless-scanning/commit/678aef5a9dd1940d21fad3c366b96e84935e2f04))
+* feat: Allow the user to pass additional custom environment variables to the ECS task (#60) (bebold-jhr)([1069a4e](https://github.com/lacework/terraform-aws-agentless-scanning/commit/1069a4eb8af10cb822d7a4ea6558ad4690cac8c8))
 ## Bug Fixes
-* fix: Remove AllowListSecrets Permissions from scan task policy  (#55) (Whitney Smith)([f7b4a40](https://github.com/lacework/terraform-aws-agentless-scanning/commit/f7b4a40d7e5c7431e24036e5aab45b377c4e22b2))
-* fix: remove use the default security group (#52) (Alan Nix)([ac3f3b5](https://github.com/lacework/terraform-aws-agentless-scanning/commit/ac3f3b5769d2d316664a51ea0bcc4cc567df4e4d))
-## Documentation Updates
-* doc: adding workaround for update loop (#51) (Alan Nix)([5e96799](https://github.com/lacework/terraform-aws-agentless-scanning/commit/5e96799573aaddc562e84d34bb0f7ddab107fd4e))
+* fix: Set ECS_CLUSTER_ARN within task_definition resource (#61) (Teddy Reed)([96812e3](https://github.com/lacework/terraform-aws-agentless-scanning/commit/96812e365d5aa0283daa54e18e45893c7e905b4b))
 ## Other Changes
-* ci: version bump to v0.7.2-dev (Lacework)([749fce2](https://github.com/lacework/terraform-aws-agentless-scanning/commit/749fce2cdc9ea29cb098a9fb85bf23060ef6ee4a))
+* ci: version bump to v0.8.1-dev (Lacework)([2a57f40](https://github.com/lacework/terraform-aws-agentless-scanning/commit/2a57f40faab38713805dbfb96c130b1ff67b8fce))
