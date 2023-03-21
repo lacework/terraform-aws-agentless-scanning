@@ -32,6 +32,10 @@ locals {
       value = local.subnet_id
     },
     {
+      name  = "ECS_SECURITY_GROUP_ID"
+      value = "${local.security_group_id}"
+    },
+    {
       name  = "S3_BUCKET"
       value = "${local.prefix}-bucket-${local.suffix}"
     },
