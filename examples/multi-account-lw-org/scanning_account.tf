@@ -1,4 +1,6 @@
-provider "lacework" {}
+provider "lacework" {
+    organization = true
+}
 
 provider "aws" {
   // Set this profile to the single AWS Account where the scanning infrastructure will be deployed.
@@ -31,6 +33,19 @@ module "lacework_aws_agentless_scanning_global" {
     // This account must also have the snapshot_role installed.
     management_account = "0001234567890"
   }
+  org_account_mappings = [{
+    default_lacework_account = "main-account"
+    mapping = [
+      {
+        lacework_account = "sub-account-1"
+        aws_accounts     = ["123456789011"]
+      },
+      {
+        lacework_account = "sub-account-2"
+        aws_accounts     = ["123456789012"]
+      }
+    ]
+  }]
   
   lacework_integration_name = "agentless_org_from_terraform"
 }

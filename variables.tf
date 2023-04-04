@@ -191,6 +191,18 @@ variable "subnet_id" {
   description = "The ID of the subnet to use for scanning compute resources.  Must also set `use_existing_subnet` to `true`."
 }
 
+variable "org_account_mappings" {
+  type = list(object({
+    default_lacework_account = string
+    mapping = list(object({
+      lacework_account = string
+      aws_accounts     = list(string)
+    }))
+  }))
+  default     = []
+  description = "Mapping of AWS accounts to Lacework accounts within a Lacework organization"
+}
+
 // The following inputs are use for organization (or multi-account) scanning.
 
 variable "organization" {
