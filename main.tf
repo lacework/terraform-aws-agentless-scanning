@@ -158,7 +158,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
       "s3:*"
     ]
     resources = [
-      "${aws_s3_bucket.agentless_scan_bucket[0].arn}",
+      aws_s3_bucket.agentless_scan_bucket[0].arn,
       "${aws_s3_bucket.agentless_scan_bucket[0].arn}/*"
     ]
   }
@@ -201,7 +201,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
       "events:PutTargets",
       "events:RemoveTargets"
     ]
-    resources = ["arn:aws:events:*:*:rule/${local.prefix}-periodic-trigger-${local.suffix}"]
+    resources = ["arn:${var.aws_partition}:events:*:*:rule/${local.prefix}-periodic-trigger-${local.suffix}"]
   }
 
   statement {
@@ -212,7 +212,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
       "secretsmanager:GetSecretValue",
       "secretsmanager:GetResourcePolicy"
     ]
-    resources = ["${aws_secretsmanager_secret.agentless_scan_secret[0].arn}"]
+    resources = [aws_secretsmanager_secret.agentless_scan_secret[0].arn]
   }
 
   statement {
@@ -266,7 +266,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     condition {
       test     = "ArnEquals"
       variable = "ecs:cluster"
-      values   = ["arn:aws:ecs:*:*:cluster/${local.prefix}-cluster-${local.suffix}"]
+      values   = ["arn:${var.aws_partition}:ecs:*:*:cluster/${local.prefix}-cluster-${local.suffix}"]
     }
   }
 
@@ -320,7 +320,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
       "logs:DescribeLogStreams",
       "logs:GetLogEvents"
     ]
-    resources = ["arn:aws:logs:*:*:log-group:/ecs/${local.prefix}-*"]
+    resources = ["arn:${var.aws_partition}:logs:*:*:log-group:/ecs/${local.prefix}-*"]
   }
 }
 
@@ -361,7 +361,7 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
   name                 = "${local.prefix}-task-event-role-${local.suffix}"
   max_session_duration = 3600
   path                 = "/service-role/"
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"]
+  managed_policy_arns  = ["arn:${var.aws_partition}:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"]
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -387,7 +387,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   name                 = "${local.prefix}-task-execution-role-${local.suffix}"
   max_session_duration = 3600
   path                 = "/"
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"]
+  managed_policy_arns  = ["arn:${var.aws_partition}:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"]
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -410,7 +410,7 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
           Sid      = "AllowLoggingToCloudWatch"
           Action   = ["logs:PutLogEvents", "logs:CreateLogStream", "logs:CreateLogGroup"]
           Effect   = "Allow"
-          Resource = "arn:aws:logs:*:*:log-group:/ecs/${local.prefix}-*"
+          Resource = "arn:${var.aws_partition}:logs:*:*:log-group:/ecs/${local.prefix}-*"
         },
       ]
     })
@@ -667,7 +667,7 @@ data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
     actions = ["sts:AssumeRole"]
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.lacework_aws_account_id}:root"]
+      identifiers = ["arn:${var.aws_partition}:iam::${var.lacework_aws_account_id}:root"]
     }
     condition {
       test     = "StringEquals"
@@ -713,13 +713,13 @@ data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
       "ecs:RunTask"
     ]
     resources = [
-      "arn:aws:ecs:*:*:task/${local.prefix}-cluster-${local.suffix}/*",
-      "arn:aws:ecs:*:*:task-definition/${local.prefix}-cluster-${local.suffix}:*",
+      "arn:${var.aws_partition}:ecs:*:*:task/${local.prefix}-cluster-${local.suffix}/*",
+      "arn:${var.aws_partition}:ecs:*:*:task-definition/${local.prefix}-cluster-${local.suffix}:*",
     ]
     condition {
       test     = "ArnEquals"
       variable = "ecs:cluster"
-      values   = ["arn:aws:ecs:*:*:cluster/${local.prefix}-cluster-${local.suffix}"]
+      values   = ["arn:${var.aws_partition}:ecs:*:*:cluster/${local.prefix}-cluster-${local.suffix}"]
     }
   }
 
@@ -730,8 +730,8 @@ data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
       "iam:PassRole"
     ]
     resources = [
-      "arn:aws:iam::*:role/${local.prefix}-task-execution-role-${local.suffix}",
-      "arn:aws:iam::*:role/${local.prefix}-task-role-${local.suffix}",
+      "arn:${var.aws_partition}:iam::*:role/${local.prefix}-task-execution-role-${local.suffix}",
+      "arn:${var.aws_partition}:iam::*:role/${local.prefix}-task-role-${local.suffix}",
     ]
   }
 
@@ -741,7 +741,7 @@ data "aws_iam_policy_document" "cross_account_inline_policy_ecs" {
     actions = [
       "ec2:DescribeSubnets"
     ]
-    resources = ["arn:aws:ec2:*:*:subnet/subnet-*"]
+    resources = ["arn:${var.aws_partition}:ec2:*:*:subnet/subnet-*"]
     condition {
       test     = "StringLike"
       variable = "aws:ResourceTag/LWTAG_SIDEKICK"

@@ -316,3 +316,14 @@ variable "additional_environment_variables" {
   default     = []
   description = "Optional list of additional environment variables passed to the ECS task."
 }
+
+variable "aws_partition" {
+  type = string
+  default = "aws"
+  description = "Apart from the default AWS allows multiple partitions. Example: us-gov cloud or for the region china."
+
+  validation {
+    condition = contains(["aws"," aws-us-gov", "aws-cn"], var.aws_partition)
+    error_message = "The aws partition must be one of [aws, aws-us-gov, aws-cn]"
+  }
+}
