@@ -193,6 +193,18 @@ variable "subnet_id" {
 
 // The following inputs are use for organization (or multi-account) scanning.
 
+variable "org_account_mappings" {
+  type = object({
+    default_lacework_account = string
+    mapping = list(object({
+      lacework_account = string
+      aws_accounts     = list(string)
+    }))
+  })
+  default     = {}
+  description = "Mapping of AWS accounts to Lacework accounts within a Lacework organization"
+}
+
 variable "organization" {
   type = object({
     management_account = string
