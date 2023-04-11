@@ -119,7 +119,6 @@ resource "lacework_integration_aws_org_agentless_scanning" "lacework_cloud_accou
   bucket_arn                = aws_s3_bucket.agentless_scan_bucket[0].arn
   monitored_accounts        = var.organization.monitored_accounts
   management_account        = var.organization.management_account
-  account_mapping           = var.org_account_mappings
   scanning_account          = data.aws_caller_identity.current.account_id
   credentials {
     role_arn    = local.cross_account_role_arn
