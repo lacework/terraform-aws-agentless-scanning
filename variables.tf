@@ -201,7 +201,7 @@ variable "org_account_mappings" {
       aws_accounts     = list(string)
     })
   })
-  default     = {}
+  default     = null
   description = "Mapping of AWS accounts to Lacework accounts within a Lacework organization"
 }
 
