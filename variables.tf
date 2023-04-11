@@ -197,8 +197,9 @@ variable "org_account_mappings" {
   type = object({
     defaultLaceworkAccountAws = string
     integration_mappings = object({
-      lacework_account = string
-      aws_accounts     = list(string)
+      lacework_account = object({
+        aws_accounts     = list(string)
+      })
     })
   })
   default     = null
