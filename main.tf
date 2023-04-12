@@ -13,7 +13,7 @@ locals {
   cross_account_role_name               = length(var.cross_account_role_name) > 0 ? var.cross_account_role_name : "${local.prefix}-cross-account-role-${local.suffix}"
 
   // Existing VPC abstraction
-  internet_gateway_id = var.regional ? (var.use_existing_vpc ? data.aws_internet_gateway.selected[0].id : aws_internet_gateway.agentless_scan_gateway[0].id) : ""
+  internet_gateway_id = var.regional && var.use_internet_gateway ? (var.use_existing_vpc ? data.aws_internet_gateway.selected[0].id : aws_internet_gateway.agentless_scan_gateway[0].id) : ""
   security_group_id   = var.regional ? (var.use_existing_security_group ? var.security_group_id : aws_security_group.agentless_scan_sec_group[0].id) : ""
   subnet_id           = var.regional ? (var.use_existing_subnet ? var.subnet_id : aws_subnet.agentless_scan_public_subnet[0].id) : ""
   vpc_id              = var.regional ? (var.use_existing_vpc ? data.aws_vpc.selected[0].id : aws_vpc.agentless_scan_vpc[0].id) : ""
@@ -68,7 +68,7 @@ data "aws_vpc" "selected" {
 }
 
 data "aws_internet_gateway" "selected" {
-  count = var.regional && var.use_existing_vpc ? 1 : 0
+  count = var.regional && var.use_existing_vpc && var.use_internet_gateway ? 1 : 0
   filter {
     name   = "attachment.vpc-id"
     values = [var.vpc_id]
