@@ -317,6 +317,9 @@ variable "additional_environment_variables" {
   description = "Optional list of additional environment variables passed to the ECS task."
 }
 
+// Use of non-default partitions is not officially supported by Lacework 
+// and is provided only as a convenience for advanced configuration.
+
 variable "aws_partition" {
   type = string
   default = "aws"
