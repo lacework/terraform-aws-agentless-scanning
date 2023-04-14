@@ -532,6 +532,7 @@ resource "aws_s3_bucket" "agentless_scan_bucket" {
 }
 
 resource "aws_s3_bucket_ownership_controls" "agentless_scan_bucket_ownership_controls" {
+  count  = var.global ? 1 : 0
   bucket = aws_s3_bucket.agentless_scan_bucket[0].id
 
   rule {
