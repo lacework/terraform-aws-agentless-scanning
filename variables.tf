@@ -193,8 +193,8 @@ variable "subnet_id" {
 
 // The following inputs are use for organization (or multi-account) scanning.
 
-variable "org_account_mappings" {
-  default = "n/a"
+variable "account_mapping" {
+  type = string
   description = "Mapping of AWS accounts to Lacework accounts within a Lacework organization"
 }
 
