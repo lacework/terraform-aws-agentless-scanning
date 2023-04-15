@@ -11,7 +11,6 @@ locals {
   is_org_integration                    = var.global && length(var.organization.monitored_accounts) > 0 ? true : false
   cross_account_role_arn                = var.use_existing_cross_account_role ? var.cross_account_role_arn : (var.global ? aws_iam_role.agentless_scan_cross_account_role[0].arn : "")
   cross_account_role_name               = length(var.cross_account_role_name) > 0 ? var.cross_account_role_name : "${local.prefix}-cross-account-role-${local.suffix}"
-  account_mapping                       = jsondecode(file(var.account_mapping))
   // Existing VPC abstraction
   internet_gateway_id = var.regional ? (var.use_existing_vpc ? data.aws_internet_gateway.selected[0].id : aws_internet_gateway.agentless_scan_gateway[0].id) : ""
   security_group_id   = var.regional ? (var.use_existing_security_group ? var.security_group_id : aws_security_group.agentless_scan_sec_group[0].id) : ""
@@ -120,6 +119,7 @@ resource "lacework_integration_aws_org_agentless_scanning" "lacework_cloud_accou
   monitored_accounts        = var.organization.monitored_accounts
   management_account        = var.organization.management_account
   scanning_account          = data.aws_caller_identity.current.account_id
+  account_mapping           = var.global && local.is_org_integration ? jsondecode(file(var.account_mapping)) : null
   credentials {
     role_arn    = local.cross_account_role_arn
     external_id = local.external_id
