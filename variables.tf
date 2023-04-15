@@ -202,10 +202,12 @@ variable "organization" {
   type = object({
     management_account = string
     monitored_accounts = list(string)
+    account_mapping_file = jsonencode(string)
   })
   default = {
     management_account = ""
     monitored_accounts = []
+    account_mapping_file = null
   }
   description = "Used for multi-account scanning. Set management_account to the AWS Organizations management account. Set the monitored_accounts list to a list of AWS account IDs or OUs."
   validation {

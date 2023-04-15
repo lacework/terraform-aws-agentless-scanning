@@ -119,7 +119,7 @@ resource "lacework_integration_aws_org_agentless_scanning" "lacework_cloud_accou
   monitored_accounts        = var.organization.monitored_accounts
   management_account        = var.organization.management_account
   scanning_account          = data.aws_caller_identity.current.account_id
-  account_mapping           = var.global && local.is_org_integration ? jsondecode(file(var.account_mapping)) : null
+  account_mapping_file      = local.is_org_integration ? jsondecode(file(var.organization.account_mapping_file)) : null
   credentials {
     role_arn    = local.cross_account_role_arn
     external_id = local.external_id
