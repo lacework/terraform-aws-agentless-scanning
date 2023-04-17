@@ -193,8 +193,15 @@ variable "subnet_id" {
 
 // The following inputs are use for organization (or multi-account) scanning.
 
-variable "account_mapping" {
-  type = string
+variable "org_account_mappings" {
+  type = list(object({
+    default_lacework_account = string
+    mapping = list(object({
+      lacework_account = string
+      aws_accounts     = list(string)
+    }))
+  }))
+  default     = []
   description = "Mapping of AWS accounts to Lacework accounts within a Lacework organization"
 }
 
@@ -202,12 +209,10 @@ variable "organization" {
   type = object({
     management_account = string
     monitored_accounts = list(string)
-    account_mapping_file = jsonencode(string)
   })
   default = {
     management_account = ""
     monitored_accounts = []
-    account_mapping_file = null
   }
   description = "Used for multi-account scanning. Set management_account to the AWS Organizations management account. Set the monitored_accounts list to a list of AWS account IDs or OUs."
   validation {
@@ -322,4 +327,16 @@ variable "additional_environment_variables" {
   }))
   default     = []
   description = "Optional list of additional environment variables passed to the ECS task."
+}
+
+variable "org_account_mappings" {
+  type = list(object({ 
+    default_lacework_account = string 
+    mapping = list(object({ 
+      lacework_account = string 
+      aws_accounts = list(string) 
+    })) 
+  }))
+  default = []
+  description = "Mapping of AWS accounts to Lacework accounts within a Lacework organization"
 }
