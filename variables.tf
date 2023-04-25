@@ -261,8 +261,8 @@ variable "suffix" {
   default     = ""
 
   validation {
-    condition     = length(var.suffix) == 0 || length(var.suffix) > 4
-    error_message = "If the suffix value is set then it must be at least 4 characters long."
+    condition     = var.suffix != null
+    error_message = "The suffix must not be null. It can either be empty which is the default and means that the module will generate a random suffix or you can set one yourself."
   }
 }
 
