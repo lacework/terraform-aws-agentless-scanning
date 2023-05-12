@@ -90,6 +90,12 @@ variable "scan_host_vulnerabilities" {
   default     = true
 }
 
+variable "scan_multi_volume" {
+  type = bool
+  description = "Whether to scan secondary volumes. Defaults to `false`."
+  default = false
+}
+
 variable "bucket_force_destroy" {
   type        = bool
   default     = true
