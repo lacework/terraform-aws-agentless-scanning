@@ -96,6 +96,12 @@ variable "scan_multi_volume" {
   default = false
 }
 
+variable "scan_stopped_instances" {
+  type = bool
+  description = "Whether to scan stopped instances. Defaults to `true`."
+  default = true
+}
+
 variable "bucket_force_destroy" {
   type        = bool
   default     = true
