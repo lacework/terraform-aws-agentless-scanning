@@ -980,7 +980,7 @@ resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
 
   count               = var.regional ? 1 : 0
   name                = "${local.prefix}-periodic-trigger-${local.suffix}"
-  schedule_expression = "rate(1 hour)"
+  schedule_expression = "rate(${var.scan_frequency_hours} hour)"
   event_bus_name      = "default"
 }
 
