@@ -61,11 +61,11 @@ variable "scan_frequency_hours" {
   type        = number
   description = "How often in hours the scan will run in hours. Defaults to `24`."
   default     = 24
-  
+
   validation {
-    condition = ( 
-      var.scan_frequency_hours == 24 || 
-      var.scan_frequency_hours == 12 || 
+    condition = (
+      var.scan_frequency_hours == 24 ||
+      var.scan_frequency_hours == 12 ||
       var.scan_frequency_hours == 6
     )
     error_message = "The scan frequency must be 6, 12, or 24 hours."
@@ -93,7 +93,7 @@ variable "scan_host_vulnerabilities" {
 variable "bucket_force_destroy" {
   type        = bool
   default     = true
-  description = "Force destroy bucket. (Required when bucket not empty)"
+  description = "Force destroy bucket. (if disabled, terraform will not be able do destroy non-empty bucket)"
 }
 
 variable "bucket_encryption_enabled" {
@@ -330,7 +330,7 @@ variable "additional_environment_variables" {
 }
 
 variable "use_internet_gateway" {
-  type = bool
-  default = true
+  type        = bool
+  default     = true
   description = "Whether or not you want to use an 'AWS internet gateway' for internet facing traffic. Only set this to false if you route internet traffic using a different approach."
 }
