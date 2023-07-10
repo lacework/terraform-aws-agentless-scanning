@@ -864,12 +864,7 @@ resource "aws_security_group" "agentless_scan_sec_group" {
   description = "A security group to allow Lacework Agentless Workload Scanning communication."
   vpc_id      = local.vpc_id
 
-  ingress {
-    protocol  = -1
-    self      = true
-    from_port = 0
-    to_port   = 0
-  }
+  ingress = []
 
   egress {
     from_port   = 443
