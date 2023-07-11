@@ -1,0 +1,12 @@
+formatter: "markdown"
+
+version: ">=0.16.0"
+
+header-from: header.md
+
+sections:
+  show: ["header", "requirements", "inputs", "outputs"]
+
+output:
+  file: "README.md"
+  mode: replace
