@@ -99,8 +99,6 @@ resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" 
   query_text                = var.filter_query_text
   scan_containers           = var.scan_containers
   scan_host_vulnerabilities = var.scan_host_vulnerabilities
-  scan_multi_volume         = var.scan_multi_volume
-  scan_stopped_instances    = var.scan_stopped_instances
   account_id                = data.aws_caller_identity.current.account_id
   bucket_arn                = aws_s3_bucket.agentless_scan_bucket[0].arn
   credentials {
@@ -117,8 +115,6 @@ resource "lacework_integration_aws_org_agentless_scanning" "lacework_cloud_accou
   query_text                = var.filter_query_text
   scan_containers           = var.scan_containers
   scan_host_vulnerabilities = var.scan_host_vulnerabilities
-  scan_stopped_instances    = var.scan_stopped_instances
-  scan_multi_volume         = var.scan_multi_volume
   account_id                = data.aws_caller_identity.current.account_id
   bucket_arn                = aws_s3_bucket.agentless_scan_bucket[0].arn
   monitored_accounts        = var.organization.monitored_accounts
