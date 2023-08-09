@@ -139,6 +139,7 @@ prepare_release() {
   check_for_minor_version_bump
   generate_release_notes
   update_changelog
+  generate_readme_file
   push_release
   open_pull_request
 }
@@ -190,6 +191,11 @@ generate_release_notes() {
   echo "Another day, another release. These are the release notes for the version \`v$VERSION\`." >> RELEASE_NOTES.md
   echo "" >> RELEASE_NOTES.md
   echo "$(cat CHANGES.md)" >> RELEASE_NOTES.md
+}
+
+generate_readme_file() {
+  log "generating readme file at RELEASE.md"
+  terraform-docs markdown .
 }
 
 load_list_of_changes() {
