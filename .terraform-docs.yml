@@ -5,7 +5,7 @@ version: ">=0.16.0"
 header-from: header.md
 
 sections:
-  show: ["header", "requirements", "inputs", "outputs"]
+  show: ["header", "requirements", "inputs", "outputs", "resources"]
 
 output:
   file: "README.md"
