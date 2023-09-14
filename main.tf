@@ -88,7 +88,7 @@ resource "random_id" "uniq" {
 
 resource "lacework_external_id" "aws_iam_external_id" {
   csp        = "aws"
-  account_id = local.lacework_account
+  account_id = data.aws_caller_identity.current.account_id
 }
 
 resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" {
