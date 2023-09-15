@@ -7,7 +7,7 @@ locals {
   agentless_scan_secret_arn             = var.global ? aws_secretsmanager_secret.agentless_scan_secret[0].id : (length(var.global_module_reference.agentless_scan_secret_arn) > 0 ? var.global_module_reference.agentless_scan_secret_arn : var.agentless_scan_secret_arn)
   lacework_domain                       = length(var.global_module_reference.lacework_domain) > 0 ? var.global_module_reference.lacework_domain : var.lacework_domain
   lacework_account                      = length(var.global_module_reference.lacework_account) > 0 ? var.global_module_reference.lacework_account : (length(var.lacework_account) > 0 ? var.lacework_account : trimsuffix(data.lacework_user_profile.current.url, ".${local.lacework_domain}"))
-  external_id                           = length(var.global_module_reference.external_id) > 0 ? var.global_module_reference.external_id : (length(var.external_id) > 0 ? var.external_id : random_string.external_id[0].result)
+  external_id                           = length(var.global_module_reference.external_id) > 0 ? var.global_module_reference.external_id : (length(var.external_id) > 0 ? var.external_id : lacework_external_id.aws_iam_external_id[0].v2)
   is_org_integration                    = var.global && length(var.organization.monitored_accounts) > 0 ? true : false
   cross_account_role_arn                = var.use_existing_cross_account_role ? var.cross_account_role_arn : (var.global ? aws_iam_role.agentless_scan_cross_account_role[0].arn : "")
   cross_account_role_name               = length(var.cross_account_role_name) > 0 ? var.cross_account_role_name : "${local.prefix}-cross-account-role-${local.suffix}"
@@ -77,12 +77,6 @@ data "aws_internet_gateway" "selected" {
 
 data "lacework_user_profile" "current" {}
 
-resource "random_string" "external_id" {
-  count            = length(var.external_id) > 0 ? 0 : 1
-  length           = 16
-  override_special = "=,.@:/-"
-}
-
 resource "random_id" "uniq" {
   byte_length = 4
 }
@@ -91,6 +85,12 @@ resource "random_id" "uniq" {
 // includes the lacework cloud account integration
 // Only create global resources if global variable is set to true
 // count = var.global ? 1 : 0
+
+resource "lacework_external_id" "aws_iam_external_id" {
+  count      = length(var.external_id) > 0 ? 0 : 1
+  csp        = "aws"
+  account_id = data.aws_caller_identity.current.account_id
+}
 
 resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" {
   count                     = var.global && !local.is_org_integration ? 1 : 0
