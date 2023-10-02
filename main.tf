@@ -821,6 +821,7 @@ resource "aws_vpc" "agentless_scan_vpc" {
 }
 
 resource "aws_default_network_acl" "default" {
+  count = var.regional && !var.use_existing_vpc ? 1 : 0
   default_network_acl_id = aws_vpc.agentless_scan_vpc[0].default_network_acl_id
 
   egress {
