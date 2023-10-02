@@ -1,7 +1,7 @@
 provider "lacework" {}
 
 provider "aws" {
-  region = "us-west-1"
+  region = "us-west-2"
 }
 
 // Create global resources, includes lacework cloud integration.
