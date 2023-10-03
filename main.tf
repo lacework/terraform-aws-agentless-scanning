@@ -93,7 +93,6 @@ resource "lacework_external_id" "aws_iam_external_id" {
 }
 
 resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" {
-  // TODO: add depends on
   count                     = var.global && !local.is_org_integration ? 1 : 0
   name                      = var.lacework_integration_name
   scan_frequency            = var.scan_frequency_hours
@@ -112,7 +111,6 @@ resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" 
 
 resource "lacework_integration_aws_org_agentless_scanning" "lacework_cloud_account" {
   // If var.organization is used then also add monitored accounts and scanning account as the caller.
-  // TODO: add depends on
   count                     = var.global && local.is_org_integration ? 1 : 0
   name                      = var.lacework_integration_name
   scan_frequency            = var.scan_frequency_hours
