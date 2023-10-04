@@ -102,6 +102,12 @@ variable "scan_stopped_instances" {
   default = true
 }
 
+variable "scan_short_lived_instances" {
+  type = bool
+  description = "Whether to scan short-lived (ephemeral) instances. Defaults to `false`."
+  default = false
+}
+
 variable "bucket_force_destroy" {
   type        = bool
   default     = true
