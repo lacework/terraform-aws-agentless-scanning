@@ -7,15 +7,28 @@
 
 A Terraform Module to configure the Lacework Agentless Scanner.
 
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-| Name | Version   |
-|------|-----------|
+| Name | Version |
+|------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.15.0 |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.0 |
+| <a name="requirement_lacework"></a> [lacework](#requirement\_lacework) | ~> 1.8 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 2.1 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
 | <a name="provider_lacework"></a> [lacework](#provider\_lacework) | ~> 1.8 |
 | <a name="provider_null"></a> [null](#provider\_null) | n/a |
+| <a name="provider_random"></a> [random](#provider\_random) | >= 2.1 |
+
+## Modules
+
+No modules.
 
 ## Resources
 
@@ -40,8 +53,8 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | [aws_route_table.agentless_scan_route_table](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
 | [aws_route_table_association.agentless_scan_route_table_association](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_s3_bucket.agentless_scan_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
-| [aws_s3_bucket_ownership_controls.agentless_scan_bucket_ownership_controls](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_ownership_controls) | resource |
 | [aws_s3_bucket_lifecycle_configuration.agentless_scan_bucket_lifecyle](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration) | resource |
+| [aws_s3_bucket_ownership_controls.agentless_scan_bucket_ownership_controls](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_ownership_controls) | resource |
 | [aws_s3_bucket_policy.agentless_scan_bucket_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_public_access_block.agentless_scan_bucket_public_access_block](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.agentless_scan_bucket_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
@@ -51,11 +64,11 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | [aws_security_group.agentless_scan_sec_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_subnet.agentless_scan_public_subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.agentless_scan_vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
+| [lacework_external_id.aws_iam_external_id](https://registry.terraform.io/providers/lacework/lacework/latest/docs/resources/external_id) | resource |
 | [lacework_integration_aws_agentless_scanning.lacework_cloud_account](https://registry.terraform.io/providers/lacework/lacework/latest/docs/resources/integration_aws_agentless_scanning) | resource |
 | [lacework_integration_aws_org_agentless_scanning.lacework_cloud_account](https://registry.terraform.io/providers/lacework/lacework/latest/docs/resources/integration_aws_org_agentless_scanning) | resource |
 | [null_resource.check_organization_requires_global_input](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [random_id.uniq](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
-| [random_string.external_id](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.agentless_scan_bucket_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.agentless_scan_cross_account_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -92,12 +105,15 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | <a name="input_lacework_aws_account_id"></a> [lacework\_aws\_account\_id](#input\_lacework\_aws\_account\_id) | The Lacework AWS account that the IAM role will grant access. | `string` | `"434813966438"` | no |
 | <a name="input_lacework_domain"></a> [lacework\_domain](#input\_lacework\_domain) | The domain of the Lacework account with with to integrate. | `string` | `"lacework.net"` | no |
 | <a name="input_lacework_integration_name"></a> [lacework\_integration\_name](#input\_lacework\_integration\_name) | The name of the Lacework cloud account integration. | `string` | `"aws-agentless-scanning"` | no |
+| <a name="input_org_account_mappings"></a> [org\_account\_mappings](#input\_org\_account\_mappings) | Mapping of AWS accounts to Lacework accounts within a Lacework organization | <pre>list(object({<br>    default_lacework_account = string<br>    mapping = list(object({<br>      lacework_account = string<br>      aws_accounts     = list(string)<br>    }))<br>  }))</pre> | `[]` | no |
 | <a name="input_organization"></a> [organization](#input\_organization) | Used for multi-account scanning. Set management\_account to the AWS Organizations management account. Set the monitored\_accounts list to a list of AWS account IDs or OUs. | <pre>object({<br>    management_account = string<br>    monitored_accounts = list(string)<br>  })</pre> | <pre>{<br>  "management_account": "",<br>  "monitored_accounts": []<br>}</pre> | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | A string to be prefixed to the name of all new resources. | `string` | `"lacework-agentless-scanning"` | no |
 | <a name="input_regional"></a> [regional](#input\_regional) | Whether or not to create regional resources. Defaults to `false`. | `bool` | `false` | no |
 | <a name="input_scan_containers"></a> [scan\_containers](#input\_scan\_containers) | Whether to includes scanning for containers.  Defaults to `true`. | `bool` | `true` | no |
 | <a name="input_scan_frequency_hours"></a> [scan\_frequency\_hours](#input\_scan\_frequency\_hours) | How often in hours the scan will run in hours. Defaults to `24`. | `number` | `24` | no |
 | <a name="input_scan_host_vulnerabilities"></a> [scan\_host\_vulnerabilities](#input\_scan\_host\_vulnerabilities) | Whether to includes scanning for host vulnerabilities.  Defaults to `true`. | `bool` | `true` | no |
+| <a name="input_scan_multi_volume"></a> [scan\_multi\_volume](#input\_scan\_multi\_volume) | Whether to scan secondary volumes. Defaults to `false`. | `bool` | `false` | no |
+| <a name="input_scan_stopped_instances"></a> [scan\_stopped\_instances](#input\_scan\_stopped\_instances) | Whether to scan stopped instances. Defaults to `true`. | `bool` | `true` | no |
 | <a name="input_secretsmanager_kms_key_id"></a> [secretsmanager\_kms\_key\_id](#input\_secretsmanager\_kms\_key\_id) | ARN or Id of the AWS KMS key to be used to encrypt the secret values in the versions stored in this secret. | `string` | `null` | no |
 | <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | The ID of the security group to use for scanning compute resources.  Must also set `use_existing_security_group` to `true`. | `string` | `""` | no |
 | <a name="input_snapshot_role"></a> [snapshot\_role](#input\_snapshot\_role) | Whether or not to create an AWS Organization snapshot role. Defaults to `false`. | `bool` | `false` | no |
@@ -110,6 +126,7 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | <a name="input_use_existing_subnet"></a> [use\_existing\_subnet](#input\_use\_existing\_subnet) | Set this to `true` to use an existing subnet for scanning compute resources. | `bool` | `false` | no |
 | <a name="input_use_existing_task_role"></a> [use\_existing\_task\_role](#input\_use\_existing\_task\_role) | Set this to true to use an existing IAM task role | `bool` | `false` | no |
 | <a name="input_use_existing_vpc"></a> [use\_existing\_vpc](#input\_use\_existing\_vpc) | Set this to true to use an existing VPC.  The VPC must have a Internet Gateway attached, and `vpc_cidr_block` will be used to create new subnet to isolate scanning resources. | `bool` | `false` | no |
+| <a name="input_use_internet_gateway"></a> [use\_internet\_gateway](#input\_use\_internet\_gateway) | Whether or not you want to use an 'AWS internet gateway' for internet facing traffic. Only set this to false if you route internet traffic using a different approach. | `bool` | `true` | no |
 | <a name="input_vpc_cidr_block"></a> [vpc\_cidr\_block](#input\_vpc\_cidr\_block) | VPC CIDR block used to isolate scanning VPC and single subnet. | `string` | `"10.10.32.0/24"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of an existing AWS VPC to use for deploying regional scan resources.  Must have an Internet Gateway attached. | `string` | `""` | no |
 
@@ -126,3 +143,4 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | <a name="output_lacework_domain"></a> [lacework\_domain](#output\_lacework\_domain) | Lacework Domain Name for Integration. |
 | <a name="output_prefix"></a> [prefix](#output\_prefix) | Prefix used to add uniqueness to resource names. |
 | <a name="output_suffix"></a> [suffix](#output\_suffix) | Suffix used to add uniqueness to resource names. |
+<!-- END_TF_DOCS -->
