@@ -826,6 +826,29 @@ resource "aws_vpc" "agentless_scan_vpc" {
   }
 }
 
+resource "aws_default_network_acl" "default" {
+  count = var.regional && !var.use_existing_vpc ? 1 : 0
+  default_network_acl_id = aws_vpc.agentless_scan_vpc[0].default_network_acl_id
+
+  egress {
+    protocol   = -1
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  ingress {
+    protocol   = 6
+    rule_no    = 101
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 1024
+    to_port    = 65535
+  }
+}
+
 resource "aws_route_table" "agentless_scan_route_table" {
   count  = var.regional && !var.use_existing_subnet ? 1 : 0
   vpc_id = local.vpc_id
