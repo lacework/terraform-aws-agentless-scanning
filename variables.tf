@@ -1,3 +1,9 @@
+variable "bucket_tags" {
+  description = "Optional collection of tags to apply to the bucket"
+  type        = map(string)
+  default     = {}
+}
+
 variable "lacework_integration_name" {
   type        = string
   description = "The name of the Lacework cloud account integration."
@@ -91,15 +97,15 @@ variable "scan_host_vulnerabilities" {
 }
 
 variable "scan_multi_volume" {
-  type = bool
+  type        = bool
   description = "Whether to scan secondary volumes. Defaults to `false`."
-  default = false
+  default     = false
 }
 
 variable "scan_stopped_instances" {
-  type = bool
+  type        = bool
   description = "Whether to scan stopped instances. Defaults to `true`."
-  default = true
+  default     = true
 }
 
 variable "bucket_force_destroy" {
