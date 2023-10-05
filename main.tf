@@ -305,6 +305,12 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
       variable = "kms:ViaService"
       values   = ["ec2.*.amazonaws.com"]
     }
+
+    condition {
+      test = "Bool"
+      variable = "kms:GrantIsForAWSResource"
+      values = [true]
+    }
   }
 
   statement {
