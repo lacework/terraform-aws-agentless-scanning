@@ -307,9 +307,9 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     }
 
     condition {
-      test = "Bool"
+      test     = "Bool"
       variable = "kms:GrantIsForAWSResource"
-      values = [true]
+      values   = [true]
     }
   }
 
@@ -548,11 +548,10 @@ resource "aws_s3_bucket" "agentless_scan_bucket" {
 
   force_destroy = var.bucket_force_destroy
 
-  tags = {
+  tags = merge(var.bucket_tags, {
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-
-  }
+  })
 }
 
 resource "aws_s3_bucket_ownership_controls" "agentless_scan_bucket_ownership_controls" {
@@ -827,7 +826,7 @@ resource "aws_vpc" "agentless_scan_vpc" {
 }
 
 resource "aws_default_network_acl" "default" {
-  count = var.regional && !var.use_existing_vpc ? 1 : 0
+  count                  = var.regional && !var.use_existing_vpc ? 1 : 0
   default_network_acl_id = aws_vpc.agentless_scan_vpc[0].default_network_acl_id
 
   egress {
