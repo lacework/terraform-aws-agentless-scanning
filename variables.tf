@@ -1,9 +1,3 @@
-variable "bucket_tags" {
-  description = "Optional collection of tags to apply to the bucket"
-  type        = map(string)
-  default     = {}
-}
-
 variable "lacework_integration_name" {
   type        = string
   description = "The name of the Lacework cloud account integration."
@@ -130,6 +124,12 @@ variable "bucket_sse_key_arn" {
   type        = string
   default     = ""
   description = "The ARN of the KMS encryption key to be used for S3 (required when `bucket_sse_algorithm` is `aws:kms`)."
+}
+
+variable "bucket_tags" {
+  description = "Optional collection of tags to apply to the bucket"
+  type        = map(string)
+  default     = {}
 }
 
 variable "lacework_account" {
