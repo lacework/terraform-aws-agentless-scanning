@@ -37,6 +37,7 @@ No modules.
 | [aws_cloudwatch_event_rule.agentless_scan_event_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_target.agentless_scan_event_target](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_log_group.agentless_scan_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_default_network_acl.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_network_acl) | resource |
 | [aws_default_security_group.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_security_group) | resource |
 | [aws_ecs_cluster.agentless_scan_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_cluster_capacity_providers.agentless_scan_capacity_providers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers) | resource |
@@ -93,6 +94,7 @@ No modules.
 | <a name="input_bucket_force_destroy"></a> [bucket\_force\_destroy](#input\_bucket\_force\_destroy) | Force destroy bucket. (if disabled, terraform will not be able do destroy non-empty bucket) | `bool` | `true` | no |
 | <a name="input_bucket_sse_algorithm"></a> [bucket\_sse\_algorithm](#input\_bucket\_sse\_algorithm) | The encryption algorithm to use for S3 bucket server-side encryption. | `string` | `"AES256"` | no |
 | <a name="input_bucket_sse_key_arn"></a> [bucket\_sse\_key\_arn](#input\_bucket\_sse\_key\_arn) | The ARN of the KMS encryption key to be used for S3 (required when `bucket_sse_algorithm` is `aws:kms`). | `string` | `""` | no |
+| <a name="input_bucket_tags"></a> [bucket\_tags](#input\_bucket\_tags) | Optional collection of tags to apply to the bucket | `map(string)` | `{}` | no |
 | <a name="input_cross_account_role_arn"></a> [cross\_account\_role\_arn](#input\_cross\_account\_role\_arn) | The IAM cross account role ARN is required when setting use\_existing\_cross\_account\_role to true | `string` | `""` | no |
 | <a name="input_cross_account_role_name"></a> [cross\_account\_role\_name](#input\_cross\_account\_role\_name) | The IAM cross account role name. Required to match with cross\_account\_role\_arn if use\_existing\_cross\_account\_role is set to true | `string` | `""` | no |
 | <a name="input_external_id"></a> [external\_id](#input\_external\_id) | The external ID configured inside the IAM role used for cross account access | `string` | `""` | no |

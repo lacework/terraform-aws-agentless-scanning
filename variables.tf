@@ -91,15 +91,15 @@ variable "scan_host_vulnerabilities" {
 }
 
 variable "scan_multi_volume" {
-  type = bool
+  type        = bool
   description = "Whether to scan secondary volumes. Defaults to `false`."
-  default = false
+  default     = false
 }
 
 variable "scan_stopped_instances" {
-  type = bool
+  type        = bool
   description = "Whether to scan stopped instances. Defaults to `true`."
-  default = true
+  default     = true
 }
 
 variable "bucket_force_destroy" {
@@ -124,6 +124,12 @@ variable "bucket_sse_key_arn" {
   type        = string
   default     = ""
   description = "The ARN of the KMS encryption key to be used for S3 (required when `bucket_sse_algorithm` is `aws:kms`)."
+}
+
+variable "bucket_tags" {
+  description = "Optional collection of tags to apply to the bucket"
+  type        = map(string)
+  default     = {}
 }
 
 variable "lacework_account" {
