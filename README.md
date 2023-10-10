@@ -7,6 +7,7 @@
 
 A Terraform Module to configure the Lacework Agentless Scanner.
 
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -24,6 +25,10 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | <a name="provider_lacework"></a> [lacework](#provider\_lacework) | ~> 1.8 |
 | <a name="provider_null"></a> [null](#provider\_null) | n/a |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 2.1 |
+
+## Modules
+
+No modules.
 
 ## Resources
 
@@ -140,3 +145,4 @@ A Terraform Module to configure the Lacework Agentless Scanner.
 | <a name="output_lacework_domain"></a> [lacework\_domain](#output\_lacework\_domain) | Lacework Domain Name for Integration. |
 | <a name="output_prefix"></a> [prefix](#output\_prefix) | Prefix used to add uniqueness to resource names. |
 | <a name="output_suffix"></a> [suffix](#output\_suffix) | Suffix used to add uniqueness to resource names. |
+<!-- END_TF_DOCS -->
