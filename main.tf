@@ -244,10 +244,23 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     sid    = "CreateSnapshots"
     effect = "Allow"
     actions = [
-      "ec2:CreateTags",
       "ec2:CreateSnapshot"
     ]
     resources = ["*"]
+  }
+
+  statement {
+    sid    = "CreateSnapshotTags"
+    effect = "Allow"
+    actions = [
+      "ec2:CreateTags"
+    ]
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:CreateAction"
+      values   = ["CreateSnapshot"]
+    }
   }
 
   statement {
@@ -496,9 +509,22 @@ resource "aws_iam_role" "agentless_scan_snapshot_role" {
         },
         {
           Sid      = "CreateSnapshots"
-          Action   = ["ec2:CreateTags", "ec2:CreateSnapshot"]
+          Action   = ["ec2:CreateSnapshot"]
           Effect   = "Allow"
           Resource = "*"
+        },
+        {
+          Sid    = "CreateSnapshotTags"
+          Effect = "Allow"
+          Action = [
+            "ec2:CreateTags"
+          ]
+          Resource = ["*"]
+          Condition = {
+            StringEquals = {
+              "ec2:CreateAction" = "CreateSnapshot"
+            }
+          }
         },
         {
           Sid = "SnapshotManagement"
