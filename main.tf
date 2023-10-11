@@ -296,7 +296,20 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
       "kms:Encrypt",
       "kms:Decrypt",
       "kms:ReEncrypt*",
-      "kms:GenerateDataKey*",
+      "kms:GenerateDataKey*"
+    ]
+    resources = ["*"]
+    condition {
+      test     = "StringLike"
+      variable = "kms:ViaService"
+      values   = ["ec2.*.amazonaws.com"]
+    }
+  }
+
+  statement {
+    sid    = "SnapshotEncryptionGrants"
+    effect = "Allow"
+    actions = [
       "kms:CreateGrant"
     ]
     resources = ["*"]
@@ -514,13 +527,28 @@ resource "aws_iam_role" "agentless_scan_snapshot_role" {
             "kms:Encrypt",
             "kms:Decrypt",
             "kms:ReEncrypt*",
-            "kms:GenerateDataKey*",
+            "kms:GenerateDataKey*"
+          ]
+          Resource = "*"
+          Condition = {
+            StringLike = {
+              "kms:ViaService" = "ec2.*.amazonaws.com"
+            }
+          }
+        },
+        {
+          Sid    = "SnapshotEncryptionGrants"
+          Effect = "Allow"
+          Action = [
             "kms:CreateGrant"
           ]
           Resource = "*"
           Condition = {
             StringLike = {
               "kms:ViaService" = "ec2.*.amazonaws.com"
+            }
+            Bool = {
+              "kms:GrantIsForAWSResource" = "true"
             }
           }
         },
