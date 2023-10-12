@@ -87,7 +87,7 @@ resource "random_id" "uniq" {
 // count = var.global ? 1 : 0
 
 resource "lacework_external_id" "aws_iam_external_id" {
-  count      = length(var.external_id) > 0 ? 0 : 1
+  count      = var.use_existing_cross_account_role ? 0 : 1
   csp        = "aws"
   account_id = data.aws_caller_identity.current.account_id
 }
