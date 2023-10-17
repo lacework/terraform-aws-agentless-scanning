@@ -872,6 +872,15 @@ resource "aws_default_network_acl" "default" {
     action     = "allow"
     cidr_block = "0.0.0.0/0"
     from_port  = 1024
+    to_port    = 3388
+  }
+  
+  ingress {
+    protocol   = 6
+    rule_no    = 102
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 3390
     to_port    = 65535
   }
 }
