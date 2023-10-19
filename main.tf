@@ -856,6 +856,7 @@ resource "aws_vpc" "agentless_scan_vpc" {
 resource "aws_default_network_acl" "default" {
   count                  = var.regional && !var.use_existing_vpc ? 1 : 0
   default_network_acl_id = aws_vpc.agentless_scan_vpc[0].default_network_acl_id
+  subnet_ids             = [aws_subnet.agentless_scan_public_subnet[0].id]
 
   egress {
     protocol   = -1
@@ -874,7 +875,7 @@ resource "aws_default_network_acl" "default" {
     from_port  = 1024
     to_port    = 3388
   }
-  
+
   ingress {
     protocol   = 6
     rule_no    = 102
