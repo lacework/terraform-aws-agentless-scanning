@@ -1061,6 +1061,8 @@ resource "aws_cloudwatch_log_group" "agentless_scan_log_group" {
   count             = var.regional ? 1 : 0
   name              = "/ecs/${aws_ecs_cluster.agentless_scan_ecs_cluster[0].name}"
   retention_in_days = 14
+  # the KMS will need to allow the log group to use it.
+  # See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html
   kms_key_id        = var.secretsmanager_kms_key_id
 }
 
