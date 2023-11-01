@@ -1,4 +1,4 @@
-# v0.14.2
+# v0.15.0
 
 ## Features
 * feat: Pass in KMS key for Cloud Watch (#119) (Ao Zhang)([b50cd28](https://github.com/lacework/terraform-aws-agentless-scanning/commit/b50cd28bf1f1dc89200594f06a62d451076cc731))
