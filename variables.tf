@@ -74,7 +74,7 @@ variable "scan_frequency_hours" {
 
 variable "filter_query_text" {
   type        = string
-  description = "The LQL query to constrain the scanning to specific resources. If left blank, Lacework will scan all resources available to the account or organization. For more information, see [Limit Scanned Workloads](https://docs.lacework.net/onboarding/lacework-console-agentless-workload-scanning#aws---limit-scanned-workloads)."
+  description = "The LQL query text."
   default     = ""
 }
 
