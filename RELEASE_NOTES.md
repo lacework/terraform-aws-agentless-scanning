@@ -1,8 +1,7 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.15.0`.
+Another day, another release. These are the release notes for the version `v0.15.1`.
 
-## Features
-* feat: Pass in KMS key for Cloud Watch (#119) (Ao Zhang)([b50cd28](https://github.com/lacework/terraform-aws-agentless-scanning/commit/b50cd28bf1f1dc89200594f06a62d451076cc731))
-
+## Documentation Updates
+* docs: update filter_query_text input description (#121) (Selvakumar T S)([c1bd3cc](https://github.com/lacework/terraform-aws-agentless-scanning/commit/c1bd3cc112d09ed4345e431671274338efca82de))
 ## Other Changes
-* ci: version bump to v0.15.0-dev (Lacework)([7da834f](https://github.com/lacework/terraform-aws-agentless-scanning/commit/7da834f469033a7941f481a97322c3a632013366))
+* ci: version bump to v0.15.1-dev (Lacework)([dc9c22e](https://github.com/lacework/terraform-aws-agentless-scanning/commit/dc9c22e5cd72a666922eb11072830ac9114db7f7))
