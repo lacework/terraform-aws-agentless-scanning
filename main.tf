@@ -754,7 +754,7 @@ data "aws_iam_policy_document" "agentless_scan_cross_account_policy" {
     actions = ["sts:AssumeRole"]
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.lacework_aws_account_id}:root"]
+      identifiers = ["arn:aws:iam::${var.lacework_aws_account_id}:role/lacework-platform"]
     }
     condition {
       test     = "StringEquals"
