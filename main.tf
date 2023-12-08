@@ -1023,7 +1023,10 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
   }
-
+  volume {
+    name = "tmp"
+    host_path = "/ecs/tmp"
+  }
   container_definitions = jsonencode([
     {
       name      = "sidekick"
@@ -1053,6 +1056,12 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
           awslogs-stream-prefix = "ecs"
         }
       }
+      readonlyRootFilesystem = true
+      mountPoints = [{
+        sourceVolume  = "tmp"
+        containerPath = "/tmp"
+        readOnly      = false
+      }]
     }
   ])
 }
