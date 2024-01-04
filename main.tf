@@ -352,6 +352,11 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
       variable = "iam:ResourceTag/LWTAG_SIDEKICK"
       values   = ["*"]
     }
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values   = ["ecs-tasks.amazonaws.com"]
+    }
   }
 
   statement {
