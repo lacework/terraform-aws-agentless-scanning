@@ -1,7 +1,7 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.15.4`.
+Another day, another release. These are the release notes for the version `v0.16.0`.
 
+## Features
+* feat: support customer-supplied resource tags (#131) (Matt Cadorette)([999e931](https://github.com/lacework/terraform-aws-agentless-scanning/commit/999e931f796d8c6e4e0644587d4f5ab4f46e37c7))
 ## Other Changes
-* chore: set local var module name (#130) (Darren)([607f3e7](https://github.com/lacework/terraform-aws-agentless-scanning/commit/607f3e76d93d2a4132776594ed5d377ee96e667b))
-* chore: add lacework_metric_module datasource (#128) (Darren)([563025a](https://github.com/lacework/terraform-aws-agentless-scanning/commit/563025a2266928c4ebb7ab6a909f7f3391fd6f1d))
-* ci: version bump to v0.15.4-dev (Lacework)([38b73da](https://github.com/lacework/terraform-aws-agentless-scanning/commit/38b73dae8284e0b7b5943c6ff67df540d1143546))
+* ci: version bump to v0.15.5-dev (Lacework)([ad4a53f](https://github.com/lacework/terraform-aws-agentless-scanning/commit/ad4a53f70afafdfd09a3d187861bb24d40c31b7b))
