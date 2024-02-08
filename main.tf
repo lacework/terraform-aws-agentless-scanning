@@ -152,6 +152,7 @@ resource "aws_secretsmanager_secret" "agentless_scan_secret" {
   count      = var.global ? 1 : 0
   name       = "${local.prefix}-secret-${local.suffix}"
   kms_key_id = var.secretsmanager_kms_key_id
+  tags       = var.tags
 }
 
 resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
@@ -169,6 +170,7 @@ resource "aws_iam_service_linked_role" "agentless_scan_linked_role" {
   count            = var.global && var.iam_service_linked_role ? 1 : 0
   aws_service_name = "ecs.amazonaws.com"
   description      = "Role to enable Amazon ECS to manage your cluster."
+  tags             = var.tags
 }
 
 data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
@@ -387,6 +389,7 @@ resource "aws_iam_policy" "agentless_scan_task_policy" {
   count  = var.global ? (var.use_existing_task_role ? 0 : 1) : 0
   name   = "${local.prefix}-task-policy-${local.suffix}"
   policy = data.aws_iam_policy_document.agentless_scan_task_policy_document[0].json
+  tags   = var.tags
 }
 
 resource "aws_iam_role" "agentless_scan_ecs_task_role" {
@@ -408,11 +411,11 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
     ]
   })
 
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-task-role"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 }
 
 resource "aws_iam_role" "agentless_scan_ecs_event_role" {
@@ -434,11 +437,11 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
     ]
   })
 
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-task-event-role"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 }
 
 resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
@@ -475,11 +478,11 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
     })
   }
 
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-task-execution-role"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 }
 
 resource "aws_iam_role" "agentless_scan_snapshot_role" {
@@ -597,11 +600,11 @@ resource "aws_iam_role" "agentless_scan_snapshot_role" {
     })
   }
 
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-task-execution-role"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 }
 
 
@@ -611,7 +614,7 @@ resource "aws_s3_bucket" "agentless_scan_bucket" {
 
   force_destroy = var.bucket_force_destroy
 
-  tags = merge(var.bucket_tags, {
+  tags = merge(var.tags, var.bucket_tags, {
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
   })
@@ -863,11 +866,11 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
     policy = data.aws_iam_policy_document.cross_account_inline_policy_ecs[0].json
   }
 
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-cross-account-role"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 }
 
 // Regional - The following are resources created once per Aws Region
@@ -881,17 +884,18 @@ resource "aws_vpc" "agentless_scan_vpc" {
   enable_dns_hostnames = true
   instance_tenancy     = "default"
 
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-vpc"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 }
 
 resource "aws_default_network_acl" "default" {
   count                  = var.regional && !var.use_existing_vpc ? 1 : 0
   default_network_acl_id = aws_vpc.agentless_scan_vpc[0].default_network_acl_id
   subnet_ids             = [aws_subnet.agentless_scan_public_subnet[0].id]
+  tags                   = var.tags
 
   egress {
     protocol   = -1
@@ -924,11 +928,11 @@ resource "aws_default_network_acl" "default" {
 resource "aws_route_table" "agentless_scan_route_table" {
   count  = var.regional && !var.use_existing_subnet ? 1 : 0
   vpc_id = local.vpc_id
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-vpc"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 }
 
 resource "aws_route_table_association" "agentless_scan_route_table_association" {
@@ -941,11 +945,11 @@ resource "aws_internet_gateway" "agentless_scan_gateway" {
   count  = var.regional && !var.use_existing_vpc ? 1 : 0
   vpc_id = local.vpc_id
 
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-gw"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 }
 
 resource "aws_route" "agentless_scan_route" {
@@ -958,6 +962,7 @@ resource "aws_route" "agentless_scan_route" {
 resource "aws_default_security_group" "default" {
   count  = var.regional && !var.use_existing_vpc ? 1 : 0
   vpc_id = local.vpc_id
+  tags   = var.tags
 
   ingress = []
   egress  = []
@@ -968,6 +973,7 @@ resource "aws_security_group" "agentless_scan_sec_group" {
   name        = "${local.prefix}-security-group"
   description = "A security group to allow Lacework Agentless Workload Scanning communication."
   vpc_id      = local.vpc_id
+  tags        = var.tags
 
   ingress = []
 
@@ -985,11 +991,11 @@ resource "aws_subnet" "agentless_scan_public_subnet" {
   cidr_block              = var.vpc_cidr_block
   map_public_ip_on_launch = false
 
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-vpc"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 }
 
 resource "aws_ecs_cluster_capacity_providers" "agentless_scan_capacity_providers" {
@@ -1002,11 +1008,11 @@ resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
   count = var.regional ? 1 : 0
   name  = "${local.prefix}-cluster-${local.suffix}"
 
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-cluster"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 
   lifecycle {
     ignore_changes = [
@@ -1027,11 +1033,11 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
   cpu                      = 4096
   memory                   = 8192
 
-  tags = {
+  tags = merge(var.tags, {
     Name                     = "${local.prefix}-task-definition"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
-  }
+  })
 
   container_definitions = jsonencode([
     {
@@ -1073,6 +1079,7 @@ resource "aws_cloudwatch_log_group" "agentless_scan_log_group" {
   # the KMS will need to allow the log group to use it.
   # See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html
   kms_key_id        = var.secretsmanager_kms_key_id
+  tags              = var.tags
 }
 
 resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
@@ -1085,6 +1092,7 @@ resource "aws_cloudwatch_event_rule" "agentless_scan_event_rule" {
   name                = "${local.prefix}-periodic-trigger-${local.suffix}"
   schedule_expression = "rate(1 hour)"
   event_bus_name      = "default"
+  tags                = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
@@ -1107,10 +1115,10 @@ resource "aws_cloudwatch_event_target" "agentless_scan_event_target" {
       assign_public_ip = true
     }
 
-    tags = {
+    tags = merge(var.tags, {
       LWTAG_SIDEKICK           = "1"
       LWTAG_LACEWORK_AGENTLESS = "1"
-    }
+    })
   }
 }
 

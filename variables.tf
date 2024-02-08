@@ -132,6 +132,12 @@ variable "bucket_tags" {
   default     = {}
 }
 
+variable "tags" {
+  type        = map(string)
+  description = "A map/dictionary of Tags to be assigned to created resources"
+  default     = {}
+}
+
 variable "lacework_account" {
   type        = string
   description = "The name of the Lacework account with which to integrate."
