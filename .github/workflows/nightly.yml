@@ -1,0 +1,34 @@
+name: Nightly Build
+
+on: workflow_dispatch
+
+  # schedule:
+  #   - cron: '0 10 * * *' # Run every day at 10AM UTC
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Initialize Workflow
+        uses: lacework-dev/oss-actions/initialize-workflow-v1@5a04f17
+        with:
+          aws_role: ${{ secrets.AWS_ROLE }}
+
+      - name: Test Terraform 1.5
+        uses: lacework-dev/oss-actions/terraform-test-v1@5a04f17
+        with:
+          version: "1.5"
+  
+      - name: Test Terraform 1.4
+        uses: lacework-dev/oss-actions/terraform-test-v1@5a04f17
+        with:
+          version: "1.4"
+
+      - name: Test Terraform 1.0
+        uses: lacework-dev/oss-actions/terraform-test-v1@5a04f17
+        with:
+          version: "1.0"
+
+        
