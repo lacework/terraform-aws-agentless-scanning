@@ -1,8 +1,6 @@
 name: Nightly Build
 
-on: workflow_dispatch
-  branches:
-    - "tmacdonald/GROW-2760/migrate-to-github-actions"
+on: [workflow_dispatch]
   # schedule:
   #   - cron: '0 10 * * *' # Run every day at 10AM UTC
 
