@@ -349,8 +349,7 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     sid    = "PassRoleToTasks"
     effect = "Allow"
     actions = [
-      "iam:PassRole",
-      "sts:AssumeRole"
+      "iam:PassRole"
     ]
     resources = ["*"]
     condition {
@@ -362,6 +361,20 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
       test     = "StringEquals"
       variable = "iam:PassedToService"
       values   = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+
+  statement {
+    sid    = "AssumeScanRoles"
+    effect = "Allow"
+    actions = [
+      "sts:AssumeRole"
+    ]
+    resources = ["*"]
+    condition {
+      test     = "StringLike"
+      variable = "iam:ResourceTag/LWTAG_SIDEKICK"
+      values   = ["*"]
     }
   }
 
