@@ -42,3 +42,12 @@ output "external_id" {
   value       = local.external_id
   description = "External ID used for assuming snapshot creation and cross-account roles."
 }
+
+output "lacework_integration_guid" {
+  description = "The GUID for the created Lacework integration"
+  value = (local.is_org_integration ?
+    (length(lacework_integration_aws_org_agentless_scanning.lacework_cloud_account) > 0 ?
+    lacework_integration_aws_org_agentless_scanning.lacework_cloud_account[0].intg_guid : null) :
+    (length(lacework_integration_aws_agentless_scanning.lacework_cloud_account) > 0 ?
+  lacework_integration_aws_agentless_scanning.lacework_cloud_account[0].intg_guid : null))
+}

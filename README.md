@@ -145,6 +145,7 @@ No modules.
 | <a name="output_external_id"></a> [external\_id](#output\_external\_id) | External ID used for assuming snapshot creation and cross-account roles. |
 | <a name="output_lacework_account"></a> [lacework\_account](#output\_lacework\_account) | Lacework Account Name for Integration. |
 | <a name="output_lacework_domain"></a> [lacework\_domain](#output\_lacework\_domain) | Lacework Domain Name for Integration. |
+| <a name="output_lacework_integration_guid"></a> [lacework\_integration\_guid](#output\_lacework\_integration\_guid) | The GUID for the created Lacework integration |
 | <a name="output_prefix"></a> [prefix](#output\_prefix) | Prefix used to add uniqueness to resource names. |
 | <a name="output_suffix"></a> [suffix](#output\_suffix) | Suffix used to add uniqueness to resource names. |
 <!-- END_TF_DOCS -->
