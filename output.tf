@@ -44,7 +44,7 @@ output "external_id" {
 }
 
 output "lacework_integration_guid" {
-  description = "The GUID for the created Lacework integration"
+  description = "The GUID for the created Lacework integration. This GUID is useful for interacting with this integration from the CLI or API."
   value = (local.is_org_integration ?
     (length(lacework_integration_aws_org_agentless_scanning.lacework_cloud_account) > 0 ?
     lacework_integration_aws_org_agentless_scanning.lacework_cloud_account[0].intg_guid : null) :
