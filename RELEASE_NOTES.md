@@ -1,9 +1,10 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.16.1`.
+Another day, another release. These are the release notes for the version `v0.17.0`.
 
-## Bug Fixes
-* fix: Align task policy to CloudFormation and add AssumeScanRoles (#135) (Teddy Reed)([c336f12](https://github.com/lacework/terraform-aws-agentless-scanning/commit/c336f121d6e92fac48ee776726c94c489bb5df8e))
+## Features
+* feat(GROW-2876): add output for lacework integration id (#139) (Matt Cadorette)([e08665a](https://github.com/lacework/terraform-aws-agentless-scanning/commit/e08665aba984df0dce50df1af8220e8e060c8e19))
+## Documentation Updates
+* docs: Simplify existing VPC networking example (#137) (Teddy Reed)([cf59d73](https://github.com/lacework/terraform-aws-agentless-scanning/commit/cf59d7372ed89563c9452f0796c3499aec53413d))
 ## Other Changes
-* ci: remove workflow (#134) (Timothy MacDonald)([a7285a2](https://github.com/lacework/terraform-aws-agentless-scanning/commit/a7285a2bfdede3684ce456ba13ec9c13ee8b8b3b))
-* ci: version bump to v0.16.1-dev (Lacework)([760dae9](https://github.com/lacework/terraform-aws-agentless-scanning/commit/760dae9a27346c0ca4b50a0cbefd6ce602753497))
-* test: add github action for nightly tests (#133) (Timothy MacDonald)([1c7057c](https://github.com/lacework/terraform-aws-agentless-scanning/commit/1c7057c93c8b4cceb4e216ef1afbd067fa8831a9))
+* ci: migrate from codefresh to github actions (#138) (Timothy MacDonald)([b15dfa3](https://github.com/lacework/terraform-aws-agentless-scanning/commit/b15dfa3bd87bc01f08ebdb70fada37579d2504a5))
+* ci: version bump to v0.16.2-dev (Lacework)([6cfc85c](https://github.com/lacework/terraform-aws-agentless-scanning/commit/6cfc85c61d565adccd874b97c56ec7fb53f6aded))
