@@ -1057,6 +1057,8 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
       name      = "sidekick"
       image     = var.image_url
       essential = true
+      cpu       = 4096
+      memory    = 8192
       environment = setunion(
         local.default_ecs_task_environment_variables,
         var.additional_environment_variables,
@@ -1069,7 +1071,8 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
       )
       linuxParameters = {
         capabilities = {
-          Add = ["SYS_PTRACE"]
+          Add  = ["SYS_PTRACE"]
+          Drop = []
         }
       }
       logConfiguration = {
@@ -1081,6 +1084,11 @@ resource "aws_ecs_task_definition" "agentless_scan_task_definition" {
           awslogs-stream-prefix = "ecs"
         }
       }
+
+      mountPoints    = []
+      portMappings   = []
+      systemControls = []
+      volumesFrom    = []
     }
   ])
 }
