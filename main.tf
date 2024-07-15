@@ -909,6 +909,10 @@ resource "aws_flow_log" "agentless_scan_vpc_flow_log" {
   vpc_id       = local.vpc_id
   traffic_type = "REJECT"
 
+  # Send logs to manged S3 bucket.
+  log_destination_type = "s3"
+  log_destination      = "arn:aws:s3:::${local.prefix}-bucket-${local.suffix}/sidekick/flow-logs/"
+
   tags = merge(var.tags, {
     Name                     = "${local.prefix}-vpc"
     LWTAG_SIDEKICK           = "1"
