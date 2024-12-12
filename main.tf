@@ -911,8 +911,7 @@ resource "aws_flow_log" "agentless_scan_vpc_flow_log" {
 
   # Send logs to manged S3 bucket.
   log_destination_type = "s3"
-  log_destination      = "${aws_s3_bucket.agentless_scan_bucket[0].arn}/sidekick/flow-logs/"
-  depends_on           = [aws_s3_bucket.agentless_scan_bucket]
+  log_destination      = "${var.global_module_reference.s3_bucket_arn}/sidekick/flow-logs/"
 
   tags = merge(var.tags, {
     Name                     = "${local.prefix}-vpc"

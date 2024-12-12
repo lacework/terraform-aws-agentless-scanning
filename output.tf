@@ -51,3 +51,8 @@ output "lacework_integration_guid" {
     (length(lacework_integration_aws_agentless_scanning.lacework_cloud_account) > 0 ?
   lacework_integration_aws_agentless_scanning.lacework_cloud_account[0].intg_guid : null))
 }
+
+output "s3_bucket_arn" {
+  description = "ARN of the S3 bucket used by Lacework Agentless Scanning"
+  value       = aws_s3_bucket.agentless_scan_bucket[0].arn
+}
