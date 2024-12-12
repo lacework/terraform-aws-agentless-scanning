@@ -34,6 +34,7 @@ variable "global_module_reference" {
     prefix                                = string
     s3_bucket_arn                         = string
     suffix                                = string
+    s3_bucket_arn                         = string
   })
   default = {
     agentless_scan_ecs_task_role_arn      = ""
@@ -46,6 +47,7 @@ variable "global_module_reference" {
     prefix                                = ""
     s3_bucket_arn                         = ""
     suffix                                = ""
+    s3_bucket_arn                         = ""
   }
   description = "A reference to the global lacework_aws_agentless_scanning module for this account."
 }
