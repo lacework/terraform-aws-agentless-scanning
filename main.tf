@@ -1,6 +1,7 @@
 locals {
   suffix                                = length(var.global_module_reference.suffix) > 0 ? var.global_module_reference.suffix : (length(var.suffix) > 0 ? var.suffix : random_id.uniq.hex)
   prefix                                = length(var.global_module_reference.prefix) > 0 ? var.global_module_reference.prefix : var.prefix
+  s3_bucket_arn                         = var.global ? (aws_s3_bucket.agentless_scan_bucket[0].arn) : (length(var.global_module_reference.s3_bucket_arn) > 0 ? var.global_module_reference.s3_bucket_arn : "")
   agentless_scan_ecs_task_role_arn      = var.global ? (var.use_existing_task_role ? var.agentless_scan_ecs_task_role_arn : aws_iam_role.agentless_scan_ecs_task_role[0].arn) : (length(var.global_module_reference.agentless_scan_ecs_task_role_arn) > 0 ? var.global_module_reference.agentless_scan_ecs_task_role_arn : var.agentless_scan_ecs_task_role_arn)
   agentless_scan_ecs_execution_role_arn = var.global ? (var.use_existing_execution_role ? var.agentless_scan_ecs_execution_role_arn : aws_iam_role.agentless_scan_ecs_execution_role[0].arn) : (length(var.global_module_reference.agentless_scan_ecs_execution_role_arn) > 0 ? var.global_module_reference.agentless_scan_ecs_execution_role_arn : var.agentless_scan_ecs_execution_role_arn)
   agentless_scan_ecs_event_role_arn     = var.global ? (var.use_existing_event_role ? var.agentless_scan_ecs_event_role_arn : aws_iam_role.agentless_scan_ecs_event_role[0].arn) : (length(var.global_module_reference.agentless_scan_ecs_event_role_arn) > 0 ? var.global_module_reference.agentless_scan_ecs_event_role_arn : var.agentless_scan_ecs_event_role_arn)
@@ -911,7 +912,7 @@ resource "aws_flow_log" "agentless_scan_vpc_flow_log" {
 
   # Send logs to manged S3 bucket.
   log_destination_type = "s3"
-  log_destination     = "${aws_s3_bucket.agentless_scan_bucket[0].arn}/sidekick/flow-logs/"
+  log_destination     = "${local.s3_bucket_arn}/sidekick/flow-logs/"
 
   tags = merge(var.tags, {
     Name                     = "${local.prefix}-vpc"

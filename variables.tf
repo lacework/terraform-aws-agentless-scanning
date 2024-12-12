@@ -32,6 +32,7 @@ variable "global_module_reference" {
     lacework_domain                       = string
     external_id                           = string
     prefix                                = string
+    s3_bucket_arn                         = string
     suffix                                = string
   })
   default = {
@@ -43,6 +44,7 @@ variable "global_module_reference" {
     lacework_domain                       = ""
     external_id                           = ""
     prefix                                = ""
+    s3_bucket_arn                         = ""
     suffix                                = ""
   }
   description = "A reference to the global lacework_aws_agentless_scanning module for this account."

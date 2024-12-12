@@ -43,6 +43,11 @@ output "external_id" {
   description = "External ID used for assuming snapshot creation and cross-account roles."
 }
 
+output "s3_bucket_arn" {
+  value = local.s3_bucket_arn
+  description = "The ARN of the S3 bucket used for storing Lacework agentless integration."
+}
+
 output "lacework_integration_guid" {
   description = "The GUID for the created Lacework integration. This GUID is useful for interacting with this integration from the CLI or API."
   value = (local.is_org_integration ?
