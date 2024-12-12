@@ -13,6 +13,11 @@ output "agentless_scan_ecs_event_role_arn" {
   description = "Output ECS event role ARN."
 }
 
+output "agentless_scan_ecs_cluster_arn" {
+  value       = var.regional ? aws_ecs_cluster.agentless_scan_ecs_cluster[0].arn : null
+  description = "Output ECS cluster ARN. Useful for managing ECS tasks via AWS CLI/SDK."
+}
+
 output "agentless_scan_secret_arn" {
   value       = local.agentless_scan_secret_arn
   description = "AWS SecretsManager Secret ARN for Lacework Account and Token."

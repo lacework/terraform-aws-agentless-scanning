@@ -139,6 +139,7 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_agentless_scan_ecs_cluster_arn"></a> [agentless\_scan\_ecs\_cluster\_arn](#output\_agentless\_scan\_ecs\_cluster\_arn) | Output ECS cluster ARN. Useful for managing ECS tasks via AWS CLI/SDK. |
 | <a name="output_agentless_scan_ecs_event_role_arn"></a> [agentless\_scan\_ecs\_event\_role\_arn](#output\_agentless\_scan\_ecs\_event\_role\_arn) | Output ECS event role ARN. |
 | <a name="output_agentless_scan_ecs_execution_role_arn"></a> [agentless\_scan\_ecs\_execution\_role\_arn](#output\_agentless\_scan\_ecs\_execution\_role\_arn) | Output ECS execution role ARN. |
 | <a name="output_agentless_scan_ecs_task_role_arn"></a> [agentless\_scan\_ecs\_task\_role\_arn](#output\_agentless\_scan\_ecs\_task\_role\_arn) | Output ECS task role ARN. |
