@@ -360,3 +360,9 @@ variable "use_internet_gateway" {
   default     = true
   description = "Whether or not you want to use an 'AWS internet gateway' for internet facing traffic. Only set this to false if you route internet traffic using a different approach."
 }
+
+variable "use_aws_flow_log" {
+  type = bool
+  default = true
+  description = "Whether or not you want to create AWS flow logs for the VPC."
+}

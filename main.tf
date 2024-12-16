@@ -906,7 +906,7 @@ resource "aws_vpc" "agentless_scan_vpc" {
 }
 
 resource "aws_flow_log" "agentless_scan_vpc_flow_log" {
-  count        = var.regional && !var.use_existing_vpc ? 1 : 0
+  count        = var.regional && var.use_aws_flow_log && !var.use_existing_vpc ? 1 : 0
   vpc_id       = local.vpc_id
   traffic_type = "REJECT"
 

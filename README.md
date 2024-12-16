@@ -124,6 +124,7 @@ No modules.
 | <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | The ID of the subnet to use for scanning compute resources.  Must also set `use_existing_subnet` to `true`. | `string` | `""` | no |
 | <a name="input_suffix"></a> [suffix](#input\_suffix) | A string to be appended to the end of the name of all new resources. | `string` | `""` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map/dictionary of Tags to be assigned to created resources | `map(string)` | `{}` | no |
+| <a name="input_use_aws_flow_log"></a> [use\_aws\_flow\_log](#input\_use\_aws\_flow\_log) | Whether or not you want to create AWS flow logs for the VPC. | `bool` | `true` | no |
 | <a name="input_use_existing_cross_account_role"></a> [use\_existing\_cross\_account\_role](#input\_use\_existing\_cross\_account\_role) | Set this to true to use an existing IAM cross account role | `bool` | `false` | no |
 | <a name="input_use_existing_event_role"></a> [use\_existing\_event\_role](#input\_use\_existing\_event\_role) | Set this to true to use an existing IAM event role | `bool` | `false` | no |
 | <a name="input_use_existing_execution_role"></a> [use\_existing\_execution\_role](#input\_use\_existing\_execution\_role) | Set this to true to use an existing IAM execution role | `bool` | `false` | no |
