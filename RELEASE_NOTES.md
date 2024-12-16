@@ -1,7 +1,7 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.18.3`.
+Another day, another release. These are the release notes for the version `v0.18.4`.
 
 ## Bug Fixes
-* fix(AWLS2-441): ensure S3 bucket exists before VPC flow log creation (#150) (Timothy Nguyen)([844913e](https://github.com/lacework/terraform-aws-agentless-scanning/commit/844913ea2b301e3380a934a495a9b5d422542ea0))
+* fix: Add variable to disable aws_vpc_flow (#153) (Lei Jin)([9162e16](https://github.com/lacework/terraform-aws-agentless-scanning/commit/9162e1604a841c45ba3c1038c947e8c04780ceae))
 ## Other Changes
-* ci: version bump to v0.18.3-dev (Lacework)([c369819](https://github.com/lacework/terraform-aws-agentless-scanning/commit/c3698194e370deddace7d882a511412a82f1d00b))
+* ci: version bump to v0.18.4-dev (Lacework)([785151f](https://github.com/lacework/terraform-aws-agentless-scanning/commit/785151fd1f4e805cbef6dadcbba4cdafc6f766d3))
