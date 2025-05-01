@@ -411,7 +411,6 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
   name                 = "${local.prefix}-task-role-${local.suffix}"
   max_session_duration = 43200
   path                 = "/"
-  managed_policy_arns  = [aws_iam_policy.agentless_scan_task_policy[0].arn]
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -432,12 +431,17 @@ resource "aws_iam_role" "agentless_scan_ecs_task_role" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "agentless_scan_ecs_task_role_policy_attachment" {
+  count                = var.global ? (var.use_existing_task_role ? 0 : 1) : 0
+  role       = aws_iam_role.agentless_scan_ecs_task_role[0].name
+  policy_arn = aws_iam_policy.agentless_scan_task_policy[0].arn
+}
+
 resource "aws_iam_role" "agentless_scan_ecs_event_role" {
   count                = var.global ? (var.use_existing_event_role ? 0 : 1) : 0
   name                 = "${local.prefix}-task-event-role-${local.suffix}"
   max_session_duration = 3600
   path                 = "/service-role/"
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"]
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -458,12 +462,17 @@ resource "aws_iam_role" "agentless_scan_ecs_event_role" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "agentless_scan_ecs_event_role_policy_attachment" {
+  count                = var.global ? (var.use_existing_task_role ? 0 : 1) : 0
+  role       = aws_iam_role.agentless_scan_ecs_event_role[0].name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
+}
+
 resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
   count                = var.global ? (var.use_existing_execution_role ? 0 : 1) : 0
   name                 = "${local.prefix}-task-execution-role-${local.suffix}"
   max_session_duration = 3600
   path                 = "/"
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"]
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -477,9 +486,18 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
     ]
   })
 
-  inline_policy {
-    name = "AllowCloudWatch"
-    policy = jsonencode({
+  tags = merge(var.tags, {
+    Name                     = "${local.prefix}-task-execution-role"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
+  })
+}
+
+resource "aws_iam_policy" "agentless-allow-cloudwatch-policy" {
+ count  = var.global ? (var.use_existing_execution_role ? 0 : 1) : 0
+ name   = "${local.prefix}-cloudwatch-policy-${local.suffix}"
+
+  policy = jsonencode({
       Version = "2012-10-17"
       Statement = [
         {
@@ -490,14 +508,22 @@ resource "aws_iam_role" "agentless_scan_ecs_execution_role" {
         },
       ]
     })
-  }
 
-  tags = merge(var.tags, {
-    Name                     = "${local.prefix}-task-execution-role"
-    LWTAG_SIDEKICK           = "1"
-    LWTAG_LACEWORK_AGENTLESS = "1"
-  })
+  tags = var.tags
 }
+
+resource "aws_iam_role_policy_attachment" "agentless_scan_ecs_execution_role_policy_attachment" {
+  count      = var.global ? (var.use_existing_execution_role ? 0 : 1) : 0
+  role       = aws_iam_role.agentless_scan_ecs_execution_role[0].name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "agentless_scan_allow_cloudwatch_policy_attachment" {
+  count      = var.global ? (var.use_existing_execution_role ? 0 : 1) : 0
+  role       = aws_iam_role.agentless_scan_ecs_execution_role[0].name
+  policy_arn = aws_iam_policy.agentless-allow-cloudwatch-policy[0].arn
+}
+
 
 resource "aws_iam_role" "agentless_scan_snapshot_role" {
   count                = var.snapshot_role ? 1 : 0
@@ -522,9 +548,18 @@ resource "aws_iam_role" "agentless_scan_snapshot_role" {
     ]
   })
 
-  inline_policy {
-    name = "LaceworkAgentlessWorkloadSnapshots"
-    policy = jsonencode({
+  tags = merge(var.tags, {
+    Name                     = "${local.prefix}-task-execution-role"
+    LWTAG_SIDEKICK           = "1"
+    LWTAG_LACEWORK_AGENTLESS = "1"
+  })
+}
+
+resource "aws_iam_policy" "agentless_snapshot_policy" {
+ count  = var.snapshot_role ? 1 : 0
+ name   = "${local.prefix}-snapshot-policy-${local.suffix}"
+
+  policy = jsonencode({
       Version = "2012-10-17"
       Statement = [
         {
@@ -612,15 +647,15 @@ resource "aws_iam_role" "agentless_scan_snapshot_role" {
         },
       ]
     })
-  }
 
-  tags = merge(var.tags, {
-    Name                     = "${local.prefix}-task-execution-role"
-    LWTAG_SIDEKICK           = "1"
-    LWTAG_LACEWORK_AGENTLESS = "1"
-  })
+  tags = var.tags
 }
 
+resource "aws_iam_role_policy_attachment" "agentless_scan_snapshot_policy_attachment" {
+  count      = var.snapshot_role ? 1 : 0
+  role       = aws_iam_role.agentless_scan_snapshot_role[0].name
+  policy_arn = aws_iam_policy.agentless_snapshot_policy[0].arn
+}
 
 resource "aws_s3_bucket" "agentless_scan_bucket" {
   count  = var.global ? 1 : 0
@@ -870,21 +905,41 @@ resource "aws_iam_role" "agentless_scan_cross_account_role" {
   path                 = "/"
   assume_role_policy   = data.aws_iam_policy_document.agentless_scan_cross_account_policy[0].json
 
-  inline_policy {
-    name   = "S3WriteAllowPolicy"
-    policy = data.aws_iam_policy_document.cross_account_inline_policy_bucket[0].json
-  }
-
-  inline_policy {
-    name   = "ECSTaskManagement"
-    policy = data.aws_iam_policy_document.cross_account_inline_policy_ecs[0].json
-  }
-
   tags = merge(var.tags, {
     Name                     = "${local.prefix}-cross-account-role"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
   })
+}
+
+resource "aws_iam_policy" "agentless_s3_write_policy" {
+ count  = var.global ? (var.use_existing_cross_account_role ? 0 : 1) : 0
+ name   = "${local.prefix}-s3-write-policy-${local.suffix}"
+
+  policy = data.aws_iam_policy_document.cross_account_inline_policy_bucket[0].json
+
+  tags = var.tags
+}
+
+resource "aws_iam_policy" "agentless_ecs_task_mgmt_policy" {
+ count  = var.global ? (var.use_existing_cross_account_role ? 0 : 1) : 0
+ name   = "${local.prefix}-ecs-task-mgmt-${local.suffix}"
+
+ policy = data.aws_iam_policy_document.cross_account_inline_policy_ecs[0].json
+
+ tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "agentless_s3_write_policy_attachment" {
+  count      = var.global ? (var.use_existing_execution_role ? 0 : 1) : 0
+  role       = aws_iam_role.agentless_scan_cross_account_role[0].name
+  policy_arn = aws_iam_policy.agentless_s3_write_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "agentless_ecs_task_mgmt_policy_attachment" {
+  count      = var.global ? (var.use_existing_execution_role ? 0 : 1) : 0
+  role       = aws_iam_role.agentless_scan_cross_account_role[0].name
+  policy_arn = aws_iam_policy.agentless_ecs_task_mgmt_policy[0].arn
 }
 
 // Regional - The following are resources created once per Aws Region
