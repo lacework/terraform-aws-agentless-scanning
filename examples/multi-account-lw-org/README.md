@@ -1,7 +1,5 @@
 # AWS Organizations integration Example
 
-## NOTE: This deployment type is currently in beta.
-
 In this example we add Terraform modules to three AWS accounts.
 
 - Scanning account, or Security account, where the scanning infrasturcture is installed.
@@ -22,6 +20,20 @@ This type of deployment is specifically for environments that are a Lacework Org
 - An account mapping must be provided in exactly the same type of setup as shown below. Note: multiple aws_accounts can be specified in the list for each sub-account. However, each aws account can only be specified once.
 
 ## Sample Code
+
+### versions.tf
+```hcl
+terraform {
+  required_version = ">= 0.15.0"
+
+  required_providers {
+    lacework = {
+      source  = "lacework/lacework"
+      version = "~> 2.0"
+    }
+  }
+}
+```
 
 ### scanning_account.tf
 

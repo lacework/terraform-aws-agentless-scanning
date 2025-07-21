@@ -1,5 +1,20 @@
 # Single Account with Single Region Example
 
+### versions.tf
+```hcl
+terraform {
+  required_version = ">= 0.15.0"
+
+  required_providers {
+    lacework = {
+      source  = "lacework/lacework"
+      version = "~> 2.0"
+    }
+  }
+}
+```
+
+### main.tf
 ```hcl
 
 provider "lacework" {}
