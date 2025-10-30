@@ -2,7 +2,7 @@
 
 In this example we add Terraform modules to three AWS accounts.
 
-- Scanning account, or Security account, where the scanning infrasturcture is installed.
+- Scanning account, or Security account, where the scanning infrastructure is installed.
 - Monitored account where a role used to create snapshots, and access snapshot data, is installed.
 - The AWS Organizations Management account so that accounts and OUs can be enumerated for each scan.
 
