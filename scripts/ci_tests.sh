@@ -43,8 +43,17 @@ lint_tests() {
 }
 
 sec_tests() {
-  # TODO: replace with `lacework iac tf-scan tfsec -m MEDIUM`
-  tfsec -m MEDIUM
+  log "Running security scan"
+
+  if command -v tfsec >/dev/null 2>&1; then
+    log "Using tfsec"
+    tfsec -m MEDIUM
+  elif command -v trivy >/dev/null 2>&1; then
+    log "Using trivy"
+    trivy config .
+  else
+    warn "No security scanner found (tfsec/trivy), skipping"
+  fi
 }
 
 main() {

@@ -397,6 +397,20 @@ data "aws_iam_policy_document" "agentless_scan_task_policy_document" {
     ]
     resources = ["arn:aws:logs:*:*:log-group:/ecs/${local.prefix}-*"]
   }
+
+  statement {
+    sid    = "OrgPermissions"
+    effect = "Allow"
+
+    actions = [
+      "organizations:DescribeOrganization",
+      "organizations:DescribeAccount",
+      "organizations:ListAccounts",
+      "organizations:ListAccountsForParent"
+    ]
+
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_policy" "agentless_scan_task_policy" {
