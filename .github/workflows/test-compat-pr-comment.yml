@@ -27,3 +27,5 @@ jobs:
     needs: check-commenting-user
     uses: lacework/oss-actions/.github/workflows/tf-test-compatibility.yml@main
     secrets: inherit
+    with:
+      min-version: "1.8.0"
