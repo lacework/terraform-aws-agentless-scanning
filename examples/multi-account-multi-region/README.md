@@ -59,7 +59,7 @@ module "lacework_aws_agentless_scanning_global" {
     // This list may contain account IDs, OUs, or the organization root.
     monitored_accounts = ["1234567890", "ou-abcd-12345678", "r-abcd"]
     // This account ID must be the AWS organizations "management account".
-    // This wil be used to enumerate the accounts and OUs in the list of monitored accounts.
+    // This will be used to enumerate the accounts and OUs in the list of monitored accounts.
     // This account must also have the snapshot_role installed.
     management_account = "0001234567890"
   }

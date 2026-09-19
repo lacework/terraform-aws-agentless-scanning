@@ -44,10 +44,10 @@ module "lacework_aws_agentless_scanning_singleregion" {
   suffix = "abc123"
 }
 ```
-In this example the **global** and **regional** resouces are added in a single region.
-Global resouces include the single per-account resouces like S3 bucket.
+In this example the **global** and **regional** resources are added in a single region.
+Global resources include the single per-account resources like S3 bucket.
 Regional resources include VPC, ECS cluster.
-Roles for both global and regional resouces are supplied. This assumes that the roles were created manually (outside Terraform) with the correct policies attached.
-A suffix is applied to predict what resouce ARNs will be, so that the manually created IAM policies created ahead of time will point to the correct resouces when Terraform builds the resources.
+Roles for both global and regional resources are supplied. This assumes that the roles were created manually (outside Terraform) with the correct policies attached.
+A suffix is applied to predict what resouce ARNs will be, so that the manually created IAM policies created ahead of time will point to the correct resources when Terraform builds the resources.
 
 Refer to the *use-existing-iam-roles-multi-region* example for adding scanning to multiple regions.
