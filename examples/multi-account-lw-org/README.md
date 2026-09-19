@@ -14,10 +14,10 @@ to the Scanning Account. This example demonstrates how to do this properly.
 
 ## How does this differ from a regular multi-account deployment?
 
-This type of deployment is specifically for environments that are a Lacework Organization and want to have specific aws account data flow into specific sub-lacework accounts. This requires the following:
+This type of deployment is specifically for environments that are a Lacework Organization and want to have specific AWS account data flow into specific sub-lacework accounts. This requires the following:
 - The person performing the install must be an OrgAdmin for the Lacework account
 - Under provider "lacework" the parameter `organization = true` must be set
-- An account mapping must be provided in exactly the same type of setup as shown below. Note: multiple aws_accounts can be specified in the list for each sub-account. However, each aws account can only be specified once.
+- An account mapping must be provided in exactly the same type of setup as shown below. Note: multiple aws_accounts can be specified in the list for each sub-account. However, each AWS account can only be specified once.
 
 ## Sample Code
 
@@ -68,7 +68,7 @@ module "lacework_aws_agentless_scanning_global" {
     // This list may contain account IDs, OUs, or the organization root.
     monitored_accounts = ["1234567890", "ou-abcd-12345678", "r-abcd"]
     // This account ID must be the AWS organizations "management account".
-    // This wil be used to enumerate the accounts and OUs in the list of monitored accounts.
+    // This will be used to enumerate the accounts and OUs in the list of monitored accounts.
     // This account must also have the snapshot_role installed.
     management_account = "0001234567890"
   }

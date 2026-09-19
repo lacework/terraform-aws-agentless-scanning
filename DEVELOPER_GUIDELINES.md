@@ -29,7 +29,7 @@ resource "aws_instance" "example" {
 
 ***Comments***
 
-Our best practice is to add a comment for every resource declared. This comment should explain what the resource is doing and how it interconnects with other resources. Hashicorp recommends using # for single-line comments.
+Our best practice is to add a comment for every resource declared. This comment should explain what the resource is doing and how it interconnects with other resources. HashiCorp recommends using # for single-line comments.
 
 Here is an example of a resource with its comment:
 
@@ -78,7 +78,7 @@ ignored by .gitignore
 
 ***Version Support / Documentation***
 
-Hashicorp release frequent patch and minor updates as needed, as well as new major releases of Terraform each year. Although Hashicorp provide solid documentation on how to upgrade between major releases of Terraform, Lacework must contend with the fact that Lacework customers do not all upgrade in a timely manor. For this reason Tech Alliances Team must continue to update documentation with supported versions of Terraform, as well as update CI pipelines to test changes across each supported version. 
+HashiCorp releases frequent patch and minor updates as needed, as well as new major releases of Terraform each year. Although HashiCorp provides solid documentation on how to upgrade between major releases of Terraform, Lacework must contend with the fact that Lacework customers do not all upgrade in a timely manner. For this reason Tech Alliances Team must continue to update documentation with supported versions of Terraform, as well as update CI pipelines to test changes across each supported version. 
 
 ***Standard Versioning for Code Snippets***
 All customer facing code snippets should adhere to the standard of using pessimistic version constraint to minor releases. 
@@ -115,7 +115,7 @@ BODY
 FOOTER
 ```
 Each commit message consists of a header, body, and footer. The header is mandatory, the scope is optional, the type and subject are mandatory.
-When writing a commit message try and limit each line of the commit to a max of 100 hundred characters, so it can be read easily.
+When writing a commit message try and limit each line of the commit to a max of 100 characters, so it can be read easily.
 
 ### Type
 
