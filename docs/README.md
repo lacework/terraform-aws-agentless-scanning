@@ -137,7 +137,9 @@ The cross-account role (`{prefix}-cross-account-role-{suffix}`, or a name you ch
 | `iam:PassRole` | the scanner task role and execution role only |
 | `ec2:DescribeSubnets` | subnets tagged `LWTAG_SIDEKICK` |
 
-That is the full extent of Lacework's access into your AWS environment. It cannot read your EC2 instances, your other buckets, or your IAM configuration.
+Those are the only permissions granted *directly* to the cross-account role: on its own it cannot read your EC2 instances, your other buckets, or your IAM configuration.
+
+One nuance worth stating plainly. `ecs:RunTask` combined with `iam:PassRole` means a caller holding this role can start a task with `containerOverrides` and thereby reach whatever the **task role** can reach — `s3:*` on the results bucket, `ec2:Describe*`, and `sts:AssumeRole` into every tagged snapshot role. This is inherent to supporting on-demand scans from the Console, not an oversight, but the effective reach of Path 1 is the table above *plus* the task role's own permissions.
 
 ### Path 2: The Scanner to Monitored Accounts
 
@@ -192,7 +194,24 @@ parameters = {
 }
 ```
 
-With auto-deployment on, any account that joins a targeted OU receives the snapshot role with no action from you, and loses it when the account leaves. See [examples/multi-account-multi-region-auto-snapshot](../examples/multi-account-multi-region-auto-snapshot).
+With auto-deployment on, any account that joins a targeted OU receives the snapshot role with no action from you, and loses it when the account leaves.
+
+**The management account is not covered by this.** `SERVICE_MANAGED` auto-deployment reaches member accounts of the targeted OUs and skips the organization's management account, so that account needs its own `snapshot_role = true` instantiation alongside the StackSet:
+
+```hcl
+module "lacework_aws_agentless_management_scanning_role" {
+  source = "../.."
+
+  providers = {
+    aws = aws.management-account-usw1
+  }
+
+  snapshot_role           = true
+  global_module_reference = module.lacework_aws_agentless_scanning_global
+}
+```
+
+Without it the scanner cannot enumerate the organization, and accounts specified by OU rather than by ID are silently never scanned. See [examples/multi-account-multi-region-auto-snapshot](../examples/multi-account-multi-region-auto-snapshot).
 
 ### Multiple Regions
 
@@ -210,7 +229,7 @@ If you use a Lacework organization with multiple Lacework accounts, `org_account
 Nothing is installed on, injected into, or executed on your instances. Analysis happens against point-in-time snapshots in the scanning account. A compromised scanner cannot reach into a running workload, and scanning cannot degrade workload performance.
 
 **Tag-scoped, least-privilege IAM**
-The `LWTAG_SIDEKICK` tag is the authorization boundary rather than a labelling convenience. Snapshot deletion and modification, ECS task management, `iam:PassRole`, `sts:AssumeRole`, and subnet lookups are all conditioned on it. The scanner can therefore only act on resources belonging to this integration, even though several of those statements are written against `Resource: "*"`.
+The `LWTAG_SIDEKICK` tag is the authorization boundary rather than a labelling convenience. Snapshot deletion and modification, `iam:PassRole`, `sts:AssumeRole`, and subnet lookups are all conditioned on it. ECS task management is scoped separately, by an `ecs:cluster` ARN condition naming the scanning cluster. The scanner can therefore only act on resources belonging to this integration, even though several of those statements are written against `Resource: "*"`.
 
 **External-ID-protected trust on both paths**
 Both the Lacework-to-scanning-account role and the scanner-to-monitored-account roles require the deployment's unique external ID. Neither can be assumed by a caller who does not have it.
@@ -235,7 +254,9 @@ Snapshots are deleted as soon as their scan completes. Working data expires from
 Check the `/ecs/{prefix}-cluster-{suffix}` CloudWatch log group in the scanning account for the orchestrator task's output. Also confirm the `{prefix}-periodic-trigger-{suffix}` EventBridge rule exists and is enabled — the scanner disables and re-enables this rule as part of normal operation, so a rule found disabled mid-scan is expected, but one that stays disabled is not. Remember the effective cadence is `scan_frequency_hours` (6, 12, or 24), not the rule's hourly rate, so allow a full cycle before investigating.
 
 **`AccessDenied` on `sts:AssumeRole` in the scanner logs**
-Either the snapshot role is missing from that account, or its name does not match what the scanning account expects. Role names are `{prefix}-snapshot-role-{suffix}`, and the scanning account's policies reference those exact names. The usual cause is a `snapshot_role = true` instantiation that was not given `global_module_reference`, so it generated its own random suffix.
+The scanner's `AssumeScanRoles` statement is written against `Resource: "*"` and gated on the target role carrying the `LWTAG_SIDEKICK` tag, so role *names* are not what is matched at runtime. The usual cause is a snapshot role that exists but is untagged — typically one created outside this module. Confirm the role is present in the monitored account, carries `LWTAG_SIDEKICK`, and has a trust policy naming the scanner task role with the correct external ID.
+
+A `snapshot_role = true` instantiation missing `global_module_reference` does *not* surface here: it fails earlier, at `terraform apply`, with an empty trust principal.
 
 **Some organization accounts are never scanned**
 Verify the snapshot role is installed in the **management account** — it is what makes OU enumeration possible, and without it accounts specified by OU rather than by ID will not be discovered. Also confirm the OU or root IDs in `monitored_accounts` are correct, and that the accounts are in an OU the StackSet actually targets.
@@ -247,4 +268,4 @@ The scanner needs outbound internet access to pull its container image and reach
 Volumes encrypted with a customer-managed KMS key require that key's policy in the monitored account to allow the snapshot role to use it. The role's own policy grants the KMS actions, but a restrictive key policy in the target account will still deny them.
 
 **Terraform validation errors**
-`prefix` must contain the string `lacework`. `scan_frequency_hours` must be exactly 6, 12, or 24. `organization` requires `global = true`. `bucket_sse_algorithm = "aws:kms"` requires `bucket_sse_key_arn`. `monitored_accounts` entries must be account IDs, `ou-*`, or `r-*`, and `management_account` must be a bare account ID.
+`prefix` must contain the string `lacework`. `scan_frequency_hours` must be exactly 6, 12, or 24. `organization` requires `global = true`. `monitored_accounts` entries must be account IDs, `ou-*`, or `r-*`, and `management_account` must be a bare account ID.
