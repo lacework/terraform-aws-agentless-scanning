@@ -48,7 +48,7 @@ module "lacework_aws_agentless_scanning_singleregion" {
 
 In this example the **global** resources and **regional** resources are added.
 Global resources include the single per-account resources like IAM roles,
-policies, and S3 bucket. Regional resources include and ECS cluster.
+policies, and S3 bucket. Regional resources include an ECS cluster.
 This example uses a single module to add both types of resources.
 This is the simplest usage but only supports a single account and single region.
 

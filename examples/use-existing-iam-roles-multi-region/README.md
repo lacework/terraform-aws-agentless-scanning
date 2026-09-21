@@ -28,7 +28,7 @@ provider "aws" {
   region = "us-west-2"
 }
 
-// Create global resouces, includes lacework cloud integration
+// Create global resources, includes lacework cloud integration
 // Use existing cross account IAM role
 module "lacework_aws_agentless_scanning_global" {
   source = "../.."
@@ -46,11 +46,11 @@ module "lacework_aws_agentless_scanning_global" {
   agentless_scan_ecs_execution_role_arn = "arn:aws:iam::123456789012:role/my-lacework-ecs-execution-role"
   agentless_scan_ecs_event_role_arn     = "arn:aws:iam::123456789012:role/my-lacework-ecs-event-role"
 
-  // Suffix can be used to "predict" what resouce ARNs will be when manually creating IAM policies ahead of time
+  // Suffix can be used to "predict" what resource ARNs will be when manually creating IAM policies ahead of time
   suffix = "abc123"
 }
 
-// Create regional resouces in our first region
+// Create regional resources in our first region
 module "lacework_aws_agentless_scanning_regional_1" {
   source                    = "../.."
 
@@ -58,7 +58,7 @@ module "lacework_aws_agentless_scanning_regional_1" {
   global_module_reference   = module.lacework_aws_agentless_scanning_global
 }
 
-// Create regional resouces in our second region
+// Create regional resources in our second region
 module "lacework_aws_agentless_scanning_regional_2" {
   source                    = "../.."
 
@@ -74,8 +74,8 @@ module "lacework_aws_agentless_scanning_regional_2" {
 In this example the **global** resources and **regional** resources are added.
 Global resources include the single per-account resources like S3 bucket and AWS Secret.
 Regional resources include a VPC, and ECS cluster.
-Roles for both global and regional resouces are supplied. This assumes that the roles were created manually (outside Terraform) with the correct policies attached.
-A suffix is applied to predict what resouce ARNs will be, so that the manually created IAM policies point to the correct resouces when Terraform runs.
+Roles for both global and regional resources are supplied. This assumes that the roles were created manually (outside Terraform) with the correct policies attached.
+A suffix is applied to predict what resource ARNs will be, so that the manually created IAM policies point to the correct resources when Terraform runs.
 A "one to many" relationship between **global** and **regional** exists so that
 scanning and snapshot usage avoids cross-region data transfer.
 
