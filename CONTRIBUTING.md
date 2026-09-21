@@ -31,7 +31,7 @@ open a new [issue](https://github.com/lacework/terraform-aws-agentless-scanning/
 
 If you have made a change or added new functionality, you can submit a pull request. The project maintainers will aim to review in a 2 week timeframe. When submitting a pull request please read the [developer guidelines](/DEVELOPER_GUIDELINES.md)
 
-The examples folder contains Terraform code that run as part of the CI pipeline. A new pull request will trigger this test run to ensure no breaking changes are added. We recommend sanity checking your own Terraform changes before submitting the change for review.
+The examples folder contains Terraform code that runs as part of the CI pipeline. A new pull request will trigger this test run to ensure no breaking changes are added. We recommend sanity checking your own Terraform changes before submitting the change for review.
 
 Thanks,
 

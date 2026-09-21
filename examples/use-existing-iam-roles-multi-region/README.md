@@ -46,7 +46,7 @@ module "lacework_aws_agentless_scanning_global" {
   agentless_scan_ecs_execution_role_arn = "arn:aws:iam::123456789012:role/my-lacework-ecs-execution-role"
   agentless_scan_ecs_event_role_arn     = "arn:aws:iam::123456789012:role/my-lacework-ecs-event-role"
 
-  // Suffix can be used to "predict" what resouce ARNs will be when manually creating IAM policies ahead of time
+  // Suffix can be used to "predict" what resource ARNs will be when manually creating IAM policies ahead of time
   suffix = "abc123"
 }
 
@@ -75,7 +75,7 @@ In this example the **global** resources and **regional** resources are added.
 Global resources include the single per-account resources like S3 bucket and AWS Secret.
 Regional resources include a VPC, and ECS cluster.
 Roles for both global and regional resources are supplied. This assumes that the roles were created manually (outside Terraform) with the correct policies attached.
-A suffix is applied to predict what resouce ARNs will be, so that the manually created IAM policies point to the correct resources when Terraform runs.
+A suffix is applied to predict what resource ARNs will be, so that the manually created IAM policies point to the correct resources when Terraform runs.
 A "one to many" relationship between **global** and **regional** exists so that
 scanning and snapshot usage avoids cross-region data transfer.
 
