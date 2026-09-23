@@ -1094,7 +1094,10 @@ resource "aws_ecs_cluster" "agentless_scan_ecs_cluster" {
   count = var.regional ? 1 : 0
   name  = "${local.prefix}-cluster-${local.suffix}"
 
-  tags = merge(var.tags, {
+  # Opt the scanner out of GuardDuty Runtime Monitoring's automated agent. Monitoring it makes
+  # GuardDuty add a VPC endpoint to the scanning subnet that Terraform does not own, and destroy
+  # then fails deleting the subnet with DependencyViolation. Set first so var.tags can override it.
+  tags = merge({ GuardDutyManaged = "false" }, var.tags, {
     Name                     = "${local.prefix}-cluster"
     LWTAG_SIDEKICK           = "1"
     LWTAG_LACEWORK_AGENTLESS = "1"
