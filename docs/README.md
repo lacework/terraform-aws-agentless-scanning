@@ -264,6 +264,13 @@ Verify the snapshot role is installed in the **management account** — it is wh
 **Tasks start and then fail immediately**
 The scanner needs outbound internet access to pull its container image and reach the Lacework API. Confirm the subnet has a route to an internet gateway and that tasks receive a public IP, or, when `use_internet_gateway = false`, that an equivalent NAT or VPC endpoint path exists. Egress on TCP 443 must be allowed. Image pull failures also appear as ECS task stopped reasons rather than in the container log group.
 
+**`terraform destroy` fails with `DependencyViolation` on the scanning subnet**
+Something outside the Terraform state still has a network interface in the subnet. There are two usual causes:
+- **A scan task is still running.** Disable the `{prefix}-periodic-trigger-{suffix}` rule, stop the tasks in the `{prefix}-cluster-{suffix}` cluster, and wait until they reach `STOPPED`.
+- **GuardDuty added a VPC endpoint.** When GuardDuty Runtime Monitoring manages the agent for ECS Fargate, it adds a VPC endpoint tagged `GuardDutyManaged=true` and a `GuardDutyManagedSecurityGroup-{vpc-id}` security group to the scanning VPC. Terraform does not own either, so neither the subnet nor the VPC can be deleted. AWS provider 6.43.0 and later removes both during destroy. If your `hashicorp/aws` version constraint allows 6.43.0, run `terraform init -upgrade` and destroy again. On an older provider, delete the endpoint yourself, wait for it to finish deleting, then delete the security group and re-run destroy.
+
+Check each scanning region's VPC, not just the global region's.
+
 **Encrypted volumes are skipped**
 Volumes encrypted with a customer-managed KMS key require that key's policy in the monitored account to allow the snapshot role to use it. The role's own policy grants the KMS actions, but a restrictive key policy in the target account will still deny them.
 
