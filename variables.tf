@@ -10,6 +10,12 @@ variable "global" {
   description = "Whether or not to create global resources. Defaults to `false`."
 }
 
+variable "create_lacework_integration" {
+  type        = bool
+  default     = true
+  description = "Whether or not the global module creates the Lacework integration and writes its token to the scan secret. Set it to `false` to create every AWS resource first, then apply again with `true` once they all succeeded, so a failed deployment never leaves an integration behind. Defaults to `true`."
+}
+
 variable "regional" {
   type        = bool
   default     = false

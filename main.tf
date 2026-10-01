@@ -98,7 +98,7 @@ resource "lacework_external_id" "aws_iam_external_id" {
 }
 
 resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" {
-  count                     = var.global && !local.is_org_integration ? 1 : 0
+  count                     = var.global && var.create_lacework_integration && !local.is_org_integration ? 1 : 0
   name                      = var.lacework_integration_name
   scan_frequency            = var.scan_frequency_hours
   query_text                = var.filter_query_text
@@ -116,7 +116,7 @@ resource "lacework_integration_aws_agentless_scanning" "lacework_cloud_account" 
 
 resource "lacework_integration_aws_org_agentless_scanning" "lacework_cloud_account" {
   // If var.organization is used then also add monitored accounts and scanning account as the caller.
-  count                     = var.global && local.is_org_integration ? 1 : 0
+  count                     = var.global && var.create_lacework_integration && local.is_org_integration ? 1 : 0
   name                      = var.lacework_integration_name
   scan_frequency            = var.scan_frequency_hours
   query_text                = var.filter_query_text
@@ -157,7 +157,7 @@ resource "aws_secretsmanager_secret" "agentless_scan_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "agentless_scan_secret_version" {
-  count         = var.global ? 1 : 0
+  count         = var.global && var.create_lacework_integration ? 1 : 0
   secret_id     = aws_secretsmanager_secret.agentless_scan_secret[0].id
   secret_string = <<EOF
    {
