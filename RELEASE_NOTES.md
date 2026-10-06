@@ -1,10 +1,9 @@
 # Release Notes
-Another day, another release. These are the release notes for the version `v0.18.8`.
+Another day, another release. These are the release notes for the version `v0.19.0`.
 
+## Features
+* feat(CAD-2410): let the caller create the integration in a later apply (#176) (Pengyuan Zhao)([b855487](https://github.com/lacework/terraform-aws-agentless-scanning/commit/b8554874413f7e0d85045ef5eecfcde89fb26fcc))
 ## Documentation Updates
-* docs: add architecture documentation (#167) (Pengyuan Zhao)([d223306](https://github.com/lacework/terraform-aws-agentless-scanning/commit/d223306e4b126e8033216aff0ccc42bfc58e904c))
-* docs: fix typos in documentation and example comments (#171) (Pengyuan Zhao)([e6a94df](https://github.com/lacework/terraform-aws-agentless-scanning/commit/e6a94df64ea1e0f101ee1179ea0a28b7434dafdc))
-* docs(examples): fix typo (#165) (Timothy Nguyen)([b1db138](https://github.com/lacework/terraform-aws-agentless-scanning/commit/b1db1382a5184c557aa83bb914df9135864d6424))
+* docs(CAD-2349): troubleshoot a subnet DependencyViolation on destroy (#174) (Pengyuan Zhao)([79deab8](https://github.com/lacework/terraform-aws-agentless-scanning/commit/79deab8c37866e38f39f524f633a687d0fc034a2))
 ## Other Changes
-* ci(CAD-2390): replace tfsec with trivy in ci_tests.sh (#170) (Pengyuan Zhao)([bb8521b](https://github.com/lacework/terraform-aws-agentless-scanning/commit/bb8521b74d72c5c52a575b5aecb82692c817782a))
-* ci: version bump to v0.18.8-dev (Lacework)([f561389](https://github.com/lacework/terraform-aws-agentless-scanning/commit/f5613894209fecb97b02a4105ba11f03c6f7758f))
+* ci: version bump to v0.18.9-dev (Lacework)([b74fdf5](https://github.com/lacework/terraform-aws-agentless-scanning/commit/b74fdf5ceeed068ca5da1fef89eb56a235b75590))
